@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2400 1200" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="h1" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f172a"/>
+      <stop offset="55%" style="stop-color:#1e293b"/>
+      <stop offset="100%" style="stop-color:#020617"/>
+    </linearGradient>
+    <linearGradient id="h2" x1="50%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" style="stop-color:#7c2d12;stop-opacity:0.5"/>
+      <stop offset="100%" style="stop-color:#0a0a0a;stop-opacity:0"/>
+    </linearGradient>
+    <radialGradient id="ember" cx="50%" cy="80%" r="60%">
+      <stop offset="0%" style="stop-color:#ea580c;stop-opacity:0.38"/>
+      <stop offset="100%" style="stop-color:#0a0a0a;stop-opacity:0"/>
+    </radialGradient>
+    <linearGradient id="steel" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#64748b"/>
+      <stop offset="100%" style="stop-color:#334155"/>
+    </linearGradient>
+    <filter id="soft" x="-5%" y="-5%" width="110%" height="110%">
+      <feGaussianBlur stdDeviation="2"/>
+    </filter>
+  </defs>
+  <rect width="2400" height="1200" fill="url(#h1)"/>
+  <rect width="2400" height="1200" fill="url(#ember)"/>
+  <ellipse cx="1200" cy="900" rx="1400" ry="400" fill="url(#h2)"/>
+  <!-- Uzak dağlar -->
+  <path d="M0 520 L0 420 L320 280 L580 400 L900 220 L1200 380 L1500 200 L1800 360 L2100 240 L2400 400 L2400 1200 H0Z" fill="#0f172a" opacity="0.85"/>
+  <path d="M0 580 L0 480 L500 360 L900 480 L1300 380 L1700 460 L2400 400 L2400 1200 H0Z" fill="#1e293b" opacity="0.9"/>
+  <!-- Kale duvarı + zikzak -->
+  <g fill="url(#steel)" stroke="#1e293b" stroke-width="2">
+    <path d="M200 1200 V680 H2200 V1200 H200 Z"/>
+    <path d="M200 680 L300 560 L400 520 L500 560 L600 500 L700 540 L800 480 L900 520 L1000 460 L1100 500 L1200 440 L1300 480 L1400 420 L1500 460 L1600 400 L1700 440 L1800 380 L1900 420 L2000 360 L2100 400 L2200 340 V680 H200 Z"/>
+  </g>
+  <g fill="#0f172a">
+    <rect x="380" y="520" width="32" height="160"/>
+    <rect x="620" y="500" width="32" height="180"/>
+    <rect x="980" y="480" width="36" height="200"/>
+    <rect x="1400" y="460" width="36" height="220"/>
+    <rect x="1780" y="500" width="32" height="180"/>
+  </g>
+  <!-- Merkez kule -->
+  <g fill="#475569">
+    <rect x="1120" y="380" width="160" height="300"/>
+    <polygon points="1120,380 1200,280 1280,380"/>
+    <rect x="1140" y="480" width="48" height="120" fill="#0f172a"/>
+    <rect x="1212" y="480" width="48" height="120" fill="#0f172a"/>
+    <rect x="1284" y="480" width="48" height="120" fill="#0f172a"/>
+  </g>
+  <!-- Kuşatma kuleleri -->
+  <g fill="#64748b" opacity="0.95">
+    <path d="M400 1200 V760 L460 680 L520 760 V1200 Z"/>
+    <path d="M1880 1200 V760 L1940 680 L2000 760 V1200 Z"/>
+  </g>
+  <!-- Alevler -->
+  <g opacity="0.88" filter="url(#soft)">
+    <ellipse cx="520" cy="920" rx="60" ry="40" fill="#f97316"/>
+    <ellipse cx="1880" cy="900" rx="55" ry="38" fill="#ea580c"/>
+    <ellipse cx="1200" cy="1000" rx="80" ry="50" fill="#c2410c"/>
+  </g>
+  <!-- Ön plan -->
+  <path d="M0 1200 V980 Q600 900 1200 940 T2400 920 V1200 Z" fill="#020617"/>
+  <g opacity="0.4" fill="#0f172a">
+    <ellipse cx="400" cy="1020" rx="12" ry="40"/>
+    <ellipse cx="440" cy="1010" rx="8" ry="32"/>
+    <ellipse cx="2000" cy="1015" rx="10" ry="36"/>
+  </g>
+</svg>

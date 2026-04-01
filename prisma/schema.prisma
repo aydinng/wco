@@ -1,0 +1,227 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// Tek satır: tüm oyuncuların gördüğü dünya çağı (arka plan)
+model GameSettings {
+  id         String @id @default("singleton")
+  currentEra String @default("ilk_cag")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  passwordHash String?
+  isAdmin   Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  /// Kayıt sırasında seçilen ülke (giriş sayfası listesi için)
+  registrationCountry String @default("")
+
+  title       String @default("General")
+  role        String @default("Player")
+  nationName  String @default("United States of America")
+  tribeName   String @default("Americans")
+
+  /// İmparatorluk genelinde araştırma seviyesi (üretim çarpanı)
+  researchTier Int @default(0)
+
+  /// Devam eden araştırma işi bitiş zamanı; null = kuyruk boş
+  researchJobEndsAt DateTime?
+
+  /// Oyuncunun bulunduğu çağ (kaynak kilidi + arka plan); yeni üye ilk çağdan başlar
+  currentEra String @default("ilk_cag")
+
+  cities       City[]
+  fleets       Fleet[]
+  battleReports BattleReport[] @relation("AttackerReports")
+  marketSales   MarketListing[] @relation("MarketSeller")
+  marketBuys    MarketListing[] @relation("MarketBuyer")
+
+  trainingJobs TrainingJob[]
+  buildingJobs BuildingJob[]
+}
+
+model Fleet {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  fromCityId String
+  fromCity   City   @relation(fields: [fromCityId], references: [id], onDelete: Cascade)
+
+  toCoordX Int
+  toCoordY Int
+  toCoordZ Int
+
+  departAt DateTime
+  arriveAt DateTime
+
+  status String @default("traveling")
+
+  attackPower  Int @default(0)
+  defensePower Int @default(0)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  report BattleReport?
+
+  @@index([userId])
+  @@index([fromCityId])
+  @@index([arriveAt])
+}
+
+model BattleReport {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  fleetId String @unique
+  fleet   Fleet  @relation(fields: [fleetId], references: [id], onDelete: Cascade)
+
+  attackerUserId String
+  attacker       User   @relation("AttackerReports", fields: [attackerUserId], references: [id], onDelete: Cascade)
+
+  defenderCoord String
+
+  attackerTotal Int
+  defenderTotal Int
+  outcome       String
+  summary       String
+
+  @@index([attackerUserId])
+}
+
+model City {
+  id         String   @id @default(cuid())
+  name       String
+  createdAt  DateTime @default(now())
+
+  coordX     Int      @default(0)
+  coordY     Int      @default(0)
+  coordZ     Int      @default(0)
+
+  wood       Int      @default(0)
+  iron       Int      @default(0)
+  oil        Int      @default(0)
+  food       Int      @default(0)
+
+  population Int      @default(0)
+  popCap     Int      @default(250)
+
+  workersWood Int     @default(0)
+  workersIron Int     @default(0)
+  workersOil  Int     @default(0)
+  workersFood Int     @default(0)
+
+  /// 0 = inşa edilmedi; 1+ = seviye (WarCity tarzı)
+  townHallLevel   Int @default(0)
+  lumberMillLevel Int @default(0)
+  ironMineLevel   Int @default(0)
+  oilWellLevel    Int @default(0)
+  farmLevel       Int @default(0)
+  barracksLevel   Int @default(0)
+  /// Kışlada eğitilmiş asker (filo saldırı önerisi için)
+  soldiers        Int @default(0)
+
+  /// Son kaynak tick (saatlik üretim / besin tüketimi)
+  lastResourceTick DateTime @default(now())
+
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  fleets     Fleet[]
+  marketListings MarketListing[] @relation("ListingCity")
+  marketIncoming MarketListing[] @relation("BuyerCity")
+  trainingJobs TrainingJob[]
+  buildingJobs BuildingJob[]
+
+  @@index([userId])
+}
+
+/// Bina yükseltme kuyruğu: şehir başına aynı anda 1 adet aktif (queued)
+model BuildingJob {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  cityId String
+  city   City   @relation(fields: [cityId], references: [id], onDelete: Cascade)
+
+  buildingId String
+  fromLevel Int
+  toLevel Int
+  durationSec Int
+
+  startsAt DateTime
+  completesAt DateTime
+
+  status String @default("queued") // queued | done | cancelled
+
+  @@index([userId])
+  @@index([cityId])
+  @@index([status, completesAt])
+}
+
+/// Üretim kuyruğu: her kayıt 1 adet askeri temsil eder (sıralı üretim için)
+model TrainingJob {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  cityId String
+  city   City   @relation(fields: [cityId], references: [id], onDelete: Cascade)
+
+  unitId String
+  durationSec Int
+
+  startsAt DateTime
+  completesAt DateTime
+
+  status String @default("queued") // queued | done | cancelled
+
+  @@index([userId])
+  @@index([cityId])
+  @@index([status, completesAt])
+}
+
+/// Pazar: asker (veya ileride kaynak) satışı; opensAt öncesi alım kapalı
+model MarketListing {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  sellerId String
+  seller   User   @relation("MarketSeller", fields: [sellerId], references: [id], onDelete: Cascade)
+
+  cityId String
+  city   City   @relation("ListingCity", fields: [cityId], references: [id], onDelete: Cascade)
+
+  kind     String @default("soldiers")
+  quantity Int
+
+  priceWood Int @default(0)
+  priceIron Int @default(0)
+  priceFood Int @default(0)
+
+  /// Geri sayım bittiğinde alım açılır
+  opensAt DateTime
+
+  status String @default("listed")
+
+  buyerId String?
+  buyer   User?   @relation("MarketBuyer", fields: [buyerId], references: [id])
+
+  buyerCityId String?
+  buyerCity   City?   @relation("BuyerCity", fields: [buyerCityId], references: [id])
+
+  @@index([sellerId])
+  @@index([status])
+  @@index([opensAt])
+}

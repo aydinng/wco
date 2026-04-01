@@ -1,0 +1,15 @@
+services:
+  db:
+    image: postgres:16
+    container_name: warcity_db
+    environment:
+      POSTGRES_USER: warcity
+      POSTGRES_PASSWORD: warcity
+      POSTGRES_DB: warcity
+    ports:
+      - "5432:5432"
+    volumes:
+      - warcity_db_data:/var/lib/postgresql/data
+
+volumes:
+  warcity_db_data:
