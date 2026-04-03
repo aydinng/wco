@@ -68,7 +68,7 @@ export function LoginLandingContent({
 
   return (
     <div
-      className="space-y-5 text-[15px] font-semibold leading-relaxed text-[#FFFF00] sm:text-base"
+      className="min-w-0 max-w-full space-y-5 break-words text-[15px] font-semibold leading-relaxed text-[#FFFF00] sm:text-base"
       style={WARCITY}
     >
       <div className="space-y-1">
@@ -139,7 +139,7 @@ export function LoginLandingContent({
         </li>
       </ol>
 
-      <div className="w-full max-w-xl space-y-4 pt-2 text-left">
+      <div className="w-full min-w-0 max-w-xl space-y-4 overflow-x-auto pt-2 text-left [-webkit-overflow-scrolling:touch]">
         <p className={`font-bold ${TITLE_SOFT_YELLOW} drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)]`}>
           {p.loginTableTopCountriesTitle}
         </p>

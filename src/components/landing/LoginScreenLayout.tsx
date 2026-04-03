@@ -42,7 +42,7 @@ export async function LoginScreenLayout({
   };
 
   return (
-    <div className="relative flex min-h-screen flex-col overflow-x-hidden text-zinc-100">
+    <div className="relative flex w-full max-w-[100%] min-h-dvh flex-col overflow-x-clip text-zinc-100 [touch-action:pan-y]">
       <div
         className="pointer-events-none fixed inset-0 -z-20 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url(${BRAND.loginPageBackgroundSrc})` }}
@@ -53,8 +53,8 @@ export async function LoginScreenLayout({
         aria-hidden
       />
 
-      <div className="relative z-0 flex min-h-screen flex-1 flex-col">
-        <header className="w-full pt-4">
+      <div className="relative z-0 flex min-h-dvh min-h-0 flex-1 flex-col">
+        <header className="w-full pt-[max(1rem,env(safe-area-inset-top))]">
           <div className="mx-auto w-full max-w-[min(100rem,100%)] overflow-hidden">
             <Image
               src={BRAND.bannerSrc}
@@ -81,7 +81,7 @@ export async function LoginScreenLayout({
           </div>
         </header>
 
-        <div className="mx-auto flex w-full max-w-[min(100rem,100%)] flex-1 flex-col gap-6 px-2 pb-4 pt-2 sm:px-4 lg:flex-row lg:items-start lg:gap-10 lg:px-10">
+        <div className="mx-auto flex w-full min-w-0 max-w-[min(100rem,100%)] flex-1 flex-col gap-6 px-2 pb-4 pt-2 sm:px-4 lg:flex-row lg:items-start lg:gap-10 lg:px-10">
           <aside
             className="flex w-full shrink-0 flex-col items-center rounded-lg border border-yellow-900/45 bg-black/88 px-3 py-4 backdrop-blur-md lg:w-52 lg:min-w-[12rem]"
             style={WARCITY}
@@ -133,7 +133,7 @@ export async function LoginScreenLayout({
         </div>
 
         <footer
-          className="mt-auto border-t border-white/25 px-4 pb-12 pt-10 text-center text-sm font-semibold leading-relaxed text-zinc-300 sm:px-8"
+          className="mt-auto border-t border-white/25 px-4 pt-10 pb-[max(3rem,env(safe-area-inset-bottom))] text-center text-sm font-semibold leading-relaxed text-zinc-300 sm:px-8"
           style={WARCITY}
         >
           <p className="mx-auto max-w-3xl drop-shadow-[0_2px_6px_rgba(0,0,0,0.95)]">

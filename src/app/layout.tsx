@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Providers } from "@/components/providers";
 import { Cinzel, Press_Start_2P } from "next/font/google";
 import "./globals.css";
@@ -22,6 +22,12 @@ export const metadata: Metadata = {
     "War of City: siege, empire, and armies in your browser. Cities, fleets, diplomacy — real-time strategy.",
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -32,7 +38,7 @@ export default function RootLayout({
       lang="tr"
       className={`${warcityTitle.variable} ${pixelGame.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="flex min-h-dvh flex-col overflow-x-clip">
         <Providers>{children}</Providers>
       </body>
     </html>
