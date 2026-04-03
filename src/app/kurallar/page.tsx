@@ -1,11 +1,14 @@
 import { LoginScreenLayout } from "@/components/landing/LoginScreenLayout";
+import { ABOUT_WAR_OF_CITY_EN } from "@/content/about-war-of-city-en";
 import { ABOUT_WAR_OF_CITY_TR } from "@/content/about-war-of-city-tr";
 import { getDictionary } from "@/i18n/dictionaries";
 import { getLocale } from "@/lib/locale";
 
 export default async function KurallarPage() {
-  const dict = getDictionary(await getLocale());
+  const locale = await getLocale();
+  const dict = getDictionary(locale);
   const serverNow = new Date();
+  const about = locale === "en" ? ABOUT_WAR_OF_CITY_EN : ABOUT_WAR_OF_CITY_TR;
 
   return (
     <LoginScreenLayout dict={dict} serverNow={serverNow} activeNav="about">
@@ -14,9 +17,9 @@ export default async function KurallarPage() {
         style={{ fontFamily: "var(--font-warcity), serif" }}
       >
         <h2 className="text-lg font-bold text-white drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)] sm:text-xl">
-          {ABOUT_WAR_OF_CITY_TR.title}
+          {about.title}
         </h2>
-        {ABOUT_WAR_OF_CITY_TR.body.split("\n\n").map((block, i) => (
+        {about.body.split("\n\n").map((block, i) => (
           <p
             key={i}
             className="whitespace-pre-line text-[#FFFF00]/95 drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]"

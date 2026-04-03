@@ -80,7 +80,8 @@ export function BuildingCatalogCard({
     <div className="w-full overflow-hidden rounded-lg border border-zinc-700/70">
       <CatalogGameRow
         imageSrc={img}
-        title={`${orderInEra}. ${title}`}
+        orderBadge={orderInEra}
+        title={title}
         locked={locked}
         lockedLabel={play.errBuildingLocked}
         actionLabel={play.catalogBtnUpgrade}

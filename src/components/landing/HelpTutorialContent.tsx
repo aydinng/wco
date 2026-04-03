@@ -1,16 +1,28 @@
 import {
+  HELP_TUTORIAL_PAGE_LABELS_EN,
+  HELP_TUTORIAL_PAGES_EN,
+} from "@/content/help-tutorial-en";
+import {
   HELP_TUTORIAL_PAGE_LABELS_TR,
   HELP_TUTORIAL_PAGES_TR,
 } from "@/content/help-tutorial-tr";
+import type { AppLocale } from "@/lib/locale";
 import Link from "next/link";
 
 const WARCITY = { fontFamily: "var(--font-warcity), serif" } as const;
 
-export function HelpTutorialContent({ page }: { page: number }) {
-  const p = Math.min(HELP_TUTORIAL_PAGES_TR.length, Math.max(1, page));
+type Props = { page: number; locale: AppLocale };
+
+export function HelpTutorialContent({ page, locale }: Props) {
+  const labels =
+    locale === "en" ? HELP_TUTORIAL_PAGE_LABELS_EN : HELP_TUTORIAL_PAGE_LABELS_TR;
+  const pages = locale === "en" ? HELP_TUTORIAL_PAGES_EN : HELP_TUTORIAL_PAGES_TR;
+  const p = Math.min(pages.length, Math.max(1, page));
   const idx = p - 1;
-  const body = HELP_TUTORIAL_PAGES_TR[idx] ?? "";
-  const next = p < HELP_TUTORIAL_PAGES_TR.length ? p + 1 : null;
+  const body = pages[idx] ?? "";
+  const next = p < pages.length ? p + 1 : null;
+  const nextLabel = locale === "en" ? "Next →" : "İleri →";
+  const lastLabel = locale === "en" ? "Last page" : "Son sayfa";
 
   return (
     <div
@@ -19,7 +31,7 @@ export function HelpTutorialContent({ page }: { page: number }) {
     >
       <div className="space-y-4 text-[14px] font-semibold leading-relaxed text-[#FFFF00] sm:text-[15px]">
         <nav className="flex flex-col gap-1.5 border-b border-yellow-700/40 pb-4">
-          {HELP_TUTORIAL_PAGE_LABELS_TR.map((label, i) => {
+          {labels.map((label, i) => {
             const n = i + 1;
             const active = n === p;
             return (
@@ -50,10 +62,10 @@ export function HelpTutorialContent({ page }: { page: number }) {
               scroll={false}
               className="inline-flex rounded border border-amber-900/60 bg-gradient-to-b from-amber-700/95 to-amber-900/95 px-4 py-2 text-sm font-bold text-amber-50 shadow-sm hover:from-amber-600 hover:to-amber-800"
             >
-              İleri →
+              {nextLabel}
             </Link>
           ) : (
-            <span className="text-sm text-zinc-500">Son sayfa</span>
+            <span className="text-sm text-zinc-500">{lastLabel}</span>
           )}
         </div>
       </div>

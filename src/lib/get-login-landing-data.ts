@@ -13,31 +13,44 @@ export type LoginLandingData = {
   topPlayers: { rank: number; username: string; countryId: string }[];
 };
 
+const emptyLandingData: LoginLandingData = {
+  totalRegistered: 0,
+  onlineCount: 0,
+  lastUser: null,
+  topCountries: [],
+  topPlayers: [],
+};
+
 export async function getLoginLandingData(): Promise<LoginLandingData> {
   const whereRegistered = { passwordHash: { not: null } as const };
 
-  const [totalRegistered, allUsers, lastUser] = await Promise.all([
-    prisma.user.count({ where: whereRegistered }),
-    prisma.user.findMany({
-      where: whereRegistered,
-      select: {
-        username: true,
-        registrationCountry: true,
-        cities: { select: { wood: true, iron: true, oil: true, food: true } },
-      },
-    }),
-    prisma.user.findFirst({
-      orderBy: { createdAt: "desc" },
-      where: whereRegistered,
-      select: { username: true, registrationCountry: true, createdAt: true },
-    }),
-  ]);
+  try {
+    const [totalRegistered, allUsers, lastUser] = await Promise.all([
+      prisma.user.count({ where: whereRegistered }),
+      prisma.user.findMany({
+        where: whereRegistered,
+        select: {
+          username: true,
+          registrationCountry: true,
+          cities: { select: { wood: true, iron: true, oil: true, food: true } },
+        },
+      }),
+      prisma.user.findFirst({
+        orderBy: { createdAt: "desc" },
+        where: whereRegistered,
+        select: { username: true, registrationCountry: true, createdAt: true },
+      }),
+    ]);
 
-  return {
-    totalRegistered,
-    onlineCount: 0,
-    lastUser,
-    topCountries: aggregateTopCountries(allUsers, 5),
-    topPlayers: aggregateTopPlayers(allUsers, 5),
-  };
+    return {
+      totalRegistered,
+      onlineCount: 0,
+      lastUser,
+      topCountries: aggregateTopCountries(allUsers, 5),
+      topPlayers: aggregateTopPlayers(allUsers, 5),
+    };
+  } catch (e) {
+    console.error("[getLoginLandingData] veritabanı okunamadı", e);
+    return emptyLandingData;
+  }
 }

@@ -48,14 +48,9 @@ export default async function BuildingsPage() {
       >
         {p.buildingsTitle}
       </h2>
-      <div className="mb-8">
-        <p className="text-sm leading-relaxed text-zinc-500">
-          {p.buildingsCatalogHint}
-        </p>
-        {isAdmin && (
-          <p className="mt-2 text-xs text-amber-200/80">{p.adminBonusHint}</p>
-        )}
-      </div>
+      {isAdmin ? (
+        <p className="mb-6 text-xs text-amber-200/80">{p.adminBonusHint}</p>
+      ) : null}
 
       <div className="space-y-12">
         {ERA_ORDER.map((eraId) => {

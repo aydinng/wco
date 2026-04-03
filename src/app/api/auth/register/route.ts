@@ -1,6 +1,7 @@
 import { countryLabelById, REGISTRATION_COUNTRIES } from "@/config/countries";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 
 const COUNTRY_IDS = new Set<string>(
@@ -130,7 +131,43 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ ok: true });
   } catch (e) {
-    console.error(e);
-    return NextResponse.json({ error: "Kayıt başarısız" }, { status: 500 });
+    console.error("[register]", e);
+
+    if (e instanceof Prisma.PrismaClientKnownRequestError) {
+      if (e.code === "P2002") {
+        return NextResponse.json(
+          { error: "Bu kullanıcı adı veya e-posta zaten kayıtlı." },
+          { status: 409 },
+        );
+      }
+    }
+
+    const msg = e instanceof Error ? e.message : String(e);
+    if (
+      /column .+ does not exist|Unknown column|no such column|42703/i.test(msg)
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "Veritabanı şeması eksik. Sunucuda çalıştırın: npx prisma migrate deploy",
+        },
+        { status: 503 },
+      );
+    }
+
+    if (
+      e instanceof Prisma.PrismaClientInitializationError ||
+      /Can\'t reach database|P1001|connection/i.test(msg)
+    ) {
+      return NextResponse.json(
+        { error: "Veritabanına bağlanılamadı. Daha sonra deneyin." },
+        { status: 503 },
+      );
+    }
+
+    return NextResponse.json(
+      { error: "Kayıt tamamlanamadı. Bilgileri kontrol edip tekrar deneyin." },
+      { status: 500 },
+    );
   }
 }

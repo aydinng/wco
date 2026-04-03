@@ -34,7 +34,13 @@ export function LoginTopBar({ labels }: { labels: Labels }) {
     });
     setBusy(false);
     if (res?.error) {
-      setError(labels.badCredentials);
+      if (res.error === "Configuration") {
+        setError(
+          "Oturum ayarı eksik (AUTH_SECRET). Vercel → Settings → Environment Variables içinde AUTH_SECRET ekleyip yeniden deploy edin.",
+        );
+      } else {
+        setError(labels.badCredentials);
+      }
       return;
     }
     router.push(callbackUrl);

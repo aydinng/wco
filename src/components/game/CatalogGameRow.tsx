@@ -6,6 +6,8 @@ type Props = {
   id?: string;
   imageSrc: string;
   title: string;
+  /** Bina kataloğu: sıra no (1,2,…) — resim yanında büyük puntoda */
+  orderBadge?: number;
   middle: ReactNode;
   rightExtra?: ReactNode;
   actionLabel: string;
@@ -26,6 +28,7 @@ export function CatalogGameRow({
   id,
   imageSrc,
   title,
+  orderBadge,
   middle,
   rightExtra,
   actionLabel,
@@ -36,10 +39,17 @@ export function CatalogGameRow({
   hideAction,
   middleStack,
 }: Props) {
+  const middleClass =
+    middleStack && orderBadge != null
+      ? "flex flex-col gap-0.5 text-[10px] leading-relaxed text-zinc-100/95 sm:text-xs"
+      : middleStack
+        ? "flex flex-col gap-0.5 text-[9px] leading-relaxed text-zinc-100/95 sm:text-[10px]"
+        : "flex flex-wrap items-baseline gap-x-2 gap-y-0.5 text-[9px] leading-relaxed text-zinc-100/95 sm:text-[10px]";
+
   const inner = (
     <div
       className={[
-        "mx-auto flex flex-row items-center gap-2 px-2 py-1.5 sm:gap-3 sm:px-3",
+        "mx-auto flex flex-row items-start gap-2 px-2 py-1.5 sm:gap-3 sm:px-3",
         fullWidth ? "w-full max-w-none" : "max-w-[min(100%,42rem)]",
       ].join(" ")}
       style={{
@@ -57,20 +67,29 @@ export function CatalogGameRow({
         />
       </div>
 
-      <div className="min-w-0 flex-1">
-        <h4 className="mb-0.5 line-clamp-2 text-xs font-normal leading-tight text-yellow-300 drop-shadow-sm sm:text-sm">
-          {title}
-        </h4>
-        <div
-          className={
-            middleStack
-              ? "flex flex-col gap-0.5 text-[9px] leading-relaxed text-zinc-100/95 sm:text-[10px]"
-              : "flex flex-wrap items-baseline gap-x-2 gap-y-0.5 text-[9px] leading-relaxed text-zinc-100/95 sm:text-[10px]"
-          }
-        >
-          {middle}
+      {orderBadge != null ? (
+        <>
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+            <span
+              className="min-w-[1.5rem] tabular-nums text-center text-xl font-bold leading-none text-amber-300 drop-shadow sm:text-2xl"
+              aria-hidden
+            >
+              {orderBadge}
+            </span>
+            <h4 className="line-clamp-2 max-w-[min(100%,14rem)] text-xs font-semibold leading-tight text-yellow-300 drop-shadow-sm sm:max-w-[18rem] sm:text-sm">
+              {title}
+            </h4>
+          </div>
+          <div className={`min-w-0 flex-1 ${middleClass}`}>{middle}</div>
+        </>
+      ) : (
+        <div className="min-w-0 flex-1">
+          <h4 className="mb-0.5 line-clamp-2 text-xs font-normal leading-tight text-yellow-300 drop-shadow-sm sm:text-sm">
+            {title}
+          </h4>
+          <div className={middleClass}>{middle}</div>
         </div>
-      </div>
+      )}
 
       {rightExtra ? (
         <div className="max-w-[min(100%,9rem)] shrink-0 text-[8px] text-white sm:max-w-[11rem] sm:text-[10px]">

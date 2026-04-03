@@ -18,7 +18,7 @@ export default async function EgitimPage({ searchParams }: PageProps) {
 
   return (
     <LoginScreenLayout dict={dict} serverNow={serverNow} activeNav="tutorial">
-      <HelpTutorialContent page={page} />
+      <HelpTutorialContent page={page} locale={locale} />
     </LoginScreenLayout>
   );
 }
