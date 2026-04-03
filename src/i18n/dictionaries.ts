@@ -49,6 +49,14 @@ export type Dictionary = {
     loginBarUser: string;
     loginBarPass: string;
     loginBarSubmit: string;
+    /** Giriş sayfası giriş paragrafı (register linki ortada) */
+    loginIntroBefore: string;
+    loginIntroAfter: string;
+    loginIntroRegisterWord: string;
+    /** 4. madde: forum linki ortada */
+    loginBullet4Before: string;
+    loginBullet4LinkWord: string;
+    loginBullet4After: string;
   };
   auth: {
     loginTitle: string;
@@ -347,13 +355,20 @@ const tr: Dictionary = {
     loginColPlayer: "Oyuncu",
     navHome: "Ana Sayfa",
     loginWelcomeTitle: "warofcity’ye hoş geldiniz",
+    loginIntroBefore:
+      "warofcity, tarayıcı üzerinden oynanan çok oyunculu bir strateji oyunudur. Kullanıcı adı ve şifreniz yoksa, katılmak için ",
+    loginIntroAfter: ".",
+    loginIntroRegisterWord: "kayıt olun",
     loginBulletsFive: [
       "warofcity hiçbir reklam içermez ve içermeyecektir.",
       "warofcity oynamak ücretsizdir.",
       "Yeni özellikler oyuncu geri bildirimiyle durmaksızın eklenecektir.",
-      "Forumumuza katılmayı unutmayın.",
+      "",
       "Haberi yayın, başkalarının da katılıp eğlenmesini sağlayın.",
     ],
+    loginBullet4Before: "",
+    loginBullet4LinkWord: "Forum",
+    loginBullet4After: "umuza katılmayı unutmayın.",
     loginNavLogin: "Giriş",
     loginNavRegister: "Kayıt",
     loginNavAbout: "Hakkında",
@@ -697,14 +712,21 @@ const en: Dictionary = {
     loginColCountry: "Country",
     loginColPlayer: "Player",
     navHome: "Home",
-    loginWelcomeTitle: "Welcome to warofcity",
+    loginWelcomeTitle: "Welcome To warofcity",
+    loginIntroBefore:
+      "warofcity is a massive multiplayer, browser based strategy game. If you do not have a User Name and Password, please ",
+    loginIntroAfter: " to join.",
+    loginIntroRegisterWord: "register",
     loginBulletsFive: [
       "warofcity does not (and will not) contain any advertisements.",
       "It is free to play warofcity.",
       "New features are going to be added non-stop with players’ guidance.",
-      "Do not forget to join our forum.",
+      "",
       "Spread the word and let others join the fun.",
     ],
+    loginBullet4Before: "Do not forget to join our ",
+    loginBullet4LinkWord: "forum",
+    loginBullet4After: ".",
     loginNavLogin: "Login",
     loginNavRegister: "Register",
     loginNavAbout: "About",

@@ -8,14 +8,14 @@ import Link from "next/link";
 import { Suspense } from "react";
 
 const SANS =
-  'ui-sans-serif, system-ui, "Segoe UI", Tahoma, Arial, sans-serif';
-const SERIF_LIST =
-  'Georgia, "Times New Roman", var(--font-warcity), serif';
+  'ui-sans-serif, system-ui, "Segoe UI", Tahoma, Arial, Helvetica, sans-serif';
 
 function navLink(active: boolean) {
   return [
     "block py-0.5 text-center text-sm font-bold transition-colors",
-    active ? "text-yellow-200" : "text-yellow-400 hover:text-yellow-200",
+    active
+      ? "text-[#FFFF00]"
+      : "text-[#FFFF00]/90 hover:text-[#FFFF00]",
   ].join(" ");
 }
 
@@ -104,12 +104,7 @@ export async function LoginScreenLayout({
           </div>
         </aside>
 
-        <div
-          className="min-w-0 flex-1 text-[15px] leading-relaxed text-yellow-400 sm:text-base"
-          style={{ fontFamily: SERIF_LIST }}
-        >
-          {children}
-        </div>
+        <div className="min-w-0 flex-1">{children}</div>
       </div>
     </div>
   );

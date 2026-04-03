@@ -79,7 +79,7 @@ export function LoginTopBar({ labels }: { labels: Labels }) {
       <button
         type="submit"
         disabled={busy}
-        className="h-8 min-w-[72px] border border-zinc-400 bg-white px-3 text-sm font-bold text-black enabled:hover:bg-zinc-100 disabled:opacity-50"
+        className="h-8 min-w-[72px] border border-white bg-black px-3 text-sm font-bold text-white enabled:hover:bg-zinc-900 disabled:opacity-50"
       >
         {busy ? "…" : labels.submit}
       </button>
