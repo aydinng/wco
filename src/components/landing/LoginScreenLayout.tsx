@@ -99,7 +99,7 @@ export async function LoginScreenLayout({
               label={lang.label}
               trLabel={lang.tr}
               enLabel={lang.en}
-              variant="compact"
+              variant="login"
             />
           </div>
         </aside>

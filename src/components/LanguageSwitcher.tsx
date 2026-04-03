@@ -9,8 +9,8 @@ type Props = {
   label: string;
   trLabel: string;
   enLabel: string;
-  /** Sol menü: daha ince çerçeve, gri tonlar */
-  variant?: "default" | "compact";
+  /** Sol menü: daha ince çerçeve, gri tonlar; login: siyah tema + beyaz "Dil" etiketi */
+  variant?: "default" | "compact" | "login";
 };
 
 export function LanguageSwitcher({
@@ -38,10 +38,23 @@ export function LanguageSwitcher({
     }
   }
 
-  if (variant === "compact") {
+  if (variant === "compact" || variant === "login") {
+    const login = variant === "login";
     return (
-      <div className="w-full max-w-[13rem] rounded-md border border-zinc-700/45 bg-zinc-950/35 px-2 py-2">
-        <div className="mb-1.5 text-xs font-medium uppercase tracking-wide text-zinc-500">
+      <div
+        className={
+          login
+            ? "w-full max-w-[13rem] rounded border border-yellow-700/50 bg-black px-2 py-2"
+            : "w-full max-w-[13rem] rounded-md border border-zinc-700/45 bg-zinc-950/35 px-2 py-2"
+        }
+      >
+        <div
+          className={
+            login
+              ? "mb-1.5 text-xs font-medium uppercase tracking-wide text-white"
+              : "mb-1.5 text-xs font-medium uppercase tracking-wide text-zinc-500"
+          }
+        >
           {label}
         </div>
         <div className="flex gap-1.5">
@@ -49,11 +62,19 @@ export function LanguageSwitcher({
             type="button"
             disabled={busy}
             onClick={() => setLocale("tr")}
-            className={`flex-1 rounded border py-1.5 text-sm font-medium transition-colors ${
-              locale === "tr"
-                ? "border-amber-800/50 bg-zinc-800/60 text-amber-100/95"
-                : "border-zinc-600/35 bg-zinc-900/40 text-zinc-400 hover:border-zinc-500/50 hover:text-zinc-200"
-            }`}
+            className={
+              login
+                ? `flex-1 rounded border py-1.5 text-sm font-medium transition-colors ${
+                    locale === "tr"
+                      ? "border-red-800/80 bg-red-950 text-white"
+                      : "border-zinc-700 bg-zinc-950/80 text-zinc-300 hover:border-zinc-500 hover:text-white"
+                  }`
+                : `flex-1 rounded border py-1.5 text-sm font-medium transition-colors ${
+                    locale === "tr"
+                      ? "border-amber-800/50 bg-zinc-800/60 text-amber-100/95"
+                      : "border-zinc-600/35 bg-zinc-900/40 text-zinc-400 hover:border-zinc-500/50 hover:text-zinc-200"
+                  }`
+            }
           >
             {trLabel}
           </button>
@@ -61,11 +82,19 @@ export function LanguageSwitcher({
             type="button"
             disabled={busy}
             onClick={() => setLocale("en")}
-            className={`flex-1 rounded border py-1.5 text-sm font-medium transition-colors ${
-              locale === "en"
-                ? "border-amber-800/50 bg-zinc-800/60 text-amber-100/95"
-                : "border-zinc-600/35 bg-zinc-900/40 text-zinc-400 hover:border-zinc-500/50 hover:text-zinc-200"
-            }`}
+            className={
+              login
+                ? `flex-1 rounded border py-1.5 text-sm font-medium transition-colors ${
+                    locale === "en"
+                      ? "border-red-800/80 bg-red-950 text-white"
+                      : "border-zinc-700 bg-zinc-950/80 text-zinc-300 hover:border-zinc-500 hover:text-white"
+                  }`
+                : `flex-1 rounded border py-1.5 text-sm font-medium transition-colors ${
+                    locale === "en"
+                      ? "border-amber-800/50 bg-zinc-800/60 text-amber-100/95"
+                      : "border-zinc-600/35 bg-zinc-900/40 text-zinc-400 hover:border-zinc-500/50 hover:text-zinc-200"
+                  }`
+            }
           >
             {enLabel}
           </button>
