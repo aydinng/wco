@@ -1,12 +1,26 @@
-import { auth } from "@/auth";
+import { getToken } from "next-auth/jwt";
+import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
-export default auth((req) => {
-  const path = req.nextUrl.pathname;
+/** Edge’de `@/auth` import etme — Prisma vb. ile 1 MB limiti aşılır. Sadece JWT. */
+const secret = process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET;
 
-  /** Kök `/` her zaman burada netleşsin (Vercel’de eski `/` oyun sayfası önbelleği / oturum karışmasını önler). */
+export async function middleware(req: NextRequest) {
+  if (!secret) {
+    console.error("AUTH_SECRET / NEXTAUTH_SECRET tanımlı değil");
+  }
+
+  const path = req.nextUrl.pathname;
+  const isProd = process.env.NODE_ENV === "production";
+
+  const token = await getToken({
+    req,
+    secret,
+    secureCookie: isProd,
+  });
+
   if (path === "/") {
-    if (!req.auth) {
+    if (!token) {
       return NextResponse.redirect(new URL("/login", req.nextUrl));
     }
     return NextResponse.redirect(new URL("/overview", req.nextUrl));
@@ -23,23 +37,22 @@ export default auth((req) => {
     return NextResponse.next();
   }
 
-  if (!req.auth) {
+  if (!token) {
     const url = req.nextUrl.clone();
     url.pathname = "/login";
     url.searchParams.set("callbackUrl", path);
     return NextResponse.redirect(url);
   }
 
-  const isAdmin = req.auth.user?.isAdmin === true;
+  const isAdmin = (token as { isAdmin?: boolean }).isAdmin === true;
   if (path.startsWith("/admin") && !isAdmin) {
     return NextResponse.redirect(new URL("/overview", req.nextUrl));
   }
 
   return NextResponse.next();
-});
+}
 
 export const config = {
-  /** Kök `/` açıkça eşleşmeli; aksi halde Vercel’de oturumsuz kullanıcı doğrudan oyun kabuğuna düşebiliyor. */
   matcher: [
     "/",
     "/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
