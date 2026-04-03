@@ -11,7 +11,7 @@ export default async function LoginPage() {
   const serverNow = new Date();
 
   return (
-    <LoginScreenLayout dict={dict} serverNow={serverNow}>
+    <LoginScreenLayout dict={dict} serverNow={serverNow} activeNav="login">
       <LoginLandingContent dict={dict} locale={locale} stats={stats} />
     </LoginScreenLayout>
   );

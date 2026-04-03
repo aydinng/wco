@@ -13,9 +13,9 @@ export function LoginSidebarClock({
   label: string;
 }) {
   return (
-    <div className="mt-2 text-[11px] leading-tight">
+    <div className="mt-2 w-full max-w-[13rem] text-center text-[11px] leading-tight">
       <div className="font-semibold text-green-500">{label}</div>
-      <div className="mt-0.5 font-semibold text-green-500">
+      <div className="mt-0.5 flex justify-center font-semibold text-green-500">
         <ServerDateTime
           initial={initial}
           locale={locale}

@@ -211,7 +211,7 @@ export function SideNav({
               </Link>
             </div>
             <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1">
-              <Link href="/forum" className={linkYellow(pathname === "/forum")}>
+              <Link href="/community" className={linkYellow(pathname === "/community")}>
                 {labels.forum}
               </Link>
               <button

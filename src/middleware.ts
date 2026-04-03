@@ -30,6 +30,9 @@ export async function middleware(req: NextRequest) {
     path === "/login" ||
     path === "/register" ||
     path === "/kurallar" ||
+    path === "/egitim" ||
+    path === "/forum" ||
+    path === "/missions" ||
     path.startsWith("/api/auth") ||
     path === "/api/locale";
 

@@ -1,6 +1,8 @@
 import { LoginTopBar } from "@/app/login/LoginTopBar";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { LoginSidebarClock } from "@/components/landing/LoginSidebarClock";
+import type { LandingShellNavId } from "@/components/landing/landing-shell-nav";
+import { isLoginOrHomeActive } from "@/components/landing/landing-shell-nav";
 import { BRAND } from "@/config/brand";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { getLocale } from "@/lib/locale";
@@ -23,10 +25,12 @@ export async function LoginScreenLayout({
   dict,
   children,
   serverNow,
+  activeNav,
 }: {
   dict: Dictionary;
   children: React.ReactNode;
   serverNow: Date;
+  activeNav: LandingShellNavId;
 }) {
   const locale = await getLocale();
   const t = dict.public;
@@ -40,6 +44,8 @@ export async function LoginScreenLayout({
     submit: t.loginBarSubmit,
     badCredentials: dict.auth.badCredentials,
   };
+
+  const onLoginHome = isLoginOrHomeActive(activeNav);
 
   return (
     <div className="relative flex w-full max-w-[100%] min-h-dvh flex-col overflow-x-clip text-zinc-100 [touch-action:pan-y]">
@@ -87,25 +93,25 @@ export async function LoginScreenLayout({
             style={WARCITY}
           >
             <nav className="w-full max-w-[13rem] space-y-1 text-center">
-              <Link href="/login" className={navLink(true)}>
+              <Link href="/login" className={navLink(onLoginHome)}>
                 {t.loginNavLogin}
               </Link>
-              <Link href="/register" className={navLink(false)}>
+              <Link href="/register" className={navLink(activeNav === "register")}>
                 {t.loginNavRegister}
               </Link>
-              <Link href="/kurallar" className={navLink(false)}>
+              <Link href="/kurallar" className={navLink(activeNav === "about")}>
                 {t.loginNavAbout}
               </Link>
-              <Link href="/help" className={navLink(false)}>
+              <Link href="/egitim" className={navLink(activeNav === "tutorial")}>
                 {t.loginNavTutorial}
               </Link>
-              <Link href="/forum" className={navLink(false)}>
+              <Link href="/forum" className={navLink(activeNav === "forum")}>
                 {t.loginNavForum}
               </Link>
-              <Link href="/missions" className={navLink(false)}>
+              <Link href="/missions" className={navLink(activeNav === "manual")}>
                 {t.loginNavManual}
               </Link>
-              <Link href="/login" className={navLink(false)}>
+              <Link href="/login" className={navLink(onLoginHome)}>
                 {t.navHome}
               </Link>
             </nav>

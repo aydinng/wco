@@ -1,15 +1,18 @@
-import { PublicPageLayout } from "@/components/landing/PublicPageLayout";
-import { RegisterForm } from "./RegisterForm";
+import { LoginScreenLayout } from "@/components/landing/LoginScreenLayout";
+import { RegisterForm } from "@/app/register/RegisterForm";
+import { getDictionary } from "@/i18n/dictionaries";
+import { getLocale } from "@/lib/locale";
 
 export default async function RegisterPage() {
+  const locale = await getLocale();
+  const dict = getDictionary(locale);
+  const serverNow = new Date();
+
   return (
-    <PublicPageLayout activeNav="register">
-      <div className="flex flex-col items-center lg:items-start">
-        <RegisterForm />
-        <p className="mt-6 max-w-md text-center text-sm text-zinc-500 lg:text-left">
-          Kayıt olduktan sonra giriş sayfasından oyuna girebilirsin.
-        </p>
+    <LoginScreenLayout dict={dict} serverNow={serverNow} activeNav="register">
+      <div className="flex flex-col items-stretch lg:items-start">
+        <RegisterForm dict={dict} locale={locale} />
       </div>
-    </PublicPageLayout>
+    </LoginScreenLayout>
   );
 }

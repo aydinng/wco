@@ -20,6 +20,12 @@ model User {
   isAdmin   Boolean  @default(false)
   createdAt DateTime @default(now())
 
+  /// Kayıt e-postası (benzersiz)
+  email     String?  @unique
+
+  /// KVKK / aydınlatma metni onayı zamanı
+  kvkkAcceptedAt DateTime?
+
   /// Kayıt sırasında seçilen ülke (giriş sayfası listesi için)
   registrationCountry String @default("")
 

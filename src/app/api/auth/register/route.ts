@@ -13,19 +13,44 @@ const RESERVED_USERNAMES = new Set(
   ),
 );
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export async function POST(req: Request) {
   try {
     const body = (await req.json()) as {
       username?: string;
       password?: string;
+      passwordConfirm?: string;
+      email?: string;
+      cityName?: string;
       countryId?: string;
+      kvkkAccepted?: boolean;
     };
     const username = body.username?.trim();
     const password = body.password;
+    const passwordConfirm = body.passwordConfirm;
+    const emailRaw = body.email?.trim().toLowerCase() ?? "";
+    const cityName = body.cityName?.trim() ?? "";
     const countryId = body.countryId?.trim() ?? "";
+    const kvkkAccepted = body.kvkkAccepted === true;
 
+    if (!kvkkAccepted) {
+      return NextResponse.json({ error: "KVKK onayı gerekli" }, { status: 400 });
+    }
     if (!username || !password) {
       return NextResponse.json({ error: "Eksik alan" }, { status: 400 });
+    }
+    if (password !== passwordConfirm) {
+      return NextResponse.json({ error: "Şifreler eşleşmiyor" }, { status: 400 });
+    }
+    if (!emailRaw || !EMAIL_RE.test(emailRaw)) {
+      return NextResponse.json({ error: "Geçerli bir e-posta girin" }, { status: 400 });
+    }
+    if (cityName.length < 2 || cityName.length > 48) {
+      return NextResponse.json(
+        { error: "Şehir adı 2–48 karakter olmalı" },
+        { status: 400 },
+      );
     }
     if (!countryId || !COUNTRY_IDS.has(countryId)) {
       return NextResponse.json({ error: "Geçersiz ülke" }, { status: 400 });
@@ -46,25 +71,39 @@ export async function POST(req: Request) {
       );
     }
 
-    const exists = await prisma.user.findUnique({ where: { username } });
-    if (exists) {
+    const existsUser = await prisma.user.findUnique({ where: { username } });
+    if (existsUser) {
       return NextResponse.json({ error: "Bu kullanıcı adı alınmış" }, { status: 409 });
+    }
+
+    const existsEmail = await prisma.user.findUnique({
+      where: { email: emailRaw },
+    });
+    if (existsEmail) {
+      return NextResponse.json(
+        { error: "Bu e-posta zaten kayıtlı" },
+        { status: 409 },
+      );
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
     const nationLabel = countryLabelById(countryId);
+    const now = new Date();
 
     await prisma.user.create({
       data: {
         username,
         passwordHash,
+        email: emailRaw,
+        kvkkAcceptedAt: now,
         isAdmin: false,
         registrationCountry: countryId,
         nationName: nationLabel,
+        tribeName: username,
         currentEra: "ilk_cag",
         cities: {
           create: {
-            name: "Capital",
+            name: cityName,
             coordX: 1,
             coordY: 1,
             coordZ: 1,

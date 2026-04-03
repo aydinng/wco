@@ -1,5 +1,5 @@
 import { PlaceholderPage } from "@/components/game/PlaceholderPage";
 
-export default function ForumPage() {
+export default function CommunityForumPage() {
   return <PlaceholderPage title="Forum" />;
 }

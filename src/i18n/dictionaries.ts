@@ -66,6 +66,16 @@ export type Dictionary = {
     loginIntroRegisterWord: string;
     /** Alt bilgi © yıl + web / mobil notu */
     loginFooterNotice: string;
+    /** Kayıt sayfası */
+    registerPageTitle: string;
+    registerPageSubtitle: string;
+    registerPasswordConfirm: string;
+    registerEmail: string;
+    registerFirstCityName: string;
+    registerKvkkHeading: string;
+    registerKvkkAccept: string;
+    registerKvkkRequired: string;
+    registerPasswordMismatch: string;
     /** 4. madde: forum linki ortada */
     loginBullet4Before: string;
     loginBullet4LinkWord: string;
@@ -379,10 +389,21 @@ const tr: Dictionary = {
       "warofcity, tarayıcı üzerinden oynanan çok oyunculu bir strateji oyunudur.",
     loginIntroParagraph2Before:
       "Kullanıcı adı ve şifreniz yoksa, katılmak için ",
-    loginIntroParagraph2After: ".",
+    loginIntroParagraph2After: "",
     loginIntroRegisterWord: "kayıt olun",
     loginFooterNotice:
       "© {year} War of City. Web tarayıcılarında oynanmak üzere geliştirilmektedir. İleride iOS ve Android uygulamaları yayınlanacaktır.",
+    registerPageTitle: "Yeni hesap",
+    registerPageSubtitle:
+      "Aşağıdaki bilgileri doldurun; kabile adı olarak kullanıcı adınız kullanılır.",
+    registerPasswordConfirm: "Şifreyi onayla",
+    registerEmail: "E-posta adresi",
+    registerFirstCityName: "İlk şehrin adı",
+    registerKvkkHeading: "Kişisel veriler ve onay",
+    registerKvkkAccept:
+      "Yukarıdaki aydınlatma metnini okudum ve kabul ediyorum.",
+    registerKvkkRequired: "Kayıt için KVKK onayı zorunludur.",
+    registerPasswordMismatch: "Şifreler eşleşmiyor.",
     loginBulletsFive: [
       "warofcity hiçbir reklam içermez ve içermeyecektir.",
       "warofcity oynamak ücretsizdir.",
@@ -752,6 +773,16 @@ const en: Dictionary = {
     loginIntroRegisterWord: "register",
     loginFooterNotice:
       "© {year} War of City. Developed for web browsers; iOS and Android apps are planned for a later release.",
+    registerPageTitle: "New account",
+    registerPageSubtitle:
+      "Fill in the fields below; your username is used as your tribe name.",
+    registerPasswordConfirm: "Confirm password",
+    registerEmail: "Email address",
+    registerFirstCityName: "Name of your first city",
+    registerKvkkHeading: "Personal data and consent",
+    registerKvkkAccept: "I have read and accept the notice above.",
+    registerKvkkRequired: "You must accept the privacy notice to register.",
+    registerPasswordMismatch: "Passwords do not match.",
     loginBulletsFive: [
       "warofcity does not (and will not) contain any advertisements.",
       "It is free to play warofcity.",

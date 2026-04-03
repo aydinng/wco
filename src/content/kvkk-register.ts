@@ -1,0 +1,4 @@
+/** Kayıt sırasında gösterilen KVKK / kişisel veri metni */
+export const KVKK_REGISTER_TEXT_TR = `6698 sayılı Kişisel Verilerin Korunması Kanunu kapsamında, War of City üzerinden ilettiğiniz kullanıcı adı, e-posta, oyun içi tercihler ve bağlantılı teknik verilerin; hesabınızın oluşturulması, yürütülmesi, güvenliğin sağlanması ve size hizmet sunulması amacıyla işlenebileceğini, yasal zorunluluk ve meşru menfaatler çerçevesinde saklanabileceğini kabul edersiniz. Kaydı tamamlamak için bu kutuyu işaretlemeniz zorunludur.`;
+
+export const KVKK_REGISTER_TEXT_EN = `Under applicable data protection laws, you agree that your username, email, in-game preferences and related technical data may be processed to create and operate your account, provide the service, and ensure security. You must check this box to complete registration.`;

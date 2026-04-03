@@ -105,7 +105,7 @@ export function LoginLandingContent({
         </span>
         <Link
           href="/register"
-          className="inline-flex w-fit shrink-0 rounded border border-white/95 bg-white px-3 py-1.5 text-sm font-semibold text-black shadow-md hover:bg-zinc-100"
+          className="inline-flex h-8 w-fit shrink-0 items-center justify-center rounded-sm border border-amber-900/60 bg-gradient-to-b from-amber-700/95 to-amber-900/95 px-3 text-sm font-bold text-amber-50 shadow-sm hover:from-amber-600 hover:to-amber-800"
         >
           {p.loginIntroRegisterWord}
         </Link>
