@@ -1,5 +1,6 @@
-import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { LoginTopBar } from "@/app/login/LoginTopBar";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { LoginSidebarClock } from "@/components/landing/LoginSidebarClock";
 import { BRAND } from "@/config/brand";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { getLocale } from "@/lib/locale";
@@ -7,24 +8,25 @@ import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
 
-const SANS =
-  'ui-sans-serif, system-ui, "Segoe UI", Tahoma, Arial, Helvetica, sans-serif';
+const WARCITY: React.CSSProperties = { fontFamily: "var(--font-warcity), serif" };
 
 function navLink(active: boolean) {
   return [
-    "block py-0.5 text-center text-sm font-bold transition-colors",
+    "block rounded px-1 py-0.5 text-left text-sm font-bold transition-colors",
     active
       ? "text-[#FFFF00]"
-      : "text-[#FFFF00]/90 hover:text-[#FFFF00]",
+      : "text-[#FFFF00]/90 hover:bg-red-950/40 hover:text-yellow-100",
   ].join(" ");
 }
 
 export async function LoginScreenLayout({
   dict,
   children,
+  serverNow,
 }: {
   dict: Dictionary;
   children: React.ReactNode;
+  serverNow: Date;
 }) {
   const locale = await getLocale();
   const t = dict.public;
@@ -39,8 +41,8 @@ export async function LoginScreenLayout({
 
   return (
     <div className="min-h-screen bg-black text-zinc-100">
-      <header className="w-full px-3 pt-4 sm:px-4">
-        <div className="mx-auto max-w-5xl overflow-hidden rounded-lg border border-yellow-900/35">
+      <header className="w-full px-2 pt-4 sm:px-4 lg:px-10">
+        <div className="mx-auto w-full max-w-[min(100rem,100%)] overflow-hidden rounded-lg border border-yellow-900/35">
           <Image
             src={BRAND.bannerSrc}
             alt={t.bannerAlt}
@@ -54,7 +56,7 @@ export async function LoginScreenLayout({
 
         <h1
           className="mt-4 text-center text-lg font-bold tracking-tight text-white sm:text-xl"
-          style={{ fontFamily: SANS }}
+          style={WARCITY}
         >
           {t.loginWelcomeTitle}
         </h1>
@@ -64,10 +66,10 @@ export async function LoginScreenLayout({
         </Suspense>
       </header>
 
-      <div className="mx-auto flex max-w-6xl flex-col gap-6 px-3 pb-10 pt-2 sm:px-4 lg:flex-row lg:items-start lg:gap-10">
+      <div className="mx-auto flex w-full max-w-[min(100rem,100%)] flex-col gap-6 px-2 pb-10 pt-2 sm:px-4 lg:flex-row lg:items-start lg:gap-10 lg:px-10">
         <aside
-          className="flex w-full shrink-0 flex-col lg:w-44"
-          style={{ fontFamily: SANS }}
+          className="flex w-full shrink-0 flex-col lg:w-52 lg:min-w-[12rem]"
+          style={WARCITY}
         >
           <nav className="space-y-1">
             <Link href="/login" className={navLink(true)}>
@@ -93,7 +95,7 @@ export async function LoginScreenLayout({
             </Link>
           </nav>
 
-          <div className="mt-4 w-full max-w-[13rem] self-center">
+          <div className="mt-4 w-full max-w-[11rem]">
             <LanguageSwitcher
               locale={locale}
               label={lang.label}
@@ -102,6 +104,12 @@ export async function LoginScreenLayout({
               variant="login"
             />
           </div>
+
+          <LoginSidebarClock
+            initial={serverNow}
+            locale={locale}
+            label={t.loginServerClockLabel}
+          />
         </aside>
 
         <div className="min-w-0 flex-1">{children}</div>

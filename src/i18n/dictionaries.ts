@@ -28,8 +28,16 @@ export type Dictionary = {
     loginNoticeItems: string[];
     loginStatRegistered: string;
     loginStatOnline: string;
-    loginStatLast: string;
+    /** {user} {ago} — cümle ülke adından önce biter; bayrak + ülke kodda eklenir */
+    loginStatLastPrefix: string;
     loginStatLastEmpty: string;
+    /** Üst sıralama tabloları başlıkları */
+    loginTableTopCountriesTitle: string;
+    loginTableTopPlayersTitle: string;
+    /** {name} {country} — EN'de "from" için ayrı şablon */
+    loginTablePlayerRow: string;
+    /** Sol menü: dil kutusunun altındaki sunucu saati etiketi */
+    loginServerClockLabel: string;
     loginColRank: string;
     loginColCountry: string;
     loginColPlayer: string;
@@ -347,9 +355,15 @@ const tr: Dictionary = {
     ],
     loginStatRegistered: "Toplamda {count} oyuncu kayıtlıdır.",
     loginStatOnline: "Şu anda {count} oyuncu çevrimiçi.",
-    loginStatLast:
-      "En son katılan lider: {user} — {mins} dk önce — {country}.",
+    loginStatLastPrefix:
+      "Son kayıt: {user} — {ago} önce — kayıtta seçilen ülke: ",
     loginStatLastEmpty: "Henüz kayıtlı oyuncu yok.",
+    loginTableTopCountriesTitle:
+      "Şu an toplam skor bakımından ilk beş ülke:",
+    loginTableTopPlayersTitle:
+      "Şu an toplam skor bakımından ilk beş oyuncu:",
+    loginTablePlayerRow: "{name} ({country})",
+    loginServerClockLabel: "Sunucu zamanı",
     loginColRank: "Sıra",
     loginColCountry: "Ülke",
     loginColPlayer: "Oyuncu",
@@ -703,11 +717,17 @@ const en: Dictionary = {
       "Spread the word.",
       "Turkish localization is being improved alongside English.",
     ],
-    loginStatRegistered: "Total registered players: {count}.",
-    loginStatOnline: "Currently online: {count}.",
-    loginStatLast:
-      "Last leader to join: {user} — {mins} min ago — {country}.",
+    loginStatRegistered: "In total {count} players are registered.",
+    loginStatOnline: "Right now {count} players are online.",
+    loginStatLastPrefix:
+      "Last registered: {user} — {ago} ago — nation chosen at signup: ",
     loginStatLastEmpty: "No registered players yet.",
+    loginTableTopCountriesTitle:
+      "Right now, top five countries with best total scores are:",
+    loginTableTopPlayersTitle:
+      "Right now, top five players with best total scores are:",
+    loginTablePlayerRow: "{name} (from {country})",
+    loginServerClockLabel: "Server time",
     loginColRank: "Rank",
     loginColCountry: "Country",
     loginColPlayer: "Player",

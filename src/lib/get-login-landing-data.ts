@@ -1,0 +1,43 @@
+import { aggregateTopCountries, aggregateTopPlayers } from "@/lib/login-landing-stats";
+import { prisma } from "@/lib/prisma";
+
+export type LoginLandingData = {
+  totalRegistered: number;
+  onlineCount: number;
+  lastUser: {
+    username: string;
+    registrationCountry: string;
+    createdAt: Date;
+  } | null;
+  topCountries: { rank: number; countryId: string }[];
+  topPlayers: { rank: number; username: string; countryId: string }[];
+};
+
+export async function getLoginLandingData(): Promise<LoginLandingData> {
+  const whereRegistered = { passwordHash: { not: null } as const };
+
+  const [totalRegistered, allUsers, lastUser] = await Promise.all([
+    prisma.user.count({ where: whereRegistered }),
+    prisma.user.findMany({
+      where: whereRegistered,
+      select: {
+        username: true,
+        registrationCountry: true,
+        cities: { select: { wood: true, iron: true, oil: true, food: true } },
+      },
+    }),
+    prisma.user.findFirst({
+      orderBy: { createdAt: "desc" },
+      where: whereRegistered,
+      select: { username: true, registrationCountry: true, createdAt: true },
+    }),
+  ]);
+
+  return {
+    totalRegistered,
+    onlineCount: 0,
+    lastUser,
+    topCountries: aggregateTopCountries(allUsers, 5),
+    topPlayers: aggregateTopPlayers(allUsers, 5),
+  };
+}

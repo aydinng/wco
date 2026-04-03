@@ -3,7 +3,7 @@
 import type { AppLocale } from "@/lib/locale";
 import { useEffect, useState } from "react";
 
-type Props = { initial: Date; locale: AppLocale };
+type Props = { initial: Date; locale: AppLocale; className?: string };
 
 export function ServerClock({ initial, locale }: Props) {
   const [now, setNow] = useState(initial);
@@ -24,7 +24,7 @@ export function ServerClock({ initial, locale }: Props) {
 }
 
 /** Tam tarih + saat (sol menü sunucu zamanı) */
-export function ServerDateTime({ initial, locale }: Props) {
+export function ServerDateTime({ initial, locale, className }: Props) {
   const [now, setNow] = useState(initial);
 
   useEffect(() => {
@@ -42,5 +42,7 @@ export function ServerDateTime({ initial, locale }: Props) {
     second: "2-digit",
   });
 
-  return <span className="tabular-nums text-white">{s}</span>;
+  return (
+    <span className={`tabular-nums ${className ?? "text-white"}`}>{s}</span>
+  );
 }

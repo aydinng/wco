@@ -44,14 +44,14 @@ export function LanguageSwitcher({
       <div
         className={
           login
-            ? "w-full max-w-[13rem] rounded border border-yellow-700/50 bg-black px-2 py-2"
+            ? "w-full max-w-[11rem] rounded border border-yellow-700/50 bg-black px-1.5 py-1.5"
             : "w-full max-w-[13rem] rounded-md border border-zinc-700/45 bg-zinc-950/35 px-2 py-2"
         }
       >
         <div
           className={
             login
-              ? "mb-1.5 text-xs font-medium uppercase tracking-wide text-white"
+              ? "mb-1 text-[10px] font-medium uppercase tracking-wide text-white"
               : "mb-1.5 text-xs font-medium uppercase tracking-wide text-zinc-500"
           }
         >
@@ -64,7 +64,7 @@ export function LanguageSwitcher({
             onClick={() => setLocale("tr")}
             className={
               login
-                ? `flex-1 rounded border py-1.5 text-sm font-medium transition-colors ${
+                ? `flex-1 rounded border py-1 text-xs font-medium transition-colors ${
                     locale === "tr"
                       ? "border-red-800/80 bg-red-950 text-white"
                       : "border-zinc-700 bg-zinc-950/80 text-zinc-300 hover:border-zinc-500 hover:text-white"
@@ -84,7 +84,7 @@ export function LanguageSwitcher({
             onClick={() => setLocale("en")}
             className={
               login
-                ? `flex-1 rounded border py-1.5 text-sm font-medium transition-colors ${
+                ? `flex-1 rounded border py-1 text-xs font-medium transition-colors ${
                     locale === "en"
                       ? "border-red-800/80 bg-red-950 text-white"
                       : "border-zinc-700 bg-zinc-950/80 text-zinc-300 hover:border-zinc-500 hover:text-white"
