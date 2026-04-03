@@ -21,6 +21,34 @@ export type Dictionary = {
     /** Giriş sayfası alt kuşatma görseli */
     loginHeroAlt: string;
     loginHeroCaption: string;
+    /** Klasik giriş sayfası (warofcity) */
+    loginWelcome: string;
+    loginIntroLine: string;
+    loginNoticeTitle: string;
+    loginNoticeItems: string[];
+    loginStatRegistered: string;
+    loginStatOnline: string;
+    loginStatLast: string;
+    loginStatLastEmpty: string;
+    loginColRank: string;
+    loginColCountry: string;
+    loginColPlayer: string;
+    /** Klasik sol menü */
+    navHome: string;
+    /** Giriş ekranı (referans görsel) — üst başlık */
+    loginWelcomeTitle: string;
+    /** Sadece ana metin: 5 madde */
+    loginBulletsFive: [string, string, string, string, string];
+    loginNavLogin: string;
+    loginNavRegister: string;
+    loginNavAbout: string;
+    loginNavTutorial: string;
+    loginNavForum: string;
+    loginNavManual: string;
+    /** Üst yatay çubuk etiketleri */
+    loginBarUser: string;
+    loginBarPass: string;
+    loginBarSubmit: string;
   };
   auth: {
     loginTitle: string;
@@ -281,7 +309,7 @@ const tr: Dictionary = {
     account: "Hesap",
     guide: "Rehber",
     community: "Topluluk",
-    login: "Giriş",
+    login: "Oyuna Gir",
     register: "Kayıt ol",
     howToPlay: "Nasıl oynanır",
     features: "Oyun özellikleri",
@@ -297,6 +325,44 @@ const tr: Dictionary = {
     loginHeroAlt: "Kuşatma ve kale — War of City",
     loginHeroCaption:
       "War of City: kaleler, ordular ve ittifaklar; tarayıcıda gerçek zamanlı strateji.",
+    loginWelcome: "warofcity Oyununa Hoşgeldiniz",
+    loginIntroLine:
+      "Savaş ve strateji dünyasına hoş geldiniz. Kayıt olmak için tıklayın:",
+    loginNoticeTitle: "Tüm oyuncuların dikkatine",
+    loginNoticeItems: [
+      "warofcity reklam içermez.",
+      "Oyun ücretsizdir.",
+      "Yeni özellikler oyuncu geri bildirimlerine göre eklenir.",
+      "Forumumuza katılın.",
+      "Oyunun adını yayın.",
+      "Türkçe çevirisi geliştirilmeye devam etmektedir.",
+    ],
+    loginStatRegistered: "Toplamda {count} oyuncu kayıtlıdır.",
+    loginStatOnline: "Şu anda {count} oyuncu çevrimiçi.",
+    loginStatLast:
+      "En son katılan lider: {user} — {mins} dk önce — {country}.",
+    loginStatLastEmpty: "Henüz kayıtlı oyuncu yok.",
+    loginColRank: "Sıra",
+    loginColCountry: "Ülke",
+    loginColPlayer: "Oyuncu",
+    navHome: "Ana Sayfa",
+    loginWelcomeTitle: "warofcity’ye hoş geldiniz",
+    loginBulletsFive: [
+      "warofcity hiçbir reklam içermez ve içermeyecektir.",
+      "warofcity oynamak ücretsizdir.",
+      "Yeni özellikler oyuncu geri bildirimiyle durmaksızın eklenecektir.",
+      "Forumumuza katılmayı unutmayın.",
+      "Haberi yayın, başkalarının da katılıp eğlenmesini sağlayın.",
+    ],
+    loginNavLogin: "Giriş",
+    loginNavRegister: "Kayıt",
+    loginNavAbout: "Hakkında",
+    loginNavTutorial: "Eğitim",
+    loginNavForum: "Forum",
+    loginNavManual: "Kılavuz",
+    loginBarUser: "Kullanıcı adı",
+    loginBarPass: "Şifre",
+    loginBarSubmit: "Giriş",
   },
   auth: {
     loginTitle: "Oyuncu girişi",
@@ -611,6 +677,43 @@ const en: Dictionary = {
     loginHeroAlt: "Siege and castle — War of City",
     loginHeroCaption:
       "War of City: castles, armies, and alliances — real-time strategy in your browser.",
+    loginWelcome: "Welcome to warofcity",
+    loginIntroLine: "Welcome to the world of war and strategy. To register, click:",
+    loginNoticeTitle: "Attention all players",
+    loginNoticeItems: [
+      "warofcity contains no advertisements.",
+      "The game is free.",
+      "New features are added based on player feedback.",
+      "Join our forum.",
+      "Spread the word.",
+      "Turkish localization is being improved alongside English.",
+    ],
+    loginStatRegistered: "Total registered players: {count}.",
+    loginStatOnline: "Currently online: {count}.",
+    loginStatLast:
+      "Last leader to join: {user} — {mins} min ago — {country}.",
+    loginStatLastEmpty: "No registered players yet.",
+    loginColRank: "Rank",
+    loginColCountry: "Country",
+    loginColPlayer: "Player",
+    navHome: "Home",
+    loginWelcomeTitle: "Welcome to warofcity",
+    loginBulletsFive: [
+      "warofcity does not (and will not) contain any advertisements.",
+      "It is free to play warofcity.",
+      "New features are going to be added non-stop with players’ guidance.",
+      "Do not forget to join our forum.",
+      "Spread the word and let others join the fun.",
+    ],
+    loginNavLogin: "Login",
+    loginNavRegister: "Register",
+    loginNavAbout: "About",
+    loginNavTutorial: "Tutorial",
+    loginNavForum: "Forum",
+    loginNavManual: "Manual",
+    loginBarUser: "User Name",
+    loginBarPass: "Password",
+    loginBarSubmit: "Login",
   },
   auth: {
     loginTitle: "Player sign-in",

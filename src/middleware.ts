@@ -30,7 +30,8 @@ export default auth((req) => {
 });
 
 export const config = {
+  /** `/api` dahil edilmez; aksi halde `/api/auth/session` JSON yerine HTML dönebiliyor (ClientFetchError). */
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
