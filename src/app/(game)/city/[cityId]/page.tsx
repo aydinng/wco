@@ -48,7 +48,7 @@ export default async function CityDetailPage({
     <div className="rounded border border-[#2a3441]/90 bg-black/35 p-4 backdrop-blur-sm">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <Link
-          href="/"
+          href="/overview"
           className="text-sm text-amber-200/80 hover:text-amber-100 hover:underline"
         >
           ← {p.cityDetailBack}

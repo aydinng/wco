@@ -23,15 +23,16 @@ export default auth((req) => {
 
   const isAdmin = req.auth.user?.isAdmin === true;
   if (path.startsWith("/admin") && !isAdmin) {
-    return NextResponse.redirect(new URL("/", req.nextUrl));
+    return NextResponse.redirect(new URL("/overview", req.nextUrl));
   }
 
   return NextResponse.next();
 });
 
 export const config = {
-  /** `/api` dahil edilmez; aksi halde `/api/auth/session` JSON yerine HTML dönebiliyor (ClientFetchError). */
+  /** Kök `/` açıkça eşleşmeli; aksi halde Vercel’de oturumsuz kullanıcı doğrudan oyun kabuğuna düşebiliyor. */
   matcher: [
+    "/",
     "/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

@@ -151,8 +151,8 @@ export function SideNav({
             style={WARCITY_FONT}
           >
             <Link
-              href="/"
-              className={linkYellow(pathname === "/")}
+              href="/overview"
+              className={linkYellow(pathname === "/overview")}
             >
               {labels.overview}
             </Link>

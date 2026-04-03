@@ -50,7 +50,7 @@ async function pe(key: PlayErr): Promise<string> {
 }
 
 function paths() {
-  revalidatePath("/");
+  revalidatePath("/overview");
   revalidatePath("/resources");
   revalidatePath("/buildings");
   revalidatePath("/research");
