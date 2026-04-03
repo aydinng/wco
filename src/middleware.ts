@@ -3,6 +3,15 @@ import { NextResponse } from "next/server";
 
 export default auth((req) => {
   const path = req.nextUrl.pathname;
+
+  /** Kök `/` her zaman burada netleşsin (Vercel’de eski `/` oyun sayfası önbelleği / oturum karışmasını önler). */
+  if (path === "/") {
+    if (!req.auth) {
+      return NextResponse.redirect(new URL("/login", req.nextUrl));
+    }
+    return NextResponse.redirect(new URL("/overview", req.nextUrl));
+  }
+
   const isPublic =
     path === "/login" ||
     path === "/register" ||
