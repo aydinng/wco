@@ -139,11 +139,11 @@ export function LoginLandingContent({
         </li>
       </ol>
 
-      <div className="space-y-4 pt-2">
+      <div className="w-full max-w-xl space-y-4 pt-2 text-left">
         <p className={`font-bold ${TITLE_SOFT_YELLOW} drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)]`}>
           {p.loginTableTopCountriesTitle}
         </p>
-        <table className="w-full max-w-xl border-collapse text-sm">
+        <table className="w-full border-collapse text-sm">
           <thead>
             <tr className="border-b border-yellow-600/40">
               <th className="pb-1 pr-3 text-left font-bold text-white">
@@ -174,7 +174,7 @@ export function LoginLandingContent({
         <p className={`font-bold ${TITLE_SOFT_YELLOW} drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)]`}>
           {p.loginTableTopPlayersTitle}
         </p>
-        <table className="w-full max-w-xl border-collapse text-sm">
+        <table className="w-full border-collapse text-sm">
           <thead>
             <tr className="border-b border-yellow-600/40">
               <th className="pb-1 pr-3 text-left font-bold text-white">

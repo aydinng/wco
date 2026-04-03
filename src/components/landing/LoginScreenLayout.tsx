@@ -4,6 +4,7 @@ import { LoginSidebarClock } from "@/components/landing/LoginSidebarClock";
 import { BRAND } from "@/config/brand";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { getLocale } from "@/lib/locale";
+import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
 
@@ -14,7 +15,7 @@ function navLink(active: boolean) {
     "block rounded px-1 py-0.5 text-center text-sm font-bold transition-colors",
     active
       ? "text-[#FFFF00]"
-      : "text-[#FFFF00]/90 hover:bg-red-950/40 hover:text-yellow-100",
+      : "text-[#FFFF00]/90 hover:bg-red-900/70 hover:text-yellow-50",
   ].join(" ");
 }
 
@@ -68,7 +69,7 @@ export async function LoginScreenLayout({
 
         <div className="mx-auto flex w-full max-w-[min(100rem,100%)] flex-col gap-6 px-2 pb-6 pt-2 sm:px-4 lg:flex-row lg:items-start lg:gap-10 lg:px-10">
           <aside
-            className="flex w-full shrink-0 flex-col items-center lg:w-52 lg:min-w-[12rem]"
+            className="flex w-full shrink-0 flex-col items-center rounded-lg border border-yellow-900/45 bg-black/88 px-3 py-4 backdrop-blur-md lg:w-52 lg:min-w-[12rem]"
             style={WARCITY}
           >
             <nav className="w-full max-w-[13rem] space-y-1 text-center">

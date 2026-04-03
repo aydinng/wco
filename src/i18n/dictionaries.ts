@@ -365,9 +365,9 @@ const tr: Dictionary = {
     loginStatLastBetweenAgoAndCountry: " önce — kayıtta seçilen ülke: ",
     loginStatLastEmpty: "Henüz kayıtlı oyuncu yok.",
     loginTableTopCountriesTitle:
-      "Şu an toplam skor bakımından ilk beş ülke:",
+      "Şu an toplam skor bakımından ilk 5 ülke:",
     loginTableTopPlayersTitle:
-      "Şu an toplam skor bakımından ilk beş oyuncu:",
+      "Şu an toplam skor bakımından ilk 5 oyuncu:",
     loginTablePlayerRow: "{name} ({country})",
     loginServerClockLabel: "Sunucu zamanı",
     loginColRank: "Sıra",
@@ -734,9 +734,9 @@ const en: Dictionary = {
     loginStatLastBetweenAgoAndCountry: " ago — nation chosen at signup: ",
     loginStatLastEmpty: "No registered players yet.",
     loginTableTopCountriesTitle:
-      "Right now, top five countries with best total scores are:",
+      "Right now, top 5 countries with best total scores are:",
     loginTableTopPlayersTitle:
-      "Right now, top five players with best total scores are:",
+      "Right now, top 5 players with best total scores are:",
     loginTablePlayerRow: "{name} (from {country})",
     loginServerClockLabel: "Server time",
     loginColRank: "Rank",

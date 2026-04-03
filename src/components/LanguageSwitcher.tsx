@@ -51,7 +51,7 @@ export function LanguageSwitcher({
         <div
           className={
             login
-              ? "mb-1 text-[10px] font-medium uppercase tracking-wide text-white"
+              ? "mb-1 w-full text-center text-[10px] font-medium uppercase tracking-wide text-white"
               : "mb-1.5 text-xs font-medium uppercase tracking-wide text-zinc-500"
           }
         >
