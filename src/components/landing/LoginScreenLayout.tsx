@@ -42,7 +42,7 @@ export async function LoginScreenLayout({
   };
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden text-zinc-100">
+    <div className="relative flex min-h-screen flex-col overflow-x-hidden text-zinc-100">
       <div
         className="pointer-events-none fixed inset-0 -z-20 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url(${BRAND.loginPageBackgroundSrc})` }}
@@ -53,21 +53,35 @@ export async function LoginScreenLayout({
         aria-hidden
       />
 
-      <div className="relative z-0">
-        <header className="w-full px-2 pt-4 sm:px-4 lg:px-10">
-          <h1
-            className="mt-1 text-center text-lg font-bold tracking-tight text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)] sm:text-xl"
-            style={WARCITY}
-          >
-            {t.loginWelcomeTitle}
-          </h1>
+      <div className="relative z-0 flex min-h-screen flex-1 flex-col">
+        <header className="w-full pt-4">
+          <div className="mx-auto w-full max-w-[min(100rem,100%)] overflow-hidden">
+            <Image
+              src={BRAND.bannerSrc}
+              alt={t.bannerAlt}
+              width={1920}
+              height={480}
+              priority
+              className="h-auto w-full max-h-[200px] object-cover object-center sm:max-h-[240px]"
+              sizes="100vw"
+            />
+          </div>
 
-          <Suspense fallback={<div className="h-12" aria-hidden />}>
-            <LoginTopBar labels={labels} />
-          </Suspense>
+          <div className="px-2 pt-3 sm:px-4 lg:px-10">
+            <h1
+              className="text-center text-lg font-bold tracking-tight text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)] sm:text-xl"
+              style={WARCITY}
+            >
+              {t.loginWelcomeTitle}
+            </h1>
+
+            <Suspense fallback={<div className="h-12" aria-hidden />}>
+              <LoginTopBar labels={labels} />
+            </Suspense>
+          </div>
         </header>
 
-        <div className="mx-auto flex w-full max-w-[min(100rem,100%)] flex-col gap-6 px-2 pb-6 pt-2 sm:px-4 lg:flex-row lg:items-start lg:gap-10 lg:px-10">
+        <div className="mx-auto flex w-full max-w-[min(100rem,100%)] flex-1 flex-col gap-6 px-2 pb-4 pt-2 sm:px-4 lg:flex-row lg:items-start lg:gap-10 lg:px-10">
           <aside
             className="flex w-full shrink-0 flex-col items-center rounded-lg border border-yellow-900/45 bg-black/88 px-3 py-4 backdrop-blur-md lg:w-52 lg:min-w-[12rem]"
             style={WARCITY}
@@ -119,10 +133,10 @@ export async function LoginScreenLayout({
         </div>
 
         <footer
-          className="border-t border-white/10 px-4 py-6 text-center text-xs leading-relaxed text-zinc-400 sm:px-8"
+          className="mt-auto border-t border-white/25 px-4 pb-12 pt-10 text-center text-sm font-semibold leading-relaxed text-zinc-300 sm:px-8"
           style={WARCITY}
         >
-          <p className="mx-auto max-w-3xl drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]">
+          <p className="mx-auto max-w-3xl drop-shadow-[0_2px_6px_rgba(0,0,0,0.95)]">
             {footerText}
           </p>
         </footer>

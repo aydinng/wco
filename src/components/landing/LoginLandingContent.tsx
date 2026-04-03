@@ -68,7 +68,7 @@ export function LoginLandingContent({
 
   return (
     <div
-      className="space-y-5 text-[15px] leading-relaxed text-[#FFFF00] sm:text-base"
+      className="space-y-5 text-[15px] font-semibold leading-relaxed text-[#FFFF00] sm:text-base"
       style={WARCITY}
     >
       <div className="space-y-1">
@@ -143,13 +143,17 @@ export function LoginLandingContent({
         <p className={`font-bold ${TITLE_SOFT_YELLOW} drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)]`}>
           {p.loginTableTopCountriesTitle}
         </p>
-        <table className="w-full border-collapse text-sm">
+        <table className="w-full table-fixed border-collapse text-sm">
+          <colgroup>
+            <col className="w-10" />
+            <col />
+          </colgroup>
           <thead>
             <tr className="border-b border-yellow-600/40">
-              <th className="pb-1 pr-3 text-left font-bold text-white">
+              <th className="w-10 pb-1 pr-2 text-left font-bold text-white">
                 {p.loginColRank}
               </th>
-              <th className="pb-1 text-left font-bold text-[#FFFF00]">
+              <th className="pb-1 pl-0 text-left font-bold text-[#FFFF00]">
                 {p.loginColCountry}
               </th>
             </tr>
@@ -157,13 +161,13 @@ export function LoginLandingContent({
           <tbody>
             {stats.topCountries.map((row) => (
               <tr key={`${row.rank}-${row.countryId}`}>
-                <td className="py-0.5 pr-3 align-middle font-bold text-white">
+                <td className="w-10 py-0.5 pr-2 align-middle font-bold tabular-nums text-white">
                   {row.rank}
                 </td>
-                <td className="py-0.5 align-middle font-bold text-[#FFFF00]">
+                <td className="py-0.5 pl-0 align-middle font-bold text-[#FFFF00]">
                   <span className="inline-flex items-center gap-2">
                     <FlagImg countryId={row.countryId} />
-                    <span>{countryName(row.countryId, locale)}</span>
+                    <span className="text-left">{countryName(row.countryId, locale)}</span>
                   </span>
                 </td>
               </tr>
@@ -174,13 +178,17 @@ export function LoginLandingContent({
         <p className={`font-bold ${TITLE_SOFT_YELLOW} drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)]`}>
           {p.loginTableTopPlayersTitle}
         </p>
-        <table className="w-full border-collapse text-sm">
+        <table className="w-full table-fixed border-collapse text-sm">
+          <colgroup>
+            <col className="w-10" />
+            <col />
+          </colgroup>
           <thead>
             <tr className="border-b border-yellow-600/40">
-              <th className="pb-1 pr-3 text-left font-bold text-white">
+              <th className="w-10 pb-1 pr-2 text-left font-bold text-white">
                 {p.loginColRank}
               </th>
-              <th className="pb-1 text-left font-bold text-[#FFFF00]">
+              <th className="pb-1 pl-0 text-left font-bold text-[#FFFF00]">
                 {p.loginColPlayer}
               </th>
             </tr>
@@ -188,13 +196,13 @@ export function LoginLandingContent({
           <tbody>
             {stats.topPlayers.map((row) => (
               <tr key={`${row.rank}-${row.username}`}>
-                <td className="py-0.5 pr-3 align-middle font-bold text-white">
+                <td className="w-10 py-0.5 pr-2 align-middle font-bold tabular-nums text-white">
                   {row.rank}
                 </td>
-                <td className="py-0.5 align-middle font-bold text-[#FFFF00]">
+                <td className="py-0.5 pl-0 align-middle font-bold text-[#FFFF00]">
                   <span className="inline-flex items-center gap-2">
                     <FlagImg countryId={row.countryId} />
-                    <span>
+                    <span className="text-left">
                       {tpl(p.loginTablePlayerRow, {
                         name: row.username,
                         country: countryName(row.countryId, locale),
