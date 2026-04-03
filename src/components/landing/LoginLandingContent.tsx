@@ -12,6 +12,9 @@ import Link from "next/link";
 
 const WARCITY: React.CSSProperties = { fontFamily: "var(--font-warcity), serif" };
 
+/** Tablo bölüm başlıkları — biraz daha açık sarı */
+const TITLE_SOFT_YELLOW = "text-[#fff176]";
+
 function tpl(s: string, vars: Record<string, string>) {
   let out = s;
   for (const [k, v] of Object.entries(vars)) {
@@ -27,7 +30,7 @@ function countryName(id: string, locale: AppLocale) {
 function lineWithCount(template: string, count: number) {
   const parts = template.split("{count}");
   return (
-    <p className="leading-relaxed" style={WARCITY}>
+    <p className="leading-relaxed drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)]" style={WARCITY}>
       <span className="text-[#FFFF00]">{parts[0]}</span>
       <span className="font-bold text-white">{count}</span>
       <span className="text-[#FFFF00]">{parts.slice(1).join("{count}")}</span>
@@ -72,39 +75,56 @@ export function LoginLandingContent({
         {lineWithCount(p.loginStatRegistered, stats.totalRegistered)}
         {lineWithCount(p.loginStatOnline, stats.onlineCount)}
         {last ? (
-          <p className="flex flex-wrap items-center gap-x-1.5 gap-y-1 leading-relaxed">
-            <span className="text-[#FFFF00]">
-              {tpl(p.loginStatLastPrefix, {
-                user: last.username,
-                ago: formatAgoSince(last.createdAt, locale),
-              })}
-            </span>
-            <FlagImg countryId={last.registrationCountry} />
-            <span className="text-[#FFFF00]">
-              {countryName(last.registrationCountry, locale)}
+          <p className="flex flex-wrap items-center gap-x-1.5 gap-y-1 leading-relaxed drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)]">
+            <span className="text-[#FFFF00]">{p.loginStatLastIntro}</span>
+            <span className="font-semibold text-white">{last.username}</span>
+            <span className="text-[#FFFF00]">{p.loginStatLastBetweenUserAndAgo}</span>
+            <span className="text-white">{formatAgoSince(last.createdAt, locale)}</span>
+            <span className="text-[#FFFF00]">{p.loginStatLastBetweenAgoAndCountry}</span>
+            <span className="inline-flex items-center gap-1.5">
+              <FlagImg countryId={last.registrationCountry} />
+              <span className="font-semibold text-white">
+                {countryName(last.registrationCountry, locale)}
+              </span>
             </span>
           </p>
         ) : (
-          <p className="text-[#FFFF00]">{p.loginStatLastEmpty}</p>
+          <p className="text-[#FFFF00] drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)]">
+            {p.loginStatLastEmpty}
+          </p>
         )}
       </div>
 
-      <p className="text-[#FFFF00]">
-        {p.loginIntroBefore}
+      <p className="text-[#FFFF00] drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)]">
+        {p.loginIntroParagraph1}
+      </p>
+
+      <div className="flex w-full max-w-2xl flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+        <span className="text-[#FFFF00] drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)]">
+          {p.loginIntroParagraph2Before}
+        </span>
         <Link
           href="/register"
-          className="text-[#FFFF00] underline decoration-yellow-600 underline-offset-2 hover:text-yellow-200"
+          className="inline-flex w-fit shrink-0 rounded border border-white/95 bg-white px-3 py-1.5 text-sm font-semibold text-black shadow-md hover:bg-zinc-100"
         >
           {p.loginIntroRegisterWord}
         </Link>
-        {p.loginIntroAfter}
-      </p>
+        <span className="text-[#FFFF00] drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)]">
+          {p.loginIntroParagraph2After}
+        </span>
+      </div>
 
-      <ol className="list-decimal space-y-3 pl-6 marker:text-[#FFFF00]">
-        <li className="pl-1">{items[0]}</li>
-        <li className="pl-1">{items[1]}</li>
-        <li className="pl-1">{items[2]}</li>
-        <li className="pl-1">
+      <ol className="list-decimal space-y-3 pl-6 marker:font-bold marker:text-white">
+        <li className="pl-1 text-[#FFFF00] drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)]">
+          {items[0]}
+        </li>
+        <li className="pl-1 text-[#FFFF00] drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)]">
+          {items[1]}
+        </li>
+        <li className="pl-1 text-[#FFFF00] drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)]">
+          {items[2]}
+        </li>
+        <li className="pl-1 text-[#FFFF00] drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)]">
           {p.loginBullet4Before}
           <Link
             href="/forum"
@@ -114,11 +134,15 @@ export function LoginLandingContent({
           </Link>
           {p.loginBullet4After}
         </li>
-        <li className="pl-1">{items[4]}</li>
+        <li className="pl-1 text-[#FFFF00] drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)]">
+          {items[4]}
+        </li>
       </ol>
 
       <div className="space-y-4 pt-2">
-        <p className="text-[#FFFF00]">{p.loginTableTopCountriesTitle}</p>
+        <p className={`font-bold ${TITLE_SOFT_YELLOW} drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)]`}>
+          {p.loginTableTopCountriesTitle}
+        </p>
         <table className="w-full max-w-xl border-collapse text-sm">
           <thead>
             <tr className="border-b border-yellow-600/40">
@@ -147,7 +171,9 @@ export function LoginLandingContent({
           </tbody>
         </table>
 
-        <p className="text-[#FFFF00]">{p.loginTableTopPlayersTitle}</p>
+        <p className={`font-bold ${TITLE_SOFT_YELLOW} drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)]`}>
+          {p.loginTableTopPlayersTitle}
+        </p>
         <table className="w-full max-w-xl border-collapse text-sm">
           <thead>
             <tr className="border-b border-yellow-600/40">

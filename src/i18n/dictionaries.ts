@@ -28,8 +28,10 @@ export type Dictionary = {
     loginNoticeItems: string[];
     loginStatRegistered: string;
     loginStatOnline: string;
-    /** {user} {ago} — cümle ülke adından önce biter; bayrak + ülke kodda eklenir */
-    loginStatLastPrefix: string;
+    /** Son kayıt satırı: sarı metin + kullanıcı / süre / ülke beyaz */
+    loginStatLastIntro: string;
+    loginStatLastBetweenUserAndAgo: string;
+    loginStatLastBetweenAgoAndCountry: string;
     loginStatLastEmpty: string;
     /** Üst sıralama tabloları başlıkları */
     loginTableTopCountriesTitle: string;
@@ -57,10 +59,13 @@ export type Dictionary = {
     loginBarUser: string;
     loginBarPass: string;
     loginBarSubmit: string;
-    /** Giriş sayfası giriş paragrafı (register linki ortada) */
-    loginIntroBefore: string;
-    loginIntroAfter: string;
+    /** Giriş: 1. paragraf; 2. satır kayıt CTA (beyaz buton) */
+    loginIntroParagraph1: string;
+    loginIntroParagraph2Before: string;
+    loginIntroParagraph2After: string;
     loginIntroRegisterWord: string;
+    /** Alt bilgi © yıl + web / mobil notu */
+    loginFooterNotice: string;
     /** 4. madde: forum linki ortada */
     loginBullet4Before: string;
     loginBullet4LinkWord: string;
@@ -355,8 +360,9 @@ const tr: Dictionary = {
     ],
     loginStatRegistered: "Toplamda {count} oyuncu kayıtlıdır.",
     loginStatOnline: "Şu anda {count} oyuncu çevrimiçi.",
-    loginStatLastPrefix:
-      "Son kayıt: {user} — {ago} önce — kayıtta seçilen ülke: ",
+    loginStatLastIntro: "Son kayıt: ",
+    loginStatLastBetweenUserAndAgo: " — ",
+    loginStatLastBetweenAgoAndCountry: " önce — kayıtta seçilen ülke: ",
     loginStatLastEmpty: "Henüz kayıtlı oyuncu yok.",
     loginTableTopCountriesTitle:
       "Şu an toplam skor bakımından ilk beş ülke:",
@@ -368,11 +374,15 @@ const tr: Dictionary = {
     loginColCountry: "Ülke",
     loginColPlayer: "Oyuncu",
     navHome: "Ana Sayfa",
-    loginWelcomeTitle: "warofcity’ye hoş geldiniz",
-    loginIntroBefore:
-      "warofcity, tarayıcı üzerinden oynanan çok oyunculu bir strateji oyunudur. Kullanıcı adı ve şifreniz yoksa, katılmak için ",
-    loginIntroAfter: ".",
+    loginWelcomeTitle: "War of City'ye Hoş Geldiniz",
+    loginIntroParagraph1:
+      "warofcity, tarayıcı üzerinden oynanan çok oyunculu bir strateji oyunudur.",
+    loginIntroParagraph2Before:
+      "Kullanıcı adı ve şifreniz yoksa, katılmak için ",
+    loginIntroParagraph2After: ".",
     loginIntroRegisterWord: "kayıt olun",
+    loginFooterNotice:
+      "© {year} War of City. Web tarayıcılarında oynanmak üzere geliştirilmektedir. İleride iOS ve Android uygulamaları yayınlanacaktır.",
     loginBulletsFive: [
       "warofcity hiçbir reklam içermez ve içermeyecektir.",
       "warofcity oynamak ücretsizdir.",
@@ -719,8 +729,9 @@ const en: Dictionary = {
     ],
     loginStatRegistered: "In total {count} players are registered.",
     loginStatOnline: "Right now {count} players are online.",
-    loginStatLastPrefix:
-      "Last registered: {user} — {ago} ago — nation chosen at signup: ",
+    loginStatLastIntro: "Last registered: ",
+    loginStatLastBetweenUserAndAgo: " — ",
+    loginStatLastBetweenAgoAndCountry: " ago — nation chosen at signup: ",
     loginStatLastEmpty: "No registered players yet.",
     loginTableTopCountriesTitle:
       "Right now, top five countries with best total scores are:",
@@ -732,11 +743,15 @@ const en: Dictionary = {
     loginColCountry: "Country",
     loginColPlayer: "Player",
     navHome: "Home",
-    loginWelcomeTitle: "Welcome To warofcity",
-    loginIntroBefore:
-      "warofcity is a massive multiplayer, browser based strategy game. If you do not have a User Name and Password, please ",
-    loginIntroAfter: " to join.",
+    loginWelcomeTitle: "Welcome to War of City",
+    loginIntroParagraph1:
+      "warofcity is a massive multiplayer, browser-based strategy game.",
+    loginIntroParagraph2Before:
+      "If you do not have a user name and password, please ",
+    loginIntroParagraph2After: " to join.",
     loginIntroRegisterWord: "register",
+    loginFooterNotice:
+      "© {year} War of City. Developed for web browsers; iOS and Android apps are planned for a later release.",
     loginBulletsFive: [
       "warofcity does not (and will not) contain any advertisements.",
       "It is free to play warofcity.",

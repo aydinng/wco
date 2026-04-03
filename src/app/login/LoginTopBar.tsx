@@ -45,10 +45,10 @@ export function LoginTopBar({ labels }: { labels: Labels }) {
     <div className="mx-auto flex w-full max-w-[min(100rem,100%)] justify-center px-2">
       <form
         onSubmit={onSubmit}
-        className="flex flex-wrap items-center justify-center gap-x-2 gap-y-2 rounded-sm border border-yellow-500/90 bg-black px-3 py-2.5 shadow-[inset_0_1px_0_rgba(255,200,100,0.08)]"
+        className="flex flex-wrap items-center justify-center gap-x-1.5 gap-y-2 rounded-sm border border-yellow-600/50 bg-black/55 px-2.5 py-2 shadow-[inset_0_1px_0_rgba(255,200,100,0.06)] backdrop-blur-sm"
         style={WARCITY}
       >
-        <div className="flex items-stretch border border-[#FFFF00] bg-black px-2 py-1.5 text-xs font-bold text-[#FFFF00] sm:text-sm">
+        <div className="flex items-stretch border border-[#d4a84b]/90 bg-black/60 px-1.5 py-1 text-[10px] font-bold text-[#FFFF00] sm:text-[11px]">
           <label htmlFor="login-user" className="cursor-pointer whitespace-nowrap">
             {labels.user}
           </label>
@@ -56,13 +56,13 @@ export function LoginTopBar({ labels }: { labels: Labels }) {
         <input
           id="login-user"
           autoComplete="username"
-          className="h-8 w-[132px] border border-white bg-white px-2 text-sm text-black sm:w-[152px]"
+          className="h-7 w-[118px] border border-stone-500/70 bg-[#e4e0d6] px-1.5 text-xs text-stone-900 placeholder:text-stone-500 sm:w-[132px]"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           required
         />
 
-        <div className="flex items-stretch border border-[#FFFF00] bg-black px-2 py-1.5 text-xs font-bold text-[#FFFF00] sm:text-sm">
+        <div className="flex items-stretch border border-[#d4a84b]/90 bg-black/60 px-1.5 py-1 text-[10px] font-bold text-[#FFFF00] sm:text-[11px]">
           <label htmlFor="login-pass" className="cursor-pointer whitespace-nowrap">
             {labels.pass}
           </label>
@@ -71,7 +71,7 @@ export function LoginTopBar({ labels }: { labels: Labels }) {
           id="login-pass"
           type="password"
           autoComplete="current-password"
-          className="h-8 w-[132px] border border-white bg-white px-2 text-sm text-black sm:w-[152px]"
+          className="h-7 w-[118px] border border-stone-500/70 bg-[#e4e0d6] px-1.5 text-xs text-stone-900 sm:w-[132px]"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
@@ -80,13 +80,13 @@ export function LoginTopBar({ labels }: { labels: Labels }) {
         <button
           type="submit"
           disabled={busy}
-          className="h-8 min-w-[76px] border border-white bg-white px-3 text-sm font-bold text-black enabled:hover:bg-zinc-200 disabled:opacity-50"
+          className="h-7 min-w-[68px] rounded-sm border border-amber-900/60 bg-gradient-to-b from-amber-700/95 to-amber-900/95 px-2.5 text-[11px] font-bold text-amber-50 shadow-sm enabled:hover:from-amber-600 enabled:hover:to-amber-800 disabled:opacity-50"
         >
           {busy ? "…" : labels.submit}
         </button>
 
         {error ? (
-          <p className="w-full basis-full text-center text-xs text-red-400">{error}</p>
+          <p className="w-full basis-full text-center text-xs text-red-300 drop-shadow">{error}</p>
         ) : null}
       </form>
     </div>
