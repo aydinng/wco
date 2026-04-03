@@ -56,7 +56,7 @@ export function LoginTopBar({ labels }: { labels: Labels }) {
         <input
           id="login-user"
           autoComplete="username"
-          className="h-9 w-[min(118px,28vw)] border border-stone-500/70 bg-[#e4e0d6] px-1.5 text-base text-stone-900 placeholder:text-stone-500 sm:h-7 sm:w-[132px] sm:text-xs"
+          className="h-8 w-[min(118px,28vw)] border border-stone-400/55 bg-[#f5f2eb] px-1.5 text-sm text-stone-800 placeholder:text-stone-500 sm:h-7 sm:w-[132px]"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           required
@@ -80,7 +80,7 @@ export function LoginTopBar({ labels }: { labels: Labels }) {
         <button
           type="submit"
           disabled={busy}
-          className="h-9 min-w-[68px] rounded-sm border border-amber-900/60 bg-gradient-to-b from-amber-700/95 to-amber-900/95 px-2.5 text-xs font-bold text-amber-50 shadow-sm enabled:hover:from-amber-600 enabled:hover:to-amber-800 disabled:opacity-50 sm:h-7 sm:text-[11px]"
+          className="h-8 min-w-[68px] rounded-sm border border-amber-900/60 bg-gradient-to-b from-amber-700/95 to-amber-900/95 px-2.5 text-sm font-bold text-amber-50 shadow-sm enabled:hover:from-amber-600 enabled:hover:to-amber-800 disabled:opacity-50 sm:h-7 sm:text-[11px]"
         >
           {busy ? "…" : labels.submit}
         </button>

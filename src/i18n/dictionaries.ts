@@ -399,7 +399,7 @@ const tr: Dictionary = {
     registerPasswordConfirm: "Şifreyi onayla",
     registerEmail: "E-posta adresi",
     registerFirstCityName: "İlk şehrin adı",
-    registerKvkkHeading: "Kişisel veriler ve onay",
+    registerKvkkHeading: "Kişisel verilerin korunması kanunu hakkında",
     registerKvkkAccept:
       "Yukarıdaki aydınlatma metnini okudum ve kabul ediyorum.",
     registerKvkkRequired: "Kayıt için KVKK onayı zorunludur.",
@@ -779,7 +779,7 @@ const en: Dictionary = {
     registerPasswordConfirm: "Confirm password",
     registerEmail: "Email address",
     registerFirstCityName: "Name of your first city",
-    registerKvkkHeading: "Personal data and consent",
+    registerKvkkHeading: "About the law on protection of personal data",
     registerKvkkAccept: "I have read and accept the notice above.",
     registerKvkkRequired: "You must accept the privacy notice to register.",
     registerPasswordMismatch: "Passwords do not match.",

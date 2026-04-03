@@ -10,16 +10,16 @@ export default async function KurallarPage() {
   return (
     <LoginScreenLayout dict={dict} serverNow={serverNow} activeNav="about">
       <article
-        className="max-w-3xl space-y-4 text-[15px] font-semibold leading-relaxed text-[#FFFF00] sm:text-base"
+        className="max-w-3xl space-y-4 rounded-lg border border-yellow-900/45 bg-black/88 px-4 py-5 text-[14px] font-semibold leading-relaxed text-[#FFFF00] backdrop-blur-md sm:px-5 sm:text-[15px]"
         style={{ fontFamily: "var(--font-warcity), serif" }}
       >
-        <h2 className="text-xl font-bold text-white drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]">
+        <h2 className="text-lg font-bold text-white drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)] sm:text-xl">
           {ABOUT_WAR_OF_CITY_TR.title}
         </h2>
         {ABOUT_WAR_OF_CITY_TR.body.split("\n\n").map((block, i) => (
           <p
             key={i}
-            className="whitespace-pre-line drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)]"
+            className="whitespace-pre-line text-[#FFFF00]/95 drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]"
           >
             {block.trim()}
           </p>

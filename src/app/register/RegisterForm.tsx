@@ -11,6 +11,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+const INPUT =
+  "mt-1 w-full rounded border border-stone-400/55 bg-[#f5f2eb] px-2.5 py-1.5 text-sm text-stone-800 placeholder:text-stone-500";
+
 type Props = {
   dict: Dictionary;
   locale: AppLocale;
@@ -80,19 +83,24 @@ export function RegisterForm({ dict, locale }: Props) {
 
   return (
     <div
-      className="w-full max-w-md rounded-lg border border-yellow-800/50 bg-black/75 px-4 py-5 shadow-xl backdrop-blur-sm sm:px-6"
+      className="w-full max-w-md rounded-lg border border-yellow-800/50 bg-black/75 px-3 py-4 shadow-xl backdrop-blur-sm sm:px-5"
       style={{ fontFamily: "var(--font-warcity), serif" }}
     >
-      <h1 className="mb-1 text-center text-xl font-bold text-[#FFFF00] sm:text-2xl">
+      <h1 className="mb-0.5 text-center text-lg font-bold text-[#FFFF00] sm:text-xl">
         {p.registerPageTitle}
       </h1>
-      <p className="mb-6 text-center text-sm text-zinc-400">{p.registerPageSubtitle}</p>
-      <form onSubmit={onSubmit} className="space-y-3 text-[15px] font-semibold leading-snug">
+      <p className="mb-4 text-center text-xs leading-snug text-zinc-400 sm:text-[13px]">
+        {p.registerPageSubtitle}
+      </p>
+      <form
+        onSubmit={onSubmit}
+        className="space-y-2.5 text-[13px] font-semibold leading-snug sm:text-sm"
+      >
         <label className="block text-[#FFFF00]">
           {a.username}
           <input
             autoComplete="username"
-            className="mt-1 w-full rounded border border-stone-500/70 bg-[#e4e0d6] px-3 py-2 text-base text-stone-900 sm:text-sm"
+            className={INPUT}
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
@@ -105,7 +113,7 @@ export function RegisterForm({ dict, locale }: Props) {
           <input
             type="password"
             autoComplete="new-password"
-            className="mt-1 w-full rounded border border-stone-500/70 bg-[#e4e0d6] px-3 py-2 text-base text-stone-900 sm:text-sm"
+            className={INPUT}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
@@ -117,7 +125,7 @@ export function RegisterForm({ dict, locale }: Props) {
           <input
             type="password"
             autoComplete="new-password"
-            className="mt-1 w-full rounded border border-stone-500/70 bg-[#e4e0d6] px-3 py-2 text-base text-stone-900 sm:text-sm"
+            className={INPUT}
             value={password2}
             onChange={(e) => setPassword2(e.target.value)}
             required
@@ -129,7 +137,7 @@ export function RegisterForm({ dict, locale }: Props) {
           <input
             type="email"
             autoComplete="email"
-            className="mt-1 w-full rounded border border-stone-500/70 bg-[#e4e0d6] px-3 py-2 text-base text-stone-900 sm:text-sm"
+            className={INPUT}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -139,7 +147,7 @@ export function RegisterForm({ dict, locale }: Props) {
           {p.registerFirstCityName}
           <input
             autoComplete="off"
-            className="mt-1 w-full rounded border border-stone-500/70 bg-[#e4e0d6] px-3 py-2 text-base text-stone-900 sm:text-sm"
+            className={INPUT}
             value={cityName}
             onChange={(e) => setCityName(e.target.value)}
             required
@@ -149,13 +157,7 @@ export function RegisterForm({ dict, locale }: Props) {
         </label>
         <label className="block text-[#FFFF00]">
           {a.country}
-          <select
-            className="mt-1 w-full rounded border border-stone-500/70 bg-[#e4e0d6] px-3 py-2 text-base text-stone-900 sm:text-sm"
-            value={countryId}
-            onChange={(e) =>
-              setCountryId(e.target.value as RegistrationCountryId)
-            }
-          >
+          <select className={INPUT} value={countryId} onChange={(e) => setCountryId(e.target.value as RegistrationCountryId)}>
             {REGISTRATION_COUNTRIES.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}
@@ -164,30 +166,34 @@ export function RegisterForm({ dict, locale }: Props) {
           </select>
         </label>
 
-        <div className="rounded border border-yellow-800/40 bg-black/40 p-3 text-xs font-normal leading-relaxed text-zinc-300 sm:text-sm">
-          <p className="mb-2 text-[#FFFF00]">{p.registerKvkkHeading}</p>
-          <p className="mb-3">{kvkkText}</p>
+        <div className="rounded border border-yellow-800/40 bg-black/50 p-2.5 text-[11px] font-normal leading-relaxed text-zinc-300 sm:text-xs">
+          <p className="mb-1.5 font-semibold text-[#FFFF00]">
+            {p.registerKvkkHeading}
+          </p>
+          <p className="mb-2.5">{kvkkText}</p>
           <label className="flex cursor-pointer items-start gap-2 text-[#FFFF00]">
             <input
               type="checkbox"
               checked={kvkk}
               onChange={(e) => setKvkk(e.target.checked)}
-              className="mt-1 h-4 w-4 shrink-0"
+              className="mt-0.5 h-3.5 w-3.5 shrink-0"
             />
-            <span>{p.registerKvkkAccept}</span>
+            <span className="text-[12px] font-medium sm:text-[13px]">
+              {p.registerKvkkAccept}
+            </span>
           </label>
         </div>
 
-        {error ? <p className="text-sm text-red-400">{error}</p> : null}
+        {error ? <p className="text-xs text-red-400">{error}</p> : null}
         <button
           type="submit"
           disabled={busy}
-          className="w-full rounded-sm border border-amber-900/60 bg-gradient-to-b from-amber-700/95 to-amber-900/95 py-2.5 text-sm font-bold text-amber-50 shadow-sm hover:from-amber-600 hover:to-amber-800 disabled:opacity-50"
+          className="w-full rounded-sm border border-amber-900/60 bg-gradient-to-b from-amber-700/95 to-amber-900/95 py-2 text-sm font-bold text-amber-50 shadow-sm hover:from-amber-600 hover:to-amber-800 disabled:opacity-50"
         >
           {busy ? a.registering : a.registerBtn}
         </button>
       </form>
-      <p className="mt-4 text-center text-sm text-zinc-500">
+      <p className="mt-3 text-center text-xs text-zinc-500">
         {a.hasAccount}{" "}
         <Link href="/login" className="text-[#FFFF00] underline hover:text-yellow-200">
           {a.signInCta}
