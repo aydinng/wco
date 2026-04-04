@@ -88,22 +88,24 @@ export default async function ResourcesPage() {
         <div className="mt-3 rounded border border-amber-800/50 bg-zinc-950/90 px-3 py-2 text-sm font-medium text-amber-100/95 shadow-inner">
           {locale === "en" ? (
             <>
-              Σ/h: +{safeInt(sumH.wood)}W
-              {unlocks.iron && ` +${safeInt(sumH.iron)}I`}
-              {unlocks.oil && ` +${safeInt(sumH.oil)}O`} +{safeInt(netFoodHour)}F
-              <span className="text-zinc-500">
-                {" "}
-                ({p.resFood} +{safeInt(sumH.food)} − {sumFoodCons} cons)
+              Net / hour: +{safeInt(sumH.wood)} {p.resWood}
+              {unlocks.iron && ` · +${safeInt(sumH.iron)} ${p.resIron}`}
+              {unlocks.oil && ` · +${safeInt(sumH.oil)} ${p.resOil}`} · +
+              {safeInt(netFoodHour)} {p.resFood}
+              <span className="mt-1 block text-xs font-normal text-zinc-400">
+                {p.resFood} production +{safeInt(sumH.food)} − {sumFoodCons}{" "}
+                consumption
               </span>
             </>
           ) : (
             <>
-              Σ/sa: +{safeInt(sumH.wood)}O
-              {unlocks.iron && ` +${safeInt(sumH.iron)}D`}
-              {unlocks.oil && ` +${safeInt(sumH.oil)}P`} +{safeInt(netFoodHour)}B
-              <span className="text-zinc-500">
-                {" "}
-                (B: +{safeInt(sumH.food)} − {sumFoodCons} tük)
+              Net / saat: +{safeInt(sumH.wood)} {p.resWood}
+              {unlocks.iron && ` · +${safeInt(sumH.iron)} ${p.resIron}`}
+              {unlocks.oil && ` · +${safeInt(sumH.oil)} ${p.resOil}`} · +
+              {safeInt(netFoodHour)} {p.resFood}
+              <span className="mt-1 block text-xs font-normal text-zinc-400">
+                {p.resFood} üretimi +{safeInt(sumH.food)} − {sumFoodCons}{" "}
+                tüketim
               </span>
             </>
           )}
@@ -199,20 +201,56 @@ export default async function ResourcesPage() {
                   <td className="bg-zinc-950/85 py-2 pl-3 text-xs font-semibold text-zinc-100 ring-1 ring-inset ring-amber-900/30">
                     {locale === "en" ? (
                       <>
-                        +{safeInt(h.wood)}W
-                        {unlocks.iron && ` / +${safeInt(h.iron)}I`}
-                        {unlocks.oil && ` / +${safeInt(h.oil)}O`} / +{nf}F
-                        <span className="mt-0.5 block text-[10px] font-normal text-zinc-400">
-                          ({p.resFood} +{safeInt(h.food)} − {fc})
+                        <span className="inline-flex flex-wrap items-center gap-x-2 gap-y-1">
+                          <span className="inline-flex items-center gap-0.5">
+                            <ResourceIcon kind="wood" />+{safeInt(h.wood)}{" "}
+                            {p.resWood}
+                          </span>
+                          {unlocks.iron && (
+                            <span className="inline-flex items-center gap-0.5">
+                              <ResourceIcon kind="iron" />+
+                              {safeInt(h.iron)} {p.resIron}
+                            </span>
+                          )}
+                          {unlocks.oil && (
+                            <span className="inline-flex items-center gap-0.5">
+                              <ResourceIcon kind="oil" />+
+                              {safeInt(h.oil)} {p.resOil}
+                            </span>
+                          )}
+                          <span className="inline-flex items-center gap-0.5">
+                            <ResourceIcon kind="food" />+{nf} {p.resFood}
+                          </span>
+                        </span>
+                        <span className="mt-1 block text-[10px] font-normal text-zinc-400">
+                          {p.resFood}: +{safeInt(h.food)} − {fc} consumption
                         </span>
                       </>
                     ) : (
                       <>
-                        +{safeInt(h.wood)}O
-                        {unlocks.iron && ` / +${safeInt(h.iron)}D`}
-                        {unlocks.oil && ` / +${safeInt(h.oil)}P`} / +{nf}B
-                        <span className="mt-0.5 block text-[10px] font-normal text-zinc-400">
-                          (B: +{safeInt(h.food)} − {fc})
+                        <span className="inline-flex flex-wrap items-center gap-x-2 gap-y-1">
+                          <span className="inline-flex items-center gap-0.5">
+                            <ResourceIcon kind="wood" />+{safeInt(h.wood)}{" "}
+                            {p.resWood}
+                          </span>
+                          {unlocks.iron && (
+                            <span className="inline-flex items-center gap-0.5">
+                              <ResourceIcon kind="iron" />+
+                              {safeInt(h.iron)} {p.resIron}
+                            </span>
+                          )}
+                          {unlocks.oil && (
+                            <span className="inline-flex items-center gap-0.5">
+                              <ResourceIcon kind="oil" />+
+                              {safeInt(h.oil)} {p.resOil}
+                            </span>
+                          )}
+                          <span className="inline-flex items-center gap-0.5">
+                            <ResourceIcon kind="food" />+{nf} {p.resFood}
+                          </span>
+                        </span>
+                        <span className="mt-1 block text-[10px] font-normal text-zinc-400">
+                          {p.resFood}: +{safeInt(h.food)} − {fc} tüketim
                         </span>
                       </>
                     )}

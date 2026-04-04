@@ -2,6 +2,8 @@
 
 import { advanceResearch } from "@/app/actions/game-city";
 import { MAX_RESEARCH_TIER } from "@/lib/economy";
+import { formatCountdownSeconds } from "@/lib/format-countdown";
+import type { AppLocale } from "@/lib/locale";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -13,6 +15,7 @@ type Props = {
   payFromLabel: string;
   btnLabel: string;
   researchJobEndsAtIso: string | null;
+  locale: AppLocale;
 };
 
 export function ResearchAdvanceForm({
@@ -21,6 +24,7 @@ export function ResearchAdvanceForm({
   payFromLabel,
   btnLabel,
   researchJobEndsAtIso,
+  locale,
 }: Props) {
   const router = useRouter();
   const [cityId, setCityId] = useState(cities[0]?.id ?? "");
@@ -66,8 +70,7 @@ export function ResearchAdvanceForm({
     return <p className="text-sm text-zinc-500">—</p>;
   }
 
-  const rm = Math.floor(remainSec / 60);
-  const rs = remainSec % 60;
+  const tr = locale !== "en";
 
   return (
     <form
@@ -92,7 +95,10 @@ export function ResearchAdvanceForm({
       </label>
       {inProgress && (
         <p className="text-xs text-amber-200/90">
-          Araştırma sürüyor: {rm}dk {String(rs).padStart(2, "0")}sn
+          {tr ? "Araştırma sürüyor: " : "Research in progress: "}
+          <span className="tabular-nums font-semibold">
+            {formatCountdownSeconds(remainSec, locale)}
+          </span>
         </p>
       )}
       <button

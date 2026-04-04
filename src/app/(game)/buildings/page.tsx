@@ -1,4 +1,5 @@
 import { BuildingCatalogCard } from "@/components/game/BuildingCatalogCard";
+import { BuildingsNextJobCountdown } from "@/components/game/BuildingsNextJobCountdown";
 import { ERA_BUILDING_CATALOG } from "@/config/building-catalog";
 import {
   ERA_ORDER,
@@ -12,6 +13,7 @@ import { getDictionary } from "@/i18n/dictionaries";
 import { getCurrentUser } from "@/lib/current-user";
 import { getLocale } from "@/lib/locale";
 import type { AppLocale } from "@/lib/locale";
+import { prisma } from "@/lib/prisma";
 import Image from "next/image";
 
 export const dynamic = "force-dynamic";
@@ -23,8 +25,6 @@ export default async function BuildingsPage() {
   const user = await getCurrentUser();
   const cities = user?.cities ?? [];
   const unlocks = getResourceUnlocks(user?.currentEra);
-  const showBonus = false;
-
   if (!user || cities.length === 0) {
     return (
       <div className="rounded border border-[#2a3441]/90 bg-black/35 p-4 backdrop-blur-sm">
@@ -39,14 +39,29 @@ export default async function BuildingsPage() {
     );
   }
 
+  const nextBuild = await prisma.buildingJob.findFirst({
+    where: { userId: user.id, status: "queued" },
+    orderBy: { completesAt: "asc" },
+    select: { completesAt: true },
+  });
+
   return (
     <div className="rounded border border-[#2a3441]/90 bg-black/35 p-4 backdrop-blur-sm">
       <h2
-        className="mb-2 text-lg text-amber-200/90"
+        className="mb-2 text-center text-lg text-amber-200/90"
         style={{ fontFamily: "var(--font-warcity), serif" }}
       >
         {p.buildingsTitle}
       </h2>
+      <BuildingsNextJobCountdown
+        completesAtIso={nextBuild?.completesAt.toISOString() ?? null}
+        locale={locale}
+        labelBusy={
+          locale === "en"
+            ? "Next building upgrade completes in"
+            : "Sonraki bina yükseltmesi"
+        }
+      />
       <div className="space-y-12">
         {ERA_ORDER.map((eraId) => {
           const cfg = getEraConfig(eraId);
@@ -94,22 +109,17 @@ export default async function BuildingsPage() {
                 </p>
               ) : (
                 <div className="grid grid-cols-1 gap-6">
-                  {rows.map((row, idx) => (
+                  {rows.map((row) => (
                     <BuildingCatalogCard
-                      key={`${eraId}-${row.buildingId}-${idx}`}
-                      orderInEra={idx + 1}
+                      key={`${eraId}-${row.buildingId}`}
                       building={row.buildingId}
                       title={
                         locale === "en" ? row.titleEn : row.titleTr
                       }
-                      desc={
-                        locale === "en" ? row.descEn : row.descTr
-                      }
                       cities={cities}
                       unlocks={unlocks}
                       play={p}
-                      showBonus={showBonus}
-                      eraOrdinal={ordinal}
+                      locale={locale}
                     />
                   ))}
                 </div>

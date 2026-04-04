@@ -3,8 +3,10 @@
 import { LiveStock } from "@/components/game/LiveStock";
 import { ResourceIcon } from "@/components/game/ResourceIcon";
 import { eraOverviewThumbUrl } from "@/config/eras";
+import { formatCountdownSeconds } from "@/lib/format-countdown";
 import { OverviewSupportButton } from "@/components/game/OverviewSupportButton";
 import { WorkersAssignButton } from "@/components/game/WorkersAssignButton";
+import { useCountdownIso } from "@/components/game/useCountdownIso";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
@@ -28,8 +30,10 @@ type CityRow = {
   hn: number;
   buildLabel: string;
   buildEtaSec: number;
+  buildCompletesAtIso: string | null;
   prodLabel: string;
   prodEtaSec: number;
+  prodCompletesAtIso: string | null;
   workersWood: number;
   workersIron: number;
   workersOil: number;
@@ -59,9 +63,7 @@ type Props = {
   currentEra: string | null | undefined;
   unlocks: { iron: boolean; oil: boolean };
   cities: CityRow[];
-  /** İmparatorluk araştırma süresi (sn); 0 = boşta */
-  researchEtaSec: number;
-  /** İkinci şehirden itibaren destek butonu */
+  researchJobEndsAtIso: string | null;
   support?: SupportConfig | null;
   labels: {
     wood: string;
@@ -84,41 +86,60 @@ type Props = {
   };
 };
 
-function fmt(n: number, locale: string) {
-  if (!Number.isFinite(n)) return "0";
-  return n.toLocaleString(locale === "en" ? "en-US" : "tr-TR");
-}
-
-function fmtEta(sec: number) {
-  const s = Math.max(0, Math.floor(sec));
-  const m = Math.floor(s / 60);
-  const r = s % 60;
-  return `${m}m ${String(r).padStart(2, "0")}s`;
-}
-
-function PopBar({
+function PopTotal({
   pop,
-  cap,
   label,
 }: {
   pop: number;
-  cap: number;
   label: string;
 }) {
-  const pct = cap > 0 ? Math.min(100, Math.round((pop / cap) * 100)) : 0;
   return (
-    <div className="min-w-[160px]">
-      <div className="mb-1 flex items-baseline justify-between text-[11px] text-zinc-300">
-        <span className="text-amber-200/90">{label}</span>
-        <span className="tabular-nums text-zinc-200">
-          {pop} / {cap}
-        </span>
+    <div className="min-w-[120px] text-right">
+      <div className="text-[11px] text-zinc-400">{label}</div>
+      <div className="tabular-nums text-lg font-semibold text-amber-100/95">
+        {pop}
       </div>
-      <div className="h-2 overflow-hidden rounded bg-black/35 ring-1 ring-inset ring-white/10">
-        <div
-          className="h-full bg-gradient-to-r from-emerald-500/80 via-sky-500/75 to-amber-500/75"
-          style={{ width: `${pct}%` }}
-        />
+    </div>
+  );
+}
+
+function RowCountdown({
+  completesAtIso,
+  locale,
+}: {
+  completesAtIso: string | null;
+  locale: string;
+}) {
+  const sec = useCountdownIso(completesAtIso);
+  if (!completesAtIso || sec <= 0) return null;
+  return (
+    <span className="tabular-nums text-amber-100/90">
+      {formatCountdownSeconds(sec, locale)}
+    </span>
+  );
+}
+
+function ResearchCountdownBlock({
+  researchJobEndsAtIso,
+  locale,
+  heading,
+}: {
+  researchJobEndsAtIso: string | null;
+  locale: string;
+  heading: string;
+}) {
+  const sec = useCountdownIso(researchJobEndsAtIso);
+  const active = researchJobEndsAtIso && sec > 0;
+  if (!active) return null;
+  return (
+    <div className="border-b border-zinc-700/60 px-3 py-2">
+      <div className="rounded border border-zinc-600/50 bg-black/25 px-3 py-2">
+        <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 text-sm">
+          <span className="font-semibold text-amber-200/90">{heading}</span>
+          <span className="tabular-nums text-zinc-100">
+            {formatCountdownSeconds(sec, locale)}
+          </span>
+        </div>
       </div>
     </div>
   );
@@ -129,18 +150,12 @@ export function WarCityOverviewLike({
   currentEra,
   unlocks,
   cities,
-  researchEtaSec,
+  researchJobEndsAtIso,
   support,
   labels,
 }: Props) {
   const eraThumb = eraOverviewThumbUrl(currentEra);
   const [selected, setSelected] = useState(cities[0]?.id ?? "");
-  const [clock, setClock] = useState(() => Date.now());
-
-  useEffect(() => {
-    const t = setInterval(() => setClock(Date.now()), 1000);
-    return () => clearInterval(t);
-  }, []);
 
   useEffect(() => {
     if (!selected && cities[0]?.id) setSelected(cities[0].id);
@@ -148,8 +163,7 @@ export function WarCityOverviewLike({
 
   const totals = useMemo(() => {
     const pop = cities.reduce((a, c) => a + c.population, 0);
-    const cap = cities.reduce((a, c) => a + c.popCap, 0);
-    return { pop, cap };
+    return { pop };
   }, [cities]);
 
   const selectedCityName =
@@ -157,8 +171,6 @@ export function WarCityOverviewLike({
 
   return (
     <div className="rounded-xl border border-zinc-700/70 bg-zinc-900/65 shadow-[0_20px_40px_-20px_rgba(0,0,0,0.65)] backdrop-blur-sm">
-
-      {/* Header line: select city */}
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-700/60 bg-black/20 px-3 py-2">
         <div className="flex flex-wrap items-baseline gap-2 text-xs text-zinc-400">
           <span className="text-zinc-300">{labels.selectCity}:</span>
@@ -178,7 +190,7 @@ export function WarCityOverviewLike({
           ))}
         </select>
         <div className="flex flex-wrap items-center justify-end gap-2">
-          <PopBar pop={totals.pop} cap={totals.cap} label={labels.population} />
+          <PopTotal pop={totals.pop} label={labels.population} />
           {(() => {
             const sel = cities.find((c) => c.id === selected);
             if (!sel) return null;
@@ -209,29 +221,16 @@ export function WarCityOverviewLike({
         </div>
       </div>
 
-      {/* Teknoloji araştırması — şehirden bağımsız */}
-      <div className="border-b border-zinc-700/60 px-3 py-2">
-        <div className="rounded border border-zinc-600/50 bg-black/25 px-3 py-2">
-          <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 text-sm">
-            <span className="font-semibold text-amber-200/90">
-              {labels.researchHeading}
-            </span>
-            <span className="tabular-nums text-zinc-200">
-              {researchEtaSec > 0
-                ? fmtEta(researchEtaSec)
-                : labels.researchIdle}
-            </span>
-          </div>
-        </div>
-      </div>
+      <ResearchCountdownBlock
+        researchJobEndsAtIso={researchJobEndsAtIso}
+        locale={locale}
+        heading={labels.researchHeading}
+      />
 
-      {/* Rows */}
       <div className="px-3 pb-3">
         <div className="overflow-hidden rounded-lg border border-zinc-700/60 bg-black/25">
           {cities.map((c, idx) => {
             const active = c.id === selected;
-            const buildSec = Math.max(0, c.buildEtaSec);
-            const prodSec = Math.max(0, c.prodEtaSec);
             const showSupport =
               support && idx > 0 && support.allCities.length >= 2;
             return (
@@ -279,7 +278,6 @@ export function WarCityOverviewLike({
 
                   <div className="mt-2 text-[11px] text-zinc-300">
                     <div className="space-y-1">
-                      {/* Resources inside the city box */}
                       <div className="rounded border border-zinc-600/45 bg-black/20 p-2">
                         <div className="grid grid-cols-1 gap-1 sm:grid-cols-2">
                           <div className="flex flex-wrap items-center gap-1">
@@ -344,34 +342,36 @@ export function WarCityOverviewLike({
                         <div className="text-zinc-200">
                           • {labels.buildingInProgress}:{" "}
                           <span className="text-zinc-400">
-                            {buildSec > 0 ? c.buildLabel : labels.buildIdle}
+                            {c.buildCompletesAtIso ? c.buildLabel : labels.buildIdle}
                           </span>
                         </div>
-                        {buildSec > 0 && (
+                        {c.buildCompletesAtIso ? (
                           <div className="mt-0.5 pl-3 text-zinc-400">
                             <span className="text-zinc-400">{labels.time}:</span>{" "}
-                            <span className="tabular-nums text-zinc-200">
-                              {fmtEta(buildSec)}
-                            </span>
+                            <RowCountdown
+                              completesAtIso={c.buildCompletesAtIso}
+                              locale={locale}
+                            />
                           </div>
-                        )}
+                        ) : null}
                       </div>
 
                       <div className="rounded border border-zinc-700/40 bg-black/15 px-2 py-1.5">
                         <div className="text-zinc-200">
                           • {labels.productionInProgress}:{" "}
                           <span className="text-zinc-400">
-                            {prodSec > 0 ? c.prodLabel : labels.armyIdle}
+                            {c.prodCompletesAtIso ? c.prodLabel : labels.armyIdle}
                           </span>
                         </div>
-                        {prodSec > 0 && (
+                        {c.prodCompletesAtIso ? (
                           <div className="mt-0.5 pl-3 text-zinc-400">
                             <span className="text-zinc-400">{labels.time}:</span>{" "}
-                            <span className="tabular-nums text-zinc-200">
-                              {fmtEta(prodSec)}
-                            </span>
+                            <RowCountdown
+                              completesAtIso={c.prodCompletesAtIso}
+                              locale={locale}
+                            />
                           </div>
-                        )}
+                        ) : null}
                       </div>
                     </div>
                   </div>
@@ -388,4 +388,3 @@ export function WarCityOverviewLike({
     </div>
   );
 }
-

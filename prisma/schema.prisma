@@ -76,6 +76,9 @@ model User {
   allianceMessages  AllianceMessage[]
   allianceInvitesSent     AllianceInvite[] @relation("AllianceInviteFrom")
   allianceInvitesReceived AllianceInvite[] @relation("AllianceInviteTo")
+
+  forumTopics ForumTopic[]
+  forumPosts  ForumPost[]
 }
 
 model CityUnitStock {
@@ -378,4 +381,29 @@ model MarketListing {
   @@index([sellerId])
   @@index([status])
   @@index([opensAt])
+}
+
+/// Basit oyun içi forum (MyBB yerine hafif MVP)
+model ForumTopic {
+  id        String   @id @default(cuid())
+  title     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  posts     ForumPost[]
+
+  @@index([createdAt])
+}
+
+model ForumPost {
+  id        String     @id @default(cuid())
+  topicId   String
+  topic     ForumTopic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  body      String     @db.VarChar(8000)
+  createdAt DateTime   @default(now())
+
+  @@index([topicId, createdAt])
 }

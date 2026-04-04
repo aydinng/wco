@@ -42,7 +42,6 @@ export default async function CityDetailPage({
   const cities = [city];
   const unlocks = getResourceUnlocks(user.currentEra);
   const isAdmin = user.isAdmin === true;
-  const showBonus = isAdmin;
 
   return (
     <div className="rounded border border-[#2a3441]/90 bg-black/35 p-4 backdrop-blur-sm">
@@ -127,18 +126,15 @@ export default async function CityDetailPage({
                 </p>
               ) : (
                 <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                  {rows.map((row, idx) => (
+                  {rows.map((row) => (
                     <BuildingCatalogCard
-                      key={`${eraId}-${row.buildingId}-${idx}`}
-                      orderInEra={idx + 1}
+                      key={`${eraId}-${row.buildingId}`}
                       building={row.buildingId}
                       title={locale === "en" ? row.titleEn : row.titleTr}
-                      desc={locale === "en" ? row.descEn : row.descTr}
                       cities={cities}
                       unlocks={unlocks}
                       play={p}
-                      showBonus={showBonus}
-                      eraOrdinal={ordinal}
+                      locale={locale}
                     />
                   ))}
                 </div>

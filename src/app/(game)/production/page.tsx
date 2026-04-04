@@ -87,6 +87,7 @@ export default async function ProductionPage({
       <TrainingQueueBar
         jobs={queueJobs}
         queueLabel={locale === "en" ? "Training queue" : "Eğitim kuyruğu"}
+        locale={locale}
         emptyHint={
           locale === "en"
             ? "No units in training for this city."

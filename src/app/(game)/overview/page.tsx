@@ -12,6 +12,7 @@ import {
 import { getCurrentUser } from "@/lib/current-user";
 import { getLocale } from "@/lib/locale";
 import { getUnitSpec } from "@/config/units";
+import { buildingJobSummaryLine } from "@/lib/building-i18n";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 
@@ -37,7 +38,13 @@ export default async function OverviewPage() {
           orderBy: { completesAt: "asc" },
           select: { unitId: true, completesAt: true, quantity: true },
         });
-        if (!j) return { cityId: c.id, prodLabel: p.overviewNone, prodEtaSec: 0 };
+        if (!j)
+          return {
+            cityId: c.id,
+            prodLabel: p.overviewNone,
+            prodEtaSec: 0,
+            prodCompletesAtIso: null as string | null,
+          };
         const eta = Math.max(
           0,
           Math.ceil((new Date(j.completesAt).getTime() - now) / 1000),
@@ -50,6 +57,7 @@ export default async function OverviewPage() {
           cityId: c.id,
           prodLabel,
           prodEtaSec: eta,
+          prodCompletesAtIso: j.completesAt.toISOString(),
         };
       }),
     );
@@ -63,15 +71,25 @@ export default async function OverviewPage() {
           select: { buildingId: true, toLevel: true, completesAt: true },
         });
         if (!b)
-          return { cityId: c.id, buildLabel: p.overviewNone, buildEtaSec: 0 };
+          return {
+            cityId: c.id,
+            buildLabel: p.overviewNone,
+            buildEtaSec: 0,
+            buildCompletesAtIso: null as string | null,
+          };
         const eta = Math.max(
           0,
           Math.ceil((new Date(b.completesAt).getTime() - now) / 1000),
         );
         return {
           cityId: c.id,
-          buildLabel: `${b.buildingId} Lv${b.toLevel}`,
+          buildLabel: buildingJobSummaryLine(
+            b.buildingId,
+            b.toLevel,
+            locale,
+          ),
           buildEtaSec: eta,
+          buildCompletesAtIso: b.completesAt.toISOString(),
         };
       }),
     );
@@ -103,8 +121,10 @@ export default async function OverviewPage() {
         hn: foodNet,
         buildLabel: bm?.buildLabel ?? p.overviewNone,
         buildEtaSec: bm?.buildEtaSec ?? 0,
+        buildCompletesAtIso: bm?.buildCompletesAtIso ?? null,
         prodLabel: pm?.prodLabel ?? p.overviewNone,
         prodEtaSec: pm?.prodEtaSec ?? 0,
+        prodCompletesAtIso: pm?.prodCompletesAtIso ?? null,
         workersWood: c.workersWood,
         workersIron: c.workersIron,
         workersOil: c.workersOil,
@@ -118,7 +138,7 @@ export default async function OverviewPage() {
         currentEra={user.currentEra}
         unlocks={unlocks}
         cities={viewCities}
-        researchEtaSec={0}
+        researchJobEndsAtIso={user.researchJobEndsAt?.toISOString() ?? null}
         support={
           cities.length >= 2 && researchTier >= 1
             ? {

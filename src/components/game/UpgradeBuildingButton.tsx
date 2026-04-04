@@ -5,7 +5,9 @@ import {
   upgradeBuilding,
 } from "@/app/actions/game-city";
 import type { ResourceUnlocks } from "@/config/eras";
+import { ResourceIcon } from "@/components/game/ResourceIcon";
 import { getUpgradeCost, MAX_BUILDING_LEVEL } from "@/lib/economy";
+import type { AppLocale } from "@/lib/locale";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -15,8 +17,14 @@ type Props = {
   currentLevel: number;
   buildLabel: string;
   upgradeLabel: string;
-  costPrefix: string;
   unlocks: ResourceUnlocks;
+  locale: AppLocale;
+  resourceLabels: {
+    wood: string;
+    iron: string;
+    oil: string;
+    food: string;
+  };
 };
 
 export function UpgradeBuildingButton({
@@ -25,8 +33,9 @@ export function UpgradeBuildingButton({
   currentLevel,
   buildLabel,
   upgradeLabel,
-  costPrefix: _costPrefix,
   unlocks,
+  locale,
+  resourceLabels,
 }: Props) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
@@ -34,6 +43,7 @@ export function UpgradeBuildingButton({
   const maxed = currentLevel >= MAX_BUILDING_LEVEL;
   const cost = getUpgradeCost(currentLevel, unlocks);
   const actionLabel = currentLevel < 1 ? buildLabel : upgradeLabel;
+  const tr = locale !== "en";
 
   async function onClick() {
     setErr(null);
@@ -47,29 +57,43 @@ export function UpgradeBuildingButton({
     }
   }
 
-  const parts: string[] = [`ODUN ${cost.wood}`];
-  if (unlocks.iron && cost.iron > 0) parts.push(`DEMİR ${cost.iron}`);
-  if (unlocks.oil && cost.oil > 0) parts.push(`PETROL ${cost.oil}`);
-  parts.push(`BESİN ${cost.food}`);
-
   return (
-    <div className="flex flex-col gap-1">
-      <div className="flex flex-wrap items-center gap-2">
+    <div className="flex flex-col items-end gap-1">
+      <div className="flex flex-wrap items-center justify-end gap-2">
         <button
           type="button"
           disabled={busy || maxed}
           onClick={onClick}
           className="shrink-0 rounded border border-amber-900/50 bg-amber-950/40 px-2 py-1 text-xs text-amber-100 hover:bg-amber-900/50 disabled:opacity-40"
         >
-          {maxed ? "MAX" : actionLabel}
+          {maxed ? (tr ? "ÜST" : "MAX") : actionLabel}
         </button>
         {!maxed && (
-          <span className="text-[10px] font-semibold uppercase leading-snug tracking-wide text-zinc-300">
-            {parts.join(" · ")}
+          <span className="flex flex-wrap items-center justify-end gap-x-2 gap-y-0.5 text-[10px] font-medium leading-snug text-zinc-200">
+            <span className="inline-flex items-center gap-0.5">
+              <ResourceIcon kind="wood" />
+              {resourceLabels.wood} {cost.wood}
+            </span>
+            {unlocks.iron && cost.iron > 0 ? (
+              <span className="inline-flex items-center gap-0.5">
+                <ResourceIcon kind="iron" />
+                {resourceLabels.iron} {cost.iron}
+              </span>
+            ) : null}
+            {unlocks.oil && cost.oil > 0 ? (
+              <span className="inline-flex items-center gap-0.5">
+                <ResourceIcon kind="oil" />
+                {resourceLabels.oil} {cost.oil}
+              </span>
+            ) : null}
+            <span className="inline-flex items-center gap-0.5">
+              <ResourceIcon kind="food" />
+              {resourceLabels.food} {cost.food}
+            </span>
           </span>
         )}
       </div>
-      {err && <span className="text-[10px] text-red-400">{err}</span>}
+      {err ? <span className="max-w-[14rem] text-right text-[10px] text-red-400">{err}</span> : null}
     </div>
   );
 }

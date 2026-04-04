@@ -1,5 +1,6 @@
 "use client";
 
+import { ResourceIcon } from "@/components/game/ResourceIcon";
 import { useEffect, useMemo, useState } from "react";
 
 export type LiveTotalCity = {
@@ -87,20 +88,24 @@ export function LiveTotalStocks({
       className="flex flex-wrap gap-x-4 gap-y-1 tabular-nums text-zinc-200"
       suppressHydrationWarning
     >
-      <span>
+      <span className="inline-flex items-center gap-1">
+        <ResourceIcon kind="wood" />
         {labels.resWood}: {fmt(totals.wood)}
       </span>
       {unlocks.iron && (
-        <span>
+        <span className="inline-flex items-center gap-1">
+          <ResourceIcon kind="iron" />
           {labels.resIron}: {fmt(totals.iron)}
         </span>
       )}
       {unlocks.oil && (
-        <span>
+        <span className="inline-flex items-center gap-1">
+          <ResourceIcon kind="oil" />
           {labels.resOil}: {fmt(totals.oil)}
         </span>
       )}
-      <span>
+      <span className="inline-flex items-center gap-1">
+        <ResourceIcon kind="food" />
         {labels.resFood}: {fmt(totals.food)}
       </span>
     </div>

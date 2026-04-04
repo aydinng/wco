@@ -6,6 +6,7 @@ import {
   CATALOG_STATS_COL,
   CATALOG_TITLE_YELLOW,
 } from "@/components/game/catalog-layout";
+import { ResourceIcon } from "@/components/game/ResourceIcon";
 import { UnitTrainRow } from "@/components/game/UnitTrainRow";
 import {
   ERA_ORDER,
@@ -42,18 +43,48 @@ function purposeText(
   return "Saldırı/Koruma";
 }
 
-function costLine(
-  spec: UnitSpec,
-  unlocks: ResourceUnlocks,
-  locale: AppLocale,
-): string {
+function UnitCostBlock({
+  spec,
+  unlocks,
+  play,
+}: {
+  spec: UnitSpec;
+  unlocks: ResourceUnlocks;
+  play: Dictionary["play"];
+}) {
   const c = unitTrainCostPerSoldierTotal(spec, unlocks);
-  const parts: string[] = [];
-  if (c.wood > 0) parts.push(locale === "en" ? `W ${c.wood}` : `O ${c.wood}`);
-  if (c.iron > 0) parts.push(locale === "en" ? `I ${c.iron}` : `D ${c.iron}`);
-  if (c.oil > 0) parts.push(locale === "en" ? `O ${c.oil}` : `P ${c.oil}`);
-  if (c.food > 0) parts.push(locale === "en" ? `F ${c.food}` : `B ${c.food}`);
-  return parts.join(" · ");
+  return (
+    <div className="flex flex-wrap gap-x-3 gap-y-1 text-[13px] text-amber-100/95">
+      {c.wood > 0 ? (
+        <span className="inline-flex items-center gap-1">
+          <ResourceIcon kind="wood" />
+          <span className="text-zinc-200">{play.resWood}</span>
+          <span className="tabular-nums">{c.wood}</span>
+        </span>
+      ) : null}
+      {c.iron > 0 ? (
+        <span className="inline-flex items-center gap-1">
+          <ResourceIcon kind="iron" />
+          <span className="text-zinc-200">{play.resIron}</span>
+          <span className="tabular-nums">{c.iron}</span>
+        </span>
+      ) : null}
+      {c.oil > 0 ? (
+        <span className="inline-flex items-center gap-1">
+          <ResourceIcon kind="oil" />
+          <span className="text-zinc-200">{play.resOil}</span>
+          <span className="tabular-nums">{c.oil}</span>
+        </span>
+      ) : null}
+      {c.food > 0 ? (
+        <span className="inline-flex items-center gap-1">
+          <ResourceIcon kind="food" />
+          <span className="text-zinc-200">{play.resFood}</span>
+          <span className="tabular-nums">{c.food}</span>
+        </span>
+      ) : null}
+    </div>
+  );
 }
 
 type Props = {
@@ -140,15 +171,12 @@ export function UnitCatalog({
                           label={play.catalogFieldTime}
                           value={fmtDuration(u.trainSeconds)}
                         />
-                        <CatalogFieldLine
-                          label={
-                            locale === "en"
-                              ? "Cost / soldier"
-                              : "Hammadde / asker"
-                          }
-                          value={costLine(u, unlocks, locale)}
-                          valueClassName="text-amber-100/90"
-                        />
+                        <div className="flex flex-col gap-0.5">
+                          <span className="text-cyan-400">
+                            {locale === "en" ? "Resources" : "Hammadde"}
+                          </span>
+                          <UnitCostBlock spec={u} unlocks={unlocks} play={play} />
+                        </div>
                         <CatalogFieldLine
                           label={play.catalogFieldPurpose}
                           value={purposeText(u.purpose, locale)}

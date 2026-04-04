@@ -100,6 +100,7 @@ export default async function ResearchPage() {
           payFromLabel={p.researchPayFrom}
           btnLabel={p.researchBtn}
           researchJobEndsAtIso={user.researchJobEndsAt?.toISOString() ?? null}
+          locale={locale}
         />
       </div>
       {tier > 0 ? (

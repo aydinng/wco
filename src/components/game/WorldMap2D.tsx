@@ -2,6 +2,8 @@
 
 import { useMemo } from "react";
 
+export type MapMarkerKind = "me" | "ally" | "neutral";
+
 export type MapCityPoint = {
   id: string;
   x: number;
@@ -9,7 +11,7 @@ export type MapCityPoint = {
   name: string;
   owner: string;
   tribe: string;
-  isMine: boolean;
+  marker: MapMarkerKind;
 };
 
 type CoordBounds = {
@@ -23,17 +25,56 @@ type Props = {
   points: MapCityPoint[];
   legendYou: string;
   legendOther: string;
+  legendAlly: string;
   planeHint: string;
   coordBounds: CoordBounds;
-  /** Seyahat / ölçek bilgisi */
   footerExtra?: string;
 };
 
-/** Modern uydu / taktik görünüm: koordinat ızgarası ve sektör hissi. */
+function markerColors(kind: MapMarkerKind): {
+  fill: string;
+  stroke: string;
+  glow: string;
+} {
+  if (kind === "me") {
+    return { fill: "#fcd34d", stroke: "#f59e0b", glow: "rgba(251,191,36,0.35)" };
+  }
+  if (kind === "ally") {
+    return { fill: "#4ade80", stroke: "#16a34a", glow: "rgba(34,197,94,0.35)" };
+  }
+  return { fill: "#38bdf8", stroke: "#0ea5e9", glow: "rgba(56,189,248,0.25)" };
+}
+
+/** Şehir kale işareti — tüm oyuncular için aynı silüet */
+function CityGlyph({
+  cx,
+  cy,
+  fill,
+  stroke,
+}: {
+  cx: number;
+  cy: number;
+  fill: string;
+  stroke: string;
+}) {
+  return (
+    <g transform={`translate(${cx},${cy}) scale(0.14)`}>
+      <path
+        transform="translate(-12,-14)"
+        d="M4 22h16v2H4v-2zm2-4h2v2H6v-2zm4 0h2v2h-2v-2zm4 0h2v2h-2v-2zm4 0h2v2h-2v-2zM5 8h2v10H5V8zm4 0h2v4H9V8zm4 0h2v4h-2V8zm4 0h2v10h-2V8zm4-2l2-2v2h2l-8-6-8 6h2V6l2 2V4h12v2z"
+        fill={fill}
+        stroke={stroke}
+        strokeWidth={0.5}
+      />
+    </g>
+  );
+}
+
 export function WorldMap2D({
   points,
   legendYou,
   legendOther,
+  legendAlly,
   planeHint,
   coordBounds,
   footerExtra,
@@ -49,15 +90,17 @@ export function WorldMap2D({
     const built = points.map((p) => {
       const nx = 8 + ((p.x - minX) / dx) * 84;
       const ny = 8 + ((maxY - p.y) / dy) * 84;
+      const col = markerColors(p.marker);
       return {
         key: p.id,
         name: `${p.name} — ${p.owner} (${p.tribe}) — ${p.x}:${p.y}`,
         cx: nx,
         cy: ny,
-        r: p.isMine ? 3.2 : 2.15,
-        fill: p.isMine ? "#fcd34d" : "#38bdf8",
-        stroke: p.isMine ? "#f59e0b" : "#0ea5e9",
-        mine: p.isMine,
+        mine: p.marker === "me",
+        fill: col.fill,
+        stroke: col.stroke,
+        glow: col.glow,
+        marker: p.marker,
       };
     });
 
@@ -81,11 +124,15 @@ export function WorldMap2D({
   }
 
   return (
-    <div className="rounded-xl border border-slate-500/60 bg-gradient-to-br from-slate-950 via-[#071a2e] to-emerald-950/50 p-3 shadow-[0_0_40px_-8px_rgba(251,191,36,0.15)] ring-1 ring-amber-900/20">
+    <div className="w-full max-w-[1600px] rounded-xl border border-slate-500/60 bg-gradient-to-br from-slate-950 via-[#071a2e] to-emerald-950/50 p-4 shadow-[0_0_40px_-8px_rgba(251,191,36,0.15)] ring-1 ring-amber-900/20">
       <div className="mb-2 flex flex-wrap gap-4 text-xs text-zinc-200">
         <span className="flex items-center gap-1.5">
           <span className="inline-block h-2.5 w-2.5 rounded-sm bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.7)]" />{" "}
           {legendYou}
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="inline-block h-2.5 w-2.5 rounded-sm bg-emerald-400 shadow-[0_0_6px_rgba(34,197,94,0.55)]" />{" "}
+          {legendAlly}
         </span>
         <span className="flex items-center gap-1.5">
           <span className="inline-block h-2.5 w-2.5 rounded-sm bg-sky-400 shadow-[0_0_6px_rgba(56,189,248,0.55)]" />{" "}
@@ -94,7 +141,7 @@ export function WorldMap2D({
       </div>
       <svg
         viewBox="0 0 100 100"
-        className="h-auto max-h-[min(480px,60vh)] w-full rounded-lg border border-slate-700/60 shadow-lg"
+        className="h-auto min-h-[420px] w-full max-h-[min(720px,78vh)] rounded-lg border border-slate-700/60 shadow-lg"
         preserveAspectRatio="xMidYMid meet"
         aria-label="World map"
       >
@@ -114,7 +161,7 @@ export function WorldMap2D({
             <path
               d="M 4 0 L 0 0 0 4"
               fill="none"
-              stroke="rgba(148,163,184,0.12)"
+              stroke="rgba(148,163,184,0.14)"
               strokeWidth="0.15"
             />
           </pattern>
@@ -127,7 +174,7 @@ export function WorldMap2D({
             <path
               d="M 20 0 L 0 0 0 20"
               fill="none"
-              stroke="rgba(251,191,36,0.18)"
+              stroke="rgba(251,191,36,0.22)"
               strokeWidth="0.35"
             />
           </pattern>
@@ -166,28 +213,21 @@ export function WorldMap2D({
         ))}
 
         {circles.map((c) => (
-          <g key={c.key} filter="url(#glowPin)" className={c.mine ? "animate-pulse" : undefined}>
-            {c.mine ? (
-              <circle
-                cx={c.cx}
-                cy={c.cy}
-                r={c.r + 1.2}
-                fill="none"
-                stroke="rgba(251,191,36,0.35)"
-                strokeWidth={0.35}
-              />
-            ) : null}
-            <rect
-              x={c.cx - c.r}
-              y={c.cy - c.r}
-              width={c.r * 2}
-              height={c.r * 2}
-              transform={`rotate(45 ${c.cx} ${c.cy})`}
-              fill={c.fill}
-              fillOpacity={0.94}
-              stroke={c.stroke}
-              strokeWidth={c.mine ? 0.55 : 0.4}
+          <g
+            key={c.key}
+            filter="url(#glowPin)"
+            className={c.mine ? "animate-pulse" : undefined}
+          >
+            <circle
+              cx={c.cx}
+              cy={c.cy}
+              r={5}
+              fill="none"
+              stroke={c.glow}
+              strokeWidth={0.45}
+              opacity={0.65}
             />
+            <CityGlyph cx={c.cx} cy={c.cy} fill={c.fill} stroke={c.stroke} />
             <title>{c.name}</title>
           </g>
         ))}

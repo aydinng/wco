@@ -1,5 +1,6 @@
 "use client";
 
+import { formatCountdownSeconds } from "@/lib/format-countdown";
 import { useEffect, useState } from "react";
 
 type Job = {
@@ -10,21 +11,16 @@ type Job = {
   completesAt: string;
 };
 
-function fmtEta(sec: number) {
-  const s = Math.max(0, Math.floor(sec));
-  const m = Math.floor(s / 60);
-  const r = s % 60;
-  return `${m}:${String(r).padStart(2, "0")}`;
-}
-
 export function TrainingQueueBar({
   jobs,
   queueLabel,
   emptyHint,
+  locale,
 }: {
   jobs: Job[];
   queueLabel: string;
   emptyHint: string;
+  locale: string;
 }) {
   const [clock, setClock] = useState(() => Date.now());
 
@@ -63,7 +59,7 @@ export function TrainingQueueBar({
                   {j.unitName}
                 </span>
                 <span className="shrink-0 tabular-nums text-amber-100/90">
-                  {fmtEta(sec)}
+                  {formatCountdownSeconds(sec, locale)}
                 </span>
               </li>
             );

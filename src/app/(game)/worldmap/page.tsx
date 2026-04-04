@@ -1,5 +1,9 @@
 import { FleetSendForm } from "@/components/game/FleetSendForm";
-import { WorldMap2D, type MapCityPoint } from "@/components/game/WorldMap2D";
+import {
+  WorldMap2D,
+  type MapCityPoint,
+  type MapMarkerKind,
+} from "@/components/game/WorldMap2D";
 import { getDictionary } from "@/i18n/dictionaries";
 import { getCurrentUser } from "@/lib/current-user";
 import { getLocale } from "@/lib/locale";
@@ -26,17 +30,37 @@ export default async function WorldmapPage() {
     orderBy: { name: "asc" },
   });
 
+  const userIds = [...new Set(rows.map((r) => r.userId))];
+  const memberships = await prisma.allianceMember.findMany({
+    where: { userId: { in: userIds } },
+    select: { userId: true, allianceId: true },
+  });
+  const allianceByUser = new Map(
+    memberships.map((m) => [m.userId, m.allianceId]),
+  );
+  const myAllianceId = me?.allianceMember?.allianceId ?? null;
+
   const coordBounds = computeWorldCoordBounds(rows);
 
-  const points: MapCityPoint[] = rows.map((c) => ({
-    id: c.id,
-    x: c.coordX,
-    y: c.coordY,
-    name: c.name,
-    owner: c.user.username,
-    tribe: c.user.tribeName,
-    isMine: me?.id === c.userId,
-  }));
+  const points: MapCityPoint[] = rows.map((c) => {
+    let marker: MapMarkerKind = "neutral";
+    if (me?.id === c.userId) marker = "me";
+    else if (
+      myAllianceId &&
+      allianceByUser.get(c.userId) === myAllianceId
+    ) {
+      marker = "ally";
+    }
+    return {
+      id: c.id,
+      x: c.coordX,
+      y: c.coordY,
+      name: c.name,
+      owner: c.user.username,
+      tribe: c.user.tribeName,
+      marker,
+    };
+  });
 
   const exampleDist = 40;
   const ex1 = fleetTravelSecondsOneWay(exampleDist);
@@ -53,8 +77,11 @@ export default async function WorldmapPage() {
       ? `Visible X: ${Math.round(coordBounds.minX)}…${Math.round(coordBounds.maxX)} (span ${spanX}), Y: ${Math.round(coordBounds.minY)}…${Math.round(coordBounds.maxY)} (span ${spanY}). Cities: ${rows.length}.`
       : `Görünen X: ${Math.round(coordBounds.minX)}…${Math.round(coordBounds.maxX)} (aralık ${spanX}), Y: ${Math.round(coordBounds.minY)}…${Math.round(coordBounds.maxY)} (aralık ${spanY}). Şehir: ${rows.length}.`;
 
+  const legendAlly =
+    locale === "en" ? "Alliance (same alliance)" : "İttifak (aynı ittifak)";
+
   return (
-    <div className="rounded-xl border border-amber-800/40 bg-gradient-to-br from-slate-900/65 via-amber-950/20 to-emerald-950/25 p-4 shadow-lg backdrop-blur-sm sm:p-6">
+    <div className="mx-auto max-w-[min(1600px,100%)] rounded-xl border border-amber-800/40 bg-gradient-to-br from-slate-900/65 via-amber-950/20 to-emerald-950/25 p-4 shadow-lg backdrop-blur-sm sm:p-6">
       <h2
         className="mb-2 text-xl text-amber-100"
         style={{ fontFamily: "var(--font-warcity), serif" }}
@@ -74,6 +101,7 @@ export default async function WorldmapPage() {
           coordBounds={coordBounds}
           legendYou={p.worldmapLegendYou}
           legendOther={p.worldmapLegendOther}
+          legendAlly={legendAlly}
           planeHint={`${p.worldmapPlaneHint} ${boundsLine}`}
           footerExtra={travelFooter}
         />
