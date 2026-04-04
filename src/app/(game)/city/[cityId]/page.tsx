@@ -137,6 +137,7 @@ export default async function CityDetailPage({
                       unlocks={unlocks}
                       play={p}
                       locale={locale}
+                      researchTier={user.researchTier}
                     />
                   ))}
                 </div>

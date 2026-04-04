@@ -35,14 +35,18 @@ export function scaledDurationSec(opts: {
   return Math.min(opts.maxSec, Math.max(1, Math.ceil(t)));
 }
 
-/** Bina türüne göre taban süre (saniye) — erken oyun kısa, üst seviye K ile uzar */
+/**
+ * Bina türüne göre taban süre (saniye, 1. seviye hedefi).
+ * Oran: köy merkezi > asker > petrol > demir > taş/odun > avcı/tarla (besin).
+ * Üst seviye K ve araştırma bonusu ile ölçeklenir.
+ */
 export const BUILDING_DURATION_BASE_SEC: Record<string, number> = {
-  townHall: 100,
-  lumberMill: 75,
-  ironMine: 85,
-  oilWell: 95,
-  farm: 70,
-  barracks: 90,
+  townHall: 280,
+  lumberMill: 160,
+  ironMine: 200,
+  oilWell: 220,
+  farm: 140,
+  barracks: 240,
 };
 
 export function buildingUpgradeDurationSec(opts: {

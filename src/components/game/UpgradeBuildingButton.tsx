@@ -8,6 +8,7 @@ import type { ResourceUnlocks } from "@/config/eras";
 import { ResourceIcon } from "@/components/game/ResourceIcon";
 import { getUpgradeCost, MAX_BUILDING_LEVEL } from "@/lib/economy";
 import type { AppLocale } from "@/lib/locale";
+import { formatCountdownSeconds } from "@/lib/format-countdown";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -25,6 +26,10 @@ type Props = {
     oil: string;
     food: string;
   };
+  /** Bir sonraki yükseltme süresi (saniye); yoksa süre satırı gösterilmez */
+  durationSec?: number;
+  /** Örn. "Süre:" */
+  timeLabel: string;
 };
 
 export function UpgradeBuildingButton({
@@ -36,6 +41,8 @@ export function UpgradeBuildingButton({
   unlocks,
   locale,
   resourceLabels,
+  durationSec,
+  timeLabel,
 }: Props) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
@@ -58,16 +65,17 @@ export function UpgradeBuildingButton({
   }
 
   return (
-    <div className="flex flex-col items-end gap-1">
-      <div className="flex flex-wrap items-center justify-end gap-2">
-        <button
-          type="button"
-          disabled={busy || maxed}
-          onClick={onClick}
-          className="shrink-0 rounded border border-amber-900/50 bg-amber-950/40 px-2 py-1 text-xs text-amber-100 hover:bg-amber-900/50 disabled:opacity-40"
-        >
-          {maxed ? (tr ? "ÜST" : "MAX") : actionLabel}
-        </button>
+    <div className="flex w-full min-w-0 flex-col gap-2">
+      {!maxed && durationSec != null && durationSec > 0 ? (
+        <p className="text-[10px] leading-snug text-zinc-400">
+          <span className="text-cyan-400">{timeLabel}</span>{" "}
+          <span className="font-semibold tabular-nums text-zinc-100">
+            {formatCountdownSeconds(durationSec, locale)}
+          </span>
+        </p>
+      ) : null}
+
+      <div className="flex flex-wrap items-center justify-end gap-x-3 gap-y-1.5">
         {!maxed && (
           <span className="flex flex-wrap items-center justify-end gap-x-2 gap-y-0.5 text-[10px] font-medium leading-snug text-zinc-200">
             <span className="inline-flex items-center gap-0.5">
@@ -92,8 +100,20 @@ export function UpgradeBuildingButton({
             </span>
           </span>
         )}
+        <button
+          type="button"
+          disabled={busy || maxed}
+          onClick={onClick}
+          className="shrink-0 rounded border border-amber-900/50 bg-amber-950/40 px-2 py-1 text-xs text-amber-100 hover:bg-amber-900/50 disabled:opacity-40"
+        >
+          {maxed ? (tr ? "ÜST" : "MAX") : actionLabel}
+        </button>
       </div>
-      {err ? <span className="max-w-[14rem] text-right text-[10px] text-red-400">{err}</span> : null}
+      {err ? (
+        <span className="max-w-[20rem] text-right text-[10px] text-red-400">
+          {err}
+        </span>
+      ) : null}
     </div>
   );
 }

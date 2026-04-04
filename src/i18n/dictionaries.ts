@@ -284,6 +284,9 @@ export type Dictionary = {
     errInvalidAmount: string;
     errBuildingLocked: string;
     errBuildBusy: string;
+    errBuildQueueFull: string;
+    buildingQueueHeading: string;
+    buildingQueueEmpty: string;
     errResearchMax: string;
     errResearchBusy: string;
     errUnitEraLocked: string;
@@ -663,6 +666,10 @@ const tr: Dictionary = {
     errInvalidAmount: "Geçersiz miktar",
     errBuildingLocked: "Bu çağda bu bina yok",
     errBuildBusy: "Bu şehirde yükseltme zaten devam ediyor.",
+    errBuildQueueFull:
+      "Aynı anda en fazla 2 bina yükseltmesi sıraya alınabilir; biri bitsin veya bekleyin.",
+    buildingQueueHeading: "Bina kuyruğu (en fazla 2)",
+    buildingQueueEmpty: "Kuyrukta bina yükseltmesi yok.",
     errResearchMax: "Araştırma maksimum",
     errResearchBusy: "Zaten bir araştırma sürüyor; bitene kadar bekleyin.",
     errUnitEraLocked: "Bu birim henüz çağınızda değil.",
@@ -1043,6 +1050,10 @@ const en: Dictionary = {
     errInvalidAmount: "Invalid amount",
     errBuildingLocked: "This building is not available in your age",
     errBuildBusy: "A building upgrade is already in progress in this city.",
+    errBuildQueueFull:
+      "You can queue at most 2 building upgrades at once; wait for one to finish.",
+    buildingQueueHeading: "Building queue (max 2)",
+    buildingQueueEmpty: "No building upgrades in the queue.",
     errResearchMax: "Research is at maximum",
     errResearchBusy: "Research is already in progress; wait until it finishes.",
     errUnitEraLocked: "This unit is not available in your age yet.",

@@ -1,5 +1,8 @@
 import { BuildingCatalogCard } from "@/components/game/BuildingCatalogCard";
-import { BuildingsNextJobCountdown } from "@/components/game/BuildingsNextJobCountdown";
+import {
+  BuildingJobsQueue,
+  type BuildingJobQueueItem,
+} from "@/components/game/BuildingJobsQueue";
 import { ERA_BUILDING_CATALOG } from "@/config/building-catalog";
 import {
   ERA_ORDER,
@@ -39,11 +42,19 @@ export default async function BuildingsPage() {
     );
   }
 
-  const nextBuild = await prisma.buildingJob.findFirst({
+  const rawJobs = await prisma.buildingJob.findMany({
     where: { userId: user.id, status: "queued" },
     orderBy: { completesAt: "asc" },
-    select: { completesAt: true },
+    take: 2,
+    include: { city: { select: { name: true } } },
   });
+  const buildingQueueItems: BuildingJobQueueItem[] = rawJobs.map((j) => ({
+    id: j.id,
+    completesAtIso: j.completesAt.toISOString(),
+    cityName: j.city.name,
+    buildingId: j.buildingId,
+    toLevel: j.toLevel,
+  }));
 
   return (
     <div className="rounded border border-[#2a3441]/90 bg-black/35 p-4 backdrop-blur-sm">
@@ -53,14 +64,11 @@ export default async function BuildingsPage() {
       >
         {p.buildingsTitle}
       </h2>
-      <BuildingsNextJobCountdown
-        completesAtIso={nextBuild?.completesAt.toISOString() ?? null}
+      <BuildingJobsQueue
+        jobs={buildingQueueItems}
         locale={locale}
-        labelBusy={
-          locale === "en"
-            ? "Next building upgrade completes in"
-            : "Sonraki bina yükseltmesi"
-        }
+        heading={p.buildingQueueHeading}
+        emptyLabel={p.buildingQueueEmpty}
       />
       <div className="space-y-12">
         {ERA_ORDER.map((eraId) => {
@@ -122,6 +130,7 @@ export default async function BuildingsPage() {
                       unlocks={unlocks}
                       play={p}
                       locale={locale}
+                      researchTier={user.researchTier}
                     />
                   ))}
                 </div>
