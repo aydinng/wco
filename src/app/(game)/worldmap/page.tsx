@@ -1,5 +1,8 @@
 import { FleetSendForm } from "@/components/game/FleetSendForm";
+import { StrategicWorldMap } from "@/components/game/StrategicWorldMap";
 import { WorldMap2D, type MapCityPoint } from "@/components/game/WorldMap2D";
+import type { StrategicWorldMapData } from "@/config/strategic-world-map.types";
+import strategicWorldMapData from "@/data/strategic-world-map.json";
 import { getDictionary } from "@/i18n/dictionaries";
 import { getCurrentUser } from "@/lib/current-user";
 import { getLocale } from "@/lib/locale";
@@ -20,6 +23,8 @@ export default async function WorldmapPage() {
     },
     orderBy: { name: "asc" },
   });
+
+  const strategicData = strategicWorldMapData as unknown as StrategicWorldMapData;
 
   const points: MapCityPoint[] = rows.map((c) => ({
     id: c.id,
@@ -43,6 +48,18 @@ export default async function WorldmapPage() {
         {p.worldmapIntro}
       </p>
       <p className="mb-4 text-xs text-zinc-400">{p.worldmapNoTileMap}</p>
+
+      <div className="mb-8">
+        <StrategicWorldMap
+          data={strategicData}
+          locale={locale === "en" ? "en" : "tr"}
+        />
+        <p className="mt-2 text-[11px] text-zinc-500">
+          {locale === "en"
+            ? "Draft strategic layer — factions, chokepoints, energy basins, tech hubs, and logistics routes are data-driven (JSON)."
+            : "Taslak stratejik katman — bloklar, dar geçitler, enerji havzaları, teknoloji üsleri ve lojistik hatlar JSON verisinden beslenir."}
+        </p>
+      </div>
 
       <h3 className="mb-2 text-sm font-semibold text-amber-200/90">
         {p.worldmapAllPlayers}
