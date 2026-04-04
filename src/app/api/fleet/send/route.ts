@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import { getDictionary } from "@/i18n/dictionaries";
 import { getLocale } from "@/lib/locale";
+import { fleetTravelMsOneWay, manhattan3D } from "@/lib/map-travel";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
@@ -14,18 +15,6 @@ type Body = {
   defenderDefense: number;
 };
 
-function travelMs(
-  ax: number,
-  ay: number,
-  az: number,
-  bx: number,
-  by: number,
-  bz: number,
-) {
-  const d =
-    Math.abs(ax - bx) + Math.abs(ay - by) + Math.abs(az - bz);
-  return Math.max(5_000, d * 3_000);
-}
 
 export async function POST(req: Request) {
   try {
@@ -72,7 +61,7 @@ export async function POST(req: Request) {
     }
 
     const departAt = new Date();
-    const ms = travelMs(
+    const d = manhattan3D(
       city.coordX,
       city.coordY,
       city.coordZ,
@@ -80,6 +69,7 @@ export async function POST(req: Request) {
       toCoordY,
       toCoordZ,
     );
+    const ms = fleetTravelMsOneWay(d);
     const arriveAt = new Date(departAt.getTime() + ms);
 
     const won = attackPower > defenderDefense;

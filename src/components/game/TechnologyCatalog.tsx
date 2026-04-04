@@ -5,14 +5,15 @@ import { ERA_ORDER, getEraConfig, getEraDisplayName } from "@/config/eras";
 import type { Dictionary } from "@/i18n/dictionaries";
 import type { AppLocale } from "@/lib/locale";
 
+const MAX_ERA_TECH_QUEUE = 2;
+
 type Props = {
   locale: AppLocale;
   play: Dictionary["play"];
-  researchJobEndsAtIso?: string | null;
   currentEra: string;
   defaultCityId: string;
   eraTechLevels: Record<string, number>;
-  activeEraTechJob: { techKey: string; completesAt: string } | null;
+  activeEraTechJobs: { techKey: string; completesAt: string }[];
 };
 
 function groupByEra(
@@ -45,16 +46,11 @@ function groupByEra(
 export function TechnologyCatalog({
   locale,
   play,
-  researchJobEndsAtIso,
   currentEra,
   defaultCityId,
   eraTechLevels,
-  activeEraTechJob,
+  activeEraTechJobs,
 }: Props) {
-  const researchBusy =
-    researchJobEndsAtIso &&
-    new Date(researchJobEndsAtIso).getTime() > Date.now();
-
   const sections = groupByEra(TECH_CATALOG, locale);
 
   return (
@@ -69,13 +65,11 @@ export function TechnologyCatalog({
         <h3 className="text-center text-base font-semibold text-amber-200/90">
           {play.techCatalogTitle}
         </h3>
-        {researchBusy && (
-          <p className="mt-1 text-center text-xs font-medium text-amber-300/95">
-            {locale === "en"
-              ? "Empire research in progress — tier advances on schedule."
-              : "İmparatorluk araştırması sürüyor — seviye süreyle ilerler."}
-          </p>
-        )}
+        <p className="mt-1 text-center text-xs text-zinc-500">
+          {locale === "en"
+            ? `Age technologies: up to ${MAX_ERA_TECH_QUEUE} parallel research slots.`
+            : `Çağ teknolojileri: en fazla ${MAX_ERA_TECH_QUEUE} paralel araştırma.`}
+        </p>
       </div>
 
       <div className="w-full">
@@ -96,7 +90,8 @@ export function TechnologyCatalog({
                   playerEra={currentEra}
                   cityId={defaultCityId}
                   level={eraTechLevels[entry.id] ?? 0}
-                  activeJob={activeEraTechJob}
+                  activeJobs={activeEraTechJobs}
+                  maxQueue={MAX_ERA_TECH_QUEUE}
                 />
               ))}
             </div>

@@ -3,32 +3,15 @@ import { WorldMap2D, type MapCityPoint } from "@/components/game/WorldMap2D";
 import { getDictionary } from "@/i18n/dictionaries";
 import { getCurrentUser } from "@/lib/current-user";
 import { getLocale } from "@/lib/locale";
+import { fleetTravelSecondsOneWay, formatTravelHms } from "@/lib/map-travel";
 import { prisma } from "@/lib/prisma";
+import {
+  computeWorldCoordBounds,
+  WORLD_COORD_HINT_MAX,
+} from "@/lib/world-map-bounds";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
-
-function coordBoundsFromRows(
-  rows: { coordX: number; coordY: number }[],
-): { minX: number; maxX: number; minY: number; maxY: number } {
-  if (rows.length === 0) {
-    return { minX: 0, maxX: 1, minY: 0, maxY: 1 };
-  }
-  let minX = Infinity;
-  let maxX = -Infinity;
-  let minY = Infinity;
-  let maxY = -Infinity;
-  for (const c of rows) {
-    minX = Math.min(minX, c.coordX);
-    maxX = Math.max(maxX, c.coordX);
-    minY = Math.min(minY, c.coordY);
-    maxY = Math.max(maxY, c.coordY);
-  }
-  if (!Number.isFinite(minX)) {
-    return { minX: 0, maxX: 1, minY: 0, maxY: 1 };
-  }
-  return { minX, maxX, minY, maxY };
-}
 
 export default async function WorldmapPage() {
   const locale = await getLocale();
@@ -43,7 +26,7 @@ export default async function WorldmapPage() {
     orderBy: { name: "asc" },
   });
 
-  const coordBounds = coordBoundsFromRows(rows);
+  const coordBounds = computeWorldCoordBounds(rows);
 
   const points: MapCityPoint[] = rows.map((c) => ({
     id: c.id,
@@ -54,6 +37,21 @@ export default async function WorldmapPage() {
     tribe: c.user.tribeName,
     isMine: me?.id === c.userId,
   }));
+
+  const exampleDist = 40;
+  const ex1 = fleetTravelSecondsOneWay(exampleDist);
+  const exRound = ex1 * 2;
+  const travelFooter =
+    locale === "en"
+      ? `War travel: Manhattan distance D = |ΔX|+|ΔY|+|ΔZ|. One-way time = max(5 s, D×3 s). Example D=${exampleDist}: one way ${formatTravelHms(ex1, "en")}, round trip ${formatTravelHms(exRound, "en")}. Map view expands with settlements (design headroom ~30k players; soft coord hint ±${WORLD_COORD_HINT_MAX}).`
+      : `Savaş süresi: Manhattan mesafe D = |ΔX|+|ΔY|+|ΔZ|. Tek yön = max(5 sn, D×3 sn). Örnek D=${exampleDist}: gidiş ${formatTravelHms(ex1, "tr")}, gidiş-dönüş ${formatTravelHms(exRound, "tr")}. Harita görünümü yerleşimlere göre genişir (tasarım ~30k oyuncu; koordinat ipucu ±${WORLD_COORD_HINT_MAX}).`;
+
+  const spanX = Math.round(coordBounds.maxX - coordBounds.minX);
+  const spanY = Math.round(coordBounds.maxY - coordBounds.minY);
+  const boundsLine =
+    locale === "en"
+      ? `Visible X: ${Math.round(coordBounds.minX)}…${Math.round(coordBounds.maxX)} (span ${spanX}), Y: ${Math.round(coordBounds.minY)}…${Math.round(coordBounds.maxY)} (span ${spanY}). Cities: ${rows.length}.`
+      : `Görünen X: ${Math.round(coordBounds.minX)}…${Math.round(coordBounds.maxX)} (aralık ${spanX}), Y: ${Math.round(coordBounds.minY)}…${Math.round(coordBounds.maxY)} (aralık ${spanY}). Şehir: ${rows.length}.`;
 
   return (
     <div className="rounded-xl border border-amber-800/40 bg-gradient-to-br from-slate-900/65 via-amber-950/20 to-emerald-950/25 p-4 shadow-lg backdrop-blur-sm sm:p-6">
@@ -76,7 +74,8 @@ export default async function WorldmapPage() {
           coordBounds={coordBounds}
           legendYou={p.worldmapLegendYou}
           legendOther={p.worldmapLegendOther}
-          planeHint={p.worldmapPlaneHint}
+          planeHint={`${p.worldmapPlaneHint} ${boundsLine}`}
+          footerExtra={travelFooter}
         />
       ) : (
         <p className="text-sm text-zinc-500">{p.worldmapNoCities}</p>

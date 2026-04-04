@@ -1,6 +1,8 @@
 import { FoundCityForm } from "@/components/game/FoundCityForm";
 import { ResearchAdvanceForm } from "@/components/game/ResearchAdvanceForm";
+import { ResearchStatusStrip } from "@/components/game/ResearchStatusStrip";
 import { TechnologyCatalog } from "@/components/game/TechnologyCatalog";
+import { getTechByKey } from "@/config/technology-catalog";
 import { getDictionary } from "@/i18n/dictionaries";
 import { canFoundCity } from "@/lib/found-city";
 import { MAX_RESEARCH_TIER } from "@/lib/economy";
@@ -9,6 +11,8 @@ import { getLocale } from "@/lib/locale";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
+
+const MAX_ERA_QUEUE = 2;
 
 export default async function ResearchPage() {
   const locale = await getLocale();
@@ -19,28 +23,41 @@ export default async function ResearchPage() {
   const tier = user?.researchTier ?? 0;
   const canFound = user ? canFoundCity(user.currentEra, tier) : false;
 
-  const [eraTechRows, eraJob] =
+  const [eraTechRows, eraJobList] =
     user && cities.length > 0
       ? await Promise.all([
           prisma.userEraTech.findMany({
             where: { userId: user.id },
           }),
-          prisma.eraTechResearchJob.findFirst({
+          prisma.eraTechResearchJob.findMany({
             where: { userId: user.id, status: "queued" },
             orderBy: { completesAt: "asc" },
+            take: MAX_ERA_QUEUE,
           }),
         ])
-      : [[], null];
+      : [[], []];
 
   const eraTechLevels = Object.fromEntries(
     eraTechRows.map((r) => [r.techKey, r.level]),
   );
-  const activeEraTechJob = eraJob
-    ? {
-        techKey: eraJob.techKey,
-        completesAt: eraJob.completesAt.toISOString(),
-      }
-    : null;
+  const activeEraTechJobs = eraJobList.map((j) => ({
+    techKey: j.techKey,
+    completesAt: j.completesAt.toISOString(),
+  }));
+
+  const eraJobsForStrip = eraJobList.map((j) => {
+    const spec = getTechByKey(j.techKey);
+    const name =
+      locale === "en"
+        ? spec?.nameEn ?? j.techKey
+        : spec?.nameTr ?? j.techKey;
+    return {
+      techKey: j.techKey,
+      completesAt: j.completesAt.toISOString(),
+      name,
+    };
+  });
+
   const defaultCityId = cities[0]?.id ?? "";
 
   if (!user || cities.length === 0) {
@@ -53,14 +70,20 @@ export default async function ResearchPage() {
 
   return (
     <div className="rounded border border-[#2a3441]/90 bg-black/35 p-4 backdrop-blur-sm">
+      <ResearchStatusStrip
+        locale={locale}
+        researchJobEndsAtIso={user.researchJobEndsAt?.toISOString() ?? null}
+        eraJobs={eraJobsForStrip}
+        maxEraQueue={MAX_ERA_QUEUE}
+      />
+
       <TechnologyCatalog
         locale={locale}
         play={p}
-        researchJobEndsAtIso={user.researchJobEndsAt?.toISOString() ?? null}
         currentEra={user.currentEra}
         defaultCityId={defaultCityId}
         eraTechLevels={eraTechLevels}
-        activeEraTechJob={activeEraTechJob}
+        activeEraTechJobs={activeEraTechJobs}
       />
       <div className="mt-4 border-t border-zinc-700/50 pt-4">
         <ResearchAdvanceForm

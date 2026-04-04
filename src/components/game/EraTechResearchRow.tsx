@@ -2,6 +2,12 @@
 
 import { startEraTechResearch } from "@/app/actions/era-tech";
 import { CatalogFieldLine } from "@/components/game/CatalogGameRow";
+import {
+  CATALOG_MIDDLE_COL,
+  CATALOG_NAME_COL,
+  CATALOG_ROW_GRID_TECH,
+  CATALOG_TITLE_YELLOW,
+} from "@/components/game/catalog-layout";
 import type { TechCatalogEntry } from "@/config/technology-catalog";
 import {
   eraTechResearchCost,
@@ -29,7 +35,8 @@ type Props = {
   playerEra: string;
   cityId: string;
   level: number;
-  activeJob: { techKey: string; completesAt: string } | null;
+  activeJobs: { techKey: string; completesAt: string }[];
+  maxQueue: number;
 };
 
 export function EraTechResearchRow({
@@ -39,7 +46,8 @@ export function EraTechResearchRow({
   playerEra,
   cityId,
   level,
-  activeJob,
+  activeJobs,
+  maxQueue,
 }: Props) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
@@ -61,12 +69,9 @@ export function EraTechResearchRow({
   const goal = locale === "en" ? entry.goalEn : entry.goalTr;
   const ageStr = String(entry.eraOrdinal);
 
-  const thisJob =
-    activeJob?.techKey === entry.id
-      ? activeJob
-      : null;
-  const otherJob =
-    activeJob && activeJob.techKey !== entry.id ? activeJob : null;
+  const thisJob = activeJobs.find((j) => j.techKey === entry.id) ?? null;
+  const queueFull =
+    activeJobs.length >= maxQueue && !thisJob;
 
   const etaSec = thisJob
     ? Math.max(
@@ -90,14 +95,10 @@ export function EraTechResearchRow({
   }
 
   const labels = {
-    research:
-      locale === "en" ? "Research" : "Araştır",
-    done:
-      locale === "en" ? "Completed" : "Tamamlandı",
-    locked:
-      locale === "en" ? "Locked" : "Kilitli",
-    queued:
-      locale === "en" ? "Queue busy" : "Kuyruk dolu",
+    research: locale === "en" ? "Research" : "Araştır",
+    done: locale === "en" ? "Completed" : "Tamamlandı",
+    locked: locale === "en" ? "Locked" : "Kilitli",
+    queued: locale === "en" ? "Queue full" : "Kuyruk dolu",
     cost:
       locale === "en"
         ? `Cost: ${cost.wood} W · ${cost.iron} I · ${cost.oil} O · ${cost.food} F`
@@ -117,7 +118,7 @@ export function EraTechResearchRow({
         {labels.done}
       </span>
     );
-  } else if (otherJob) {
+  } else if (queueFull) {
     button = (
       <span className="rounded border border-amber-800/60 bg-black/40 px-3 py-2 text-center text-xs text-zinc-500">
         {labels.queued}
@@ -153,13 +154,13 @@ export function EraTechResearchRow({
       style={{ fontFamily: "var(--font-warcity), serif" }}
     >
       <div
-        className="flex w-full flex-col gap-3 px-2 py-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4 sm:px-3"
+        className={CATALOG_ROW_GRID_TECH}
         style={{
           background:
             "linear-gradient(90deg, rgba(61,46,26,0.92) 0%, rgba(26,21,16,0.88) 45%, rgba(0,0,0,0.96) 100%)",
         }}
       >
-        <div className="flex shrink-0 items-center gap-3">
+        <div className={CATALOG_NAME_COL}>
           <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-md border border-blue-950/50 bg-black/50">
             <Image
               src={entry.imageSrc}
@@ -169,12 +170,10 @@ export function EraTechResearchRow({
               sizes="56px"
             />
           </div>
-          <span className="max-w-[12rem] text-center text-sm font-semibold leading-tight text-yellow-300 drop-shadow sm:text-base">
-            {name}
-          </span>
+          <span className={CATALOG_TITLE_YELLOW}>{name}</span>
         </div>
 
-        <div className="flex min-h-[5.5rem] min-w-[min(100%,240px)] flex-1 flex-col justify-center gap-1.5 text-sm leading-snug sm:min-w-[220px] sm:text-[15px]">
+        <div className={CATALOG_MIDDLE_COL}>
           <CatalogFieldLine
             label={play.catalogFieldTime}
             value={durLabel}
@@ -201,7 +200,7 @@ export function EraTechResearchRow({
           />
         </div>
 
-        <div className="flex min-w-0 flex-1 flex-col items-center justify-center gap-2 sm:flex-[0.6]">
+        <div className="flex min-w-0 flex-col items-center justify-center gap-2">
           {button}
           {!lockedByEra && !done ? (
             <p className="max-w-[18rem] text-center text-[11px] leading-tight text-zinc-500">

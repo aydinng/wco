@@ -49,11 +49,15 @@ export async function startEraTechResearch(
     return { ok: false, error: "Bu teknoloji zaten tamamlandı." };
   }
 
-  const active = await prisma.eraTechResearchJob.findFirst({
+  const MAX_ERA_TECH_QUEUE = 2;
+  const queuedCount = await prisma.eraTechResearchJob.count({
     where: { userId, status: "queued" },
   });
-  if (active) {
-    return { ok: false, error: "Zaten bir çağ teknolojisi araştırması sürüyor." };
+  if (queuedCount >= MAX_ERA_TECH_QUEUE) {
+    return {
+      ok: false,
+      error: `Çağ teknolojisi kuyruğu dolu (en fazla ${MAX_ERA_TECH_QUEUE}).`,
+    };
   }
 
   const unlocks = getResourceUnlocks(user.currentEra);

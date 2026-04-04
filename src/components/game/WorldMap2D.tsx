@@ -25,6 +25,8 @@ type Props = {
   legendOther: string;
   planeHint: string;
   coordBounds: CoordBounds;
+  /** Seyahat / ölçek bilgisi */
+  footerExtra?: string;
 };
 
 /** Modern uydu / taktik görünüm: koordinat ızgarası ve sektör hissi. */
@@ -34,6 +36,7 @@ export function WorldMap2D({
   legendOther,
   planeHint,
   coordBounds,
+  footerExtra,
 }: Props) {
   const { circles, sectorLabels } = useMemo(() => {
     if (points.length === 0) {
@@ -181,6 +184,11 @@ export function WorldMap2D({
       <p className="mt-2 text-center text-[11px] leading-snug text-slate-400">
         {planeHint}
       </p>
+      {footerExtra ? (
+        <p className="mt-2 border-t border-slate-700/50 pt-2 text-center text-[11px] leading-relaxed text-slate-500">
+          {footerExtra}
+        </p>
+      ) : null}
     </div>
   );
 }

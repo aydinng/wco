@@ -1,4 +1,11 @@
 import { CatalogFieldLine } from "@/components/game/CatalogGameRow";
+import {
+  CATALOG_MIDDLE_COL,
+  CATALOG_NAME_COL,
+  CATALOG_ROW_GRID_UNITS,
+  CATALOG_STATS_COL,
+  CATALOG_TITLE_YELLOW,
+} from "@/components/game/catalog-layout";
 import { UnitTrainRow } from "@/components/game/UnitTrainRow";
 import {
   ERA_ORDER,
@@ -90,13 +97,13 @@ export function UnitCatalog({
                   style={{ fontFamily: "var(--font-warcity), serif" }}
                 >
                   <div
-                    className="flex w-full flex-col gap-3 px-2 py-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4 sm:px-3"
+                    className={CATALOG_ROW_GRID_UNITS}
                     style={{
                       background:
                         "linear-gradient(90deg, rgba(61,46,26,0.92) 0%, rgba(26,21,16,0.88) 45%, rgba(0,0,0,0.96) 100%)",
                     }}
                   >
-                    <div className="flex shrink-0 items-center gap-3">
+                    <div className={CATALOG_NAME_COL}>
                       <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-md border border-blue-950/50 bg-black/50">
                         <Image
                           src={u.imageSrc}
@@ -106,13 +113,11 @@ export function UnitCatalog({
                           sizes="56px"
                         />
                       </div>
-                      <span className="max-w-[10rem] text-sm font-semibold leading-tight text-yellow-300 drop-shadow sm:text-base">
-                        {u.name}
-                      </span>
+                      <span className={CATALOG_TITLE_YELLOW}>{u.name}</span>
                     </div>
 
-                    <div className="flex min-h-[5.5rem] min-w-[min(100%,220px)] flex-1 flex-col justify-center sm:min-w-[200px]">
-                      <div className="flex flex-col gap-1 text-sm leading-snug text-zinc-100/95 sm:text-[15px]">
+                    <div className={CATALOG_MIDDLE_COL}>
+                      <div className="flex flex-col gap-1 text-zinc-100/95">
                         <CatalogFieldLine
                           label={play.catalogFieldTime}
                           value={fmtDuration(u.trainSeconds)}
@@ -128,7 +133,7 @@ export function UnitCatalog({
                       </div>
                     </div>
 
-                    <div className="min-w-[140px] shrink-0 sm:min-w-[160px]">
+                    <div className={CATALOG_STATS_COL}>
                       <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-sm text-white sm:text-[15px]">
                         <span className="text-cyan-300">
                           {play.catalogStatAttack}
@@ -149,7 +154,7 @@ export function UnitCatalog({
                       </div>
                     </div>
 
-                    <div className="flex shrink-0 justify-end sm:ml-auto">
+                    <div className="flex shrink-0 justify-center sm:justify-end">
                       <UnitTrainRow
                         cityId={cityId}
                         unitId={u.id}
