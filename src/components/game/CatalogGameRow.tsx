@@ -49,8 +49,8 @@ export function CatalogGameRow({
   const inner = (
     <div
       className={[
-        "mx-auto flex flex-row items-start gap-2 px-2 py-1.5 sm:gap-3 sm:px-3",
-        fullWidth ? "w-full max-w-none" : "max-w-[min(100%,42rem)]",
+        "mx-auto flex flex-row flex-wrap items-start gap-2 px-2 py-1.5 sm:gap-3 sm:px-3",
+        fullWidth ? "w-full max-w-none justify-center" : "max-w-[min(100%,42rem)]",
       ].join(" ")}
       style={{
         background:
@@ -69,14 +69,14 @@ export function CatalogGameRow({
 
       {orderBadge != null ? (
         <>
-          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+          <div className="flex w-full shrink-0 flex-wrap items-center justify-center gap-1.5 sm:gap-2">
             <span
               className="min-w-[1.5rem] tabular-nums text-center text-xl font-bold leading-none text-amber-300 drop-shadow sm:text-2xl"
               aria-hidden
             >
               {orderBadge}
             </span>
-            <h4 className="line-clamp-2 max-w-[min(100%,14rem)] text-xs font-semibold leading-tight text-yellow-300 drop-shadow-sm sm:max-w-[18rem] sm:text-sm">
+            <h4 className="line-clamp-2 max-w-[min(100%,14rem)] text-center text-xs font-semibold leading-tight text-yellow-300 drop-shadow-sm sm:max-w-[18rem] sm:text-sm">
               {title}
             </h4>
           </div>
@@ -127,14 +127,19 @@ export function CatalogFieldLine({
   label,
   value,
   valueClassName,
+  labelClassName,
 }: {
   label: string;
   value: string;
   valueClassName?: string;
+  /** Varsayılan: cyan etiket (birimler); teknolojide sky kullanılabilir */
+  labelClassName?: string;
 }) {
   return (
     <span className="inline-flex max-w-full flex-wrap items-baseline gap-x-1">
-      <span className="shrink-0 text-cyan-400">{label}</span>
+      <span className={`shrink-0 ${labelClassName ?? "text-cyan-400"}`}>
+        {label}
+      </span>
       <span
         className={`min-w-0 break-words text-white ${valueClassName ?? ""}`}
       >

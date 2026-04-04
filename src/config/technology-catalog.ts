@@ -3,20 +3,23 @@
  * Seviye 1 süresi: kısa süreler (<1 saat) için ref/tier; uzunlar için ref/tier²; üst sınır 48 saat.
  */
 export type TechCatalogEntry = {
+  id: string;
   eraOrdinal: number;
   tier: number;
   nameTr: string;
   nameEn: string;
   durationTr: string;
   durationEn: string;
+  /** Sunucu işi için saniye */
+  durationSec: number;
   goalTr: string;
   goalEn: string;
-  /** Satır küçük görseli; ileride teknoloji bazlı değiştirilebilir */
   imageSrc: string;
 };
 
 /** Referans süre (saniye) ve tier — seviye 1 süresi hesaplanır */
 type RawTech = {
+  id: string;
   eraOrdinal: number;
   tier: number;
   nameTr: string;
@@ -30,7 +33,7 @@ const D = 86400;
 const H = 3600;
 const M = 60;
 
-function level1DurationSec(refSec: number, tier: number): number {
+export function level1DurationSec(refSec: number, tier: number): number {
   if (refSec <= 0) return 0;
   const t = Math.max(1, tier);
   const d = refSec < H ? refSec / t : refSec / (t * t);
@@ -39,7 +42,6 @@ function level1DurationSec(refSec: number, tier: number): number {
   return Math.min(48 * H, Math.max(1, rounded));
 }
 
-/** Her zaman dakika + saniye göster (0 süre: 0m 00s); “Anında” kullanılmaz */
 function fmtTr(sec: number): string {
   const s = Math.max(0, Math.floor(sec));
   const m = Math.floor(s / 60);
@@ -56,6 +58,7 @@ function fmtEn(sec: number): string {
 
 const RAW: RawTech[] = [
   {
+    id: "robotbilim",
     eraOrdinal: 5,
     tier: 11,
     nameTr: "Robotbilim",
@@ -65,6 +68,7 @@ const RAW: RawTech[] = [
     goalEn: "Required for other technologies.",
   },
   {
+    id: "accelerated_decay",
     eraOrdinal: 5,
     tier: 20,
     nameTr: "Hızlandırılmış çürüme",
@@ -74,6 +78,7 @@ const RAW: RawTech[] = [
     goalEn: "Multiplies oil production by 1.6×.",
   },
   {
+    id: "moss_cultivation",
     eraOrdinal: 5,
     tier: 18,
     nameTr: "Yosun yetiştirme",
@@ -83,6 +88,7 @@ const RAW: RawTech[] = [
     goalEn: "Multiplies food production by 1.6×.",
   },
   {
+    id: "season_control",
     eraOrdinal: 5,
     tier: 27,
     nameTr: "Mevsim kontrolü",
@@ -92,6 +98,7 @@ const RAW: RawTech[] = [
     goalEn: "Multiplies wood production by 1.6×.",
   },
   {
+    id: "alloy_processing",
     eraOrdinal: 5,
     tier: 26,
     nameTr: "Alaşım işleme",
@@ -101,6 +108,7 @@ const RAW: RawTech[] = [
     goalEn: "Multiplies iron production by 1.6×.",
   },
   {
+    id: "serial_manufacturing",
     eraOrdinal: 5,
     tier: 10,
     nameTr: "Seri imalat",
@@ -110,6 +118,7 @@ const RAW: RawTech[] = [
     goalEn: "Increases production speed.",
   },
   {
+    id: "food_pill",
     eraOrdinal: 5,
     tier: 20,
     nameTr: "Besin hapı",
@@ -119,6 +128,7 @@ const RAW: RawTech[] = [
     goalEn: "Increases production capacity.",
   },
   {
+    id: "sadelik",
     eraOrdinal: 1,
     tier: 10,
     nameTr: "Sadelik",
@@ -128,6 +138,7 @@ const RAW: RawTech[] = [
     goalEn: "Fleet +1.",
   },
   {
+    id: "orta_cag_unlock",
     eraOrdinal: 1,
     tier: 1,
     nameTr: "Orta çağ",
@@ -137,6 +148,7 @@ const RAW: RawTech[] = [
     goalEn: "New age.",
   },
   {
+    id: "sosyalizm",
     eraOrdinal: 1,
     tier: 21,
     nameTr: "Sosyalizm",
@@ -146,6 +158,7 @@ const RAW: RawTech[] = [
     goalEn: "+0.5 population/hour.",
   },
   {
+    id: "internet",
     eraOrdinal: 4,
     tier: 15,
     nameTr: "İnternet",
@@ -155,6 +168,7 @@ const RAW: RawTech[] = [
     goalEn: "Required for other technologies.",
   },
   {
+    id: "propaganda",
     eraOrdinal: 4,
     tier: 32,
     nameTr: "Propaganda",
@@ -169,10 +183,12 @@ function buildCatalog(): TechCatalogEntry[] {
   return RAW.map((r) => {
     const s = level1DurationSec(r.refSec, r.tier);
     return {
+      id: r.id,
       eraOrdinal: r.eraOrdinal,
       tier: r.tier,
       nameTr: r.nameTr,
       nameEn: r.nameEn,
+      durationSec: s,
       durationTr: fmtTr(s),
       durationEn: fmtEn(s),
       goalTr: r.goalTr,
@@ -182,4 +198,42 @@ function buildCatalog(): TechCatalogEntry[] {
   });
 }
 
-export const TECH_CATALOG: TechCatalogEntry[] = buildCatalog();
+/** Çağ numarasına göre sıralı (1. çağ üstte), sonra tier */
+export function sortTechCatalog(entries: TechCatalogEntry[]): TechCatalogEntry[] {
+  return [...entries].sort((a, b) => {
+    if (a.eraOrdinal !== b.eraOrdinal) return a.eraOrdinal - b.eraOrdinal;
+    return a.tier - b.tier;
+  });
+}
+
+/**
+ * Hammadde maliyeti: çağ ve tier ile ölçeklenir (kitap / klasik strateji hissi).
+ */
+export function eraTechResearchCost(entry: Pick<TechCatalogEntry, "eraOrdinal" | "tier">): {
+  wood: number;
+  iron: number;
+  oil: number;
+  food: number;
+} {
+  const mult = 1 + entry.eraOrdinal * 0.14 + entry.tier * 0.012;
+  return {
+    wood: Math.floor(220 * mult),
+    iron: Math.floor(180 * mult),
+    oil: Math.floor(95 * mult),
+    food: Math.floor(200 * mult),
+  };
+}
+
+const _built = buildCatalog();
+export const TECH_CATALOG: TechCatalogEntry[] = sortTechCatalog(_built);
+
+const BY_KEY = new Map(_built.map((t) => [t.id, t]));
+
+export function getTechByKey(key: string): TechCatalogEntry | undefined {
+  return BY_KEY.get(key);
+}
+
+/** Oyuncu çağı bu teknoloji çağından gerideyse kilitli (ör. 5 → 5. çağ ve üstü) */
+export function requiredEraIndexForTech(eraOrdinal: number): number {
+  return Math.max(0, eraOrdinal - 1);
+}

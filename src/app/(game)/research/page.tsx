@@ -6,6 +6,7 @@ import { canFoundCity } from "@/lib/found-city";
 import { MAX_RESEARCH_TIER } from "@/lib/economy";
 import { getCurrentUser } from "@/lib/current-user";
 import { getLocale } from "@/lib/locale";
+import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +18,30 @@ export default async function ResearchPage() {
   const cities = user?.cities ?? [];
   const tier = user?.researchTier ?? 0;
   const canFound = user ? canFoundCity(user.currentEra, tier) : false;
+
+  const [eraTechRows, eraJob] =
+    user && cities.length > 0
+      ? await Promise.all([
+          prisma.userEraTech.findMany({
+            where: { userId: user.id },
+          }),
+          prisma.eraTechResearchJob.findFirst({
+            where: { userId: user.id, status: "queued" },
+            orderBy: { completesAt: "asc" },
+          }),
+        ])
+      : [[], null];
+
+  const eraTechLevels = Object.fromEntries(
+    eraTechRows.map((r) => [r.techKey, r.level]),
+  );
+  const activeEraTechJob = eraJob
+    ? {
+        techKey: eraJob.techKey,
+        completesAt: eraJob.completesAt.toISOString(),
+      }
+    : null;
+  const defaultCityId = cities[0]?.id ?? "";
 
   if (!user || cities.length === 0) {
     return (
@@ -32,6 +57,10 @@ export default async function ResearchPage() {
         locale={locale}
         play={p}
         researchJobEndsAtIso={user.researchJobEndsAt?.toISOString() ?? null}
+        currentEra={user.currentEra}
+        defaultCityId={defaultCityId}
+        eraTechLevels={eraTechLevels}
+        activeEraTechJob={activeEraTechJob}
       />
       <div className="mt-4 border-t border-zinc-700/50 pt-4">
         <ResearchAdvanceForm

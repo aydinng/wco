@@ -175,6 +175,45 @@ async function main() {
         soldiers: 600,
       },
     },
+    {
+      username: "test_alpha",
+      tribeName: "Test Alpha",
+      currentEra: "ilk_cag",
+      researchTier: 1,
+      city: {
+        name: "AlphaVille",
+        coordX: 12,
+        coordY: 12,
+        coordZ: 1,
+        soldiers: 120,
+      },
+    },
+    {
+      username: "test_beta",
+      tribeName: "Test Beta",
+      currentEra: "ilk_cag",
+      researchTier: 0,
+      city: {
+        name: "BetaTown",
+        coordX: 14,
+        coordY: 11,
+        coordZ: 2,
+        soldiers: 90,
+      },
+    },
+    {
+      username: "test_gamer",
+      tribeName: "Casual",
+      currentEra: "orta_cag",
+      researchTier: 2,
+      city: {
+        name: "GammaKeep",
+        coordX: 20,
+        coordY: 20,
+        coordZ: 3,
+        soldiers: 200,
+      },
+    },
   ];
 
   for (const b of bots) {

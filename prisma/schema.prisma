@@ -70,6 +70,12 @@ model User {
   adminTickets     AdminTicket[]
   foundedAlliances Alliance[]      @relation("AllianceFounder")
   allianceMember   AllianceMember?
+
+  userEraTechs      UserEraTech[]
+  eraTechJobs       EraTechResearchJob[]
+  allianceMessages  AllianceMessage[]
+  allianceInvitesSent     AllianceInvite[] @relation("AllianceInviteFrom")
+  allianceInvitesReceived AllianceInvite[] @relation("AllianceInviteTo")
 }
 
 model CityUnitStock {
@@ -93,7 +99,37 @@ model Alliance {
   maxMembers Int      @default(50)
   createdAt  DateTime @default(now())
 
-  members AllianceMember[]
+  members  AllianceMember[]
+  messages AllianceMessage[]
+  invites  AllianceInvite[]
+}
+
+model AllianceMessage {
+  id         String   @id @default(cuid())
+  allianceId String
+  alliance   Alliance @relation(fields: [allianceId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  body       String   @db.VarChar(2000)
+  createdAt  DateTime @default(now())
+
+  @@index([allianceId, createdAt])
+}
+
+/// Lider davet gönderir; hedef kullanıcı kabul edene kadar bekler
+model AllianceInvite {
+  id         String   @id @default(cuid())
+  allianceId String
+  alliance   Alliance @relation(fields: [allianceId], references: [id], onDelete: Cascade)
+  fromUserId String
+  fromUser   User     @relation("AllianceInviteFrom", fields: [fromUserId], references: [id], onDelete: Cascade)
+  toUserId   String
+  toUser     User     @relation("AllianceInviteTo", fields: [toUserId], references: [id], onDelete: Cascade)
+  status     String   @default("pending")
+  createdAt  DateTime @default(now())
+
+  @@index([toUserId, status])
+  @@index([allianceId])
 }
 
 model AllianceMember {
@@ -226,8 +262,36 @@ model City {
   trainingJobs TrainingJob[]
   buildingJobs BuildingJob[]
   cityUnitStocks CityUnitStock[]
+  eraTechJobs  EraTechResearchJob[]
 
   @@index([userId])
+}
+
+/// Çağ teknolojisi: çoğu teknoloji en fazla 1. seviye
+model UserEraTech {
+  id      String @id @default(cuid())
+  userId  String
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  techKey String
+  level   Int    @default(0)
+
+  @@unique([userId, techKey])
+  @@index([userId])
+}
+
+model EraTechResearchJob {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cityId      String
+  city        City     @relation(fields: [cityId], references: [id], onDelete: Cascade)
+  techKey     String
+  durationSec Int
+  completesAt DateTime
+  status      String   @default("queued")
+
+  @@index([userId, status])
+  @@index([completesAt])
 }
 
 /// Bina yükseltme kuyruğu: şehir başına aynı anda 1 adet aktif (queued)

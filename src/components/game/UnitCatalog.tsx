@@ -111,7 +111,7 @@ export function UnitCatalog({
                       </span>
                     </div>
 
-                    <div className="min-w-[min(100%,220px)] flex-1 sm:min-w-[200px]">
+                    <div className="flex min-h-[5.5rem] min-w-[min(100%,220px)] flex-1 flex-col justify-center sm:min-w-[200px]">
                       <div className="flex flex-col gap-1 text-sm leading-snug text-zinc-100/95 sm:text-[15px]">
                         <CatalogFieldLine
                           label={play.catalogFieldTime}

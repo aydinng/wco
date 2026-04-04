@@ -3,6 +3,7 @@ import { applyResourceTicksFromSnapshot } from "@/lib/resource-tick";
 import { applyBuildingJobs } from "@/lib/building-tick";
 import { applyTrainingJobs } from "@/lib/training-tick";
 import { applyResearchJobs } from "@/lib/research-tick";
+import { applyEraTechJobs } from "@/lib/era-tech-tick";
 import { syncLegacySoldiersToUnitStocks } from "@/lib/ensure-unit-stocks";
 import { computeUserScores } from "@/lib/score";
 import { prisma } from "@/lib/prisma";
@@ -36,6 +37,12 @@ export const getCurrentUser = cache(async () => {
       await applyResearchJobs(user);
     } catch (e) {
       console.error("[applyResearchJobs]", e);
+    }
+
+    try {
+      await applyEraTechJobs(user.id);
+    } catch (e) {
+      console.error("[applyEraTechJobs]", e);
     }
 
     try {
