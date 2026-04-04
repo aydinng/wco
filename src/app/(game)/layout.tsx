@@ -82,9 +82,6 @@ export default async function GameShellLayout({
             registrationCountry: user?.registrationCountry ?? "",
           }}
           scoreLine={scoreLine}
-          productionCities={
-            user?.cities?.map((c) => ({ id: c.id, name: c.name })) ?? []
-          }
           activeMissions={activeMissions}
           activeMissionsTitle={locale === "en" ? "Active missions" : "Aktif görevler"}
           etaLabel="ETA"

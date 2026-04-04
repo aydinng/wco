@@ -22,7 +22,9 @@ export default async function DiplomacyPage() {
       id: true,
       name: true,
       inviteOnly: true,
+      maxMembers: true,
       founder: { select: { username: true } },
+      _count: { select: { members: true } },
     },
   });
 
@@ -65,6 +67,8 @@ export default async function DiplomacyPage() {
           name: a.name,
           founder: a.founder.username,
           inviteOnly: a.inviteOnly,
+          memberCount: a._count.members,
+          maxMembers: a.maxMembers,
         }))}
       />
 

@@ -1,10 +1,12 @@
-import { TrainUnitQueueForm } from "@/components/game/TrainUnitQueueForm";
+import { ProductionCityPicker } from "@/components/game/ProductionCityPicker";
+import { TrainingQueueBar } from "@/components/game/TrainingQueueBar";
 import { UnitCatalog } from "@/components/game/UnitCatalog";
-import { unlockedUnits } from "@/config/units";
+import { catalogUnits, getUnitSpec } from "@/config/units";
 import { getDictionary } from "@/i18n/dictionaries";
 import { getCurrentUser } from "@/lib/current-user";
 import { getLocale } from "@/lib/locale";
 import { prisma } from "@/lib/prisma";
+import { Suspense } from "react";
 
 export const dynamic = "force-dynamic";
 
@@ -19,7 +21,7 @@ export default async function ProductionPage({
   const user = await getCurrentUser();
   const cities = user?.cities ?? [];
   const sp = await searchParams;
-  const units = unlockedUnits(user?.currentEra);
+  const units = catalogUnits();
 
   if (!user || cities.length === 0) {
     return (
@@ -49,42 +51,53 @@ export default async function ProductionPage({
     },
     orderBy: { completesAt: "asc" },
     take: 3,
-    select: { id: true, unitId: true, completesAt: true },
+    select: { id: true, unitId: true, completesAt: true, quantity: true },
   });
-  const typedJobs = jobs as {
-    id: string;
-    unitId: string;
-    completesAt: Date;
-  }[];
+
+  const queueJobs = jobs.map((j) => ({
+    id: j.id,
+    unitId: j.unitId,
+    unitName: getUnitSpec(j.unitId)?.name ?? j.unitId,
+    quantity: j.quantity ?? 1,
+    completesAt: j.completesAt.toISOString(),
+  }));
 
   return (
     <div className="rounded border border-[#2a3441]/90 bg-black/35 p-4 backdrop-blur-sm">
       <h2
-        className="mb-4 text-lg text-amber-200/90"
+        className="mb-1 text-lg text-amber-200/90"
         style={{ fontFamily: "var(--font-warcity), serif" }}
       >
         {p.productionTitle}
       </h2>
+
+      <Suspense
+        fallback={
+          <div className="mb-4 h-10 max-w-md animate-pulse rounded bg-zinc-800/40" />
+        }
+      >
+        <ProductionCityPicker
+          cities={cities.map((c) => ({ id: c.id, name: c.name }))}
+          label={p.overviewSelectCity}
+        />
+      </Suspense>
+
+      <TrainingQueueBar
+        jobs={queueJobs}
+        queueLabel={locale === "en" ? "Training queue" : "Eğitim kuyruğu"}
+        emptyHint={
+          locale === "en"
+            ? "No units in training for this city."
+            : "Bu şehirde eğitimde birim yok."
+        }
+      />
+
       <UnitCatalog
         units={units}
         playerEra={user.currentEra}
         play={p}
         locale={locale}
-      />
-      <TrainUnitQueueForm
         cityId={selectedCity.id}
-        cityName={selectedCity.name}
-        units={units}
-        jobs={typedJobs.map((j) => ({
-          id: j.id,
-          unitId: j.unitId,
-          completesAt: j.completesAt.toISOString(),
-        }))}
-        labels={{
-          trainBtn: p.trainBtn,
-          amountLabel: p.trainAmount,
-          queueLabel: locale === "en" ? "Queue" : "Kuyruk",
-        }}
       />
     </div>
   );

@@ -21,7 +21,8 @@ import {
   researchTierAdvanceDurationSec,
 } from "@/lib/duration-scaling";
 import { flushResearchJob } from "@/lib/research-tick";
-import { enqueueTrainingJobs } from "@/lib/training-tick";
+import { eraIndex } from "@/config/eras";
+import { enqueueTrainingJobsTx } from "@/lib/training-tick";
 import { revalidatePath } from "next/cache";
 import type { UnitId } from "@/config/units";
 import { getUnitSpec } from "@/config/units";
@@ -42,6 +43,8 @@ type PlayErr = keyof Pick<
   | "errBuildBusy"
   | "errResearchMax"
   | "errResearchBusy"
+  | "errUnitEraLocked"
+  | "errTrainQueueFull"
 >;
 
 async function pe(key: PlayErr): Promise<string> {
@@ -272,53 +275,79 @@ export async function queueTrainUnit(
   const spec = getUnitSpec(unitId);
   if (!spec) return { ok: false, error: await pe("errInvalidAmount") };
 
+  if (eraIndex(spec.minEra) > eraIndex(user.currentEra)) {
+    return { ok: false, error: await pe("errUnitEraLocked") };
+  }
+
   const n = Math.max(0, Math.floor(amount));
-  if (n < 1) return { ok: false, error: await pe("errInvalidAmount") };
-  if (n > 3) return { ok: false, error: await pe("errInvalidAmount") };
+  if (n < 1 || n > 50) return { ok: false, error: await pe("errInvalidAmount") };
 
   if (city.barracksLevel < 1) {
     return { ok: false, error: await pe("errBuildingLocked") };
   }
 
-  const active = await prisma.trainingJob.count({
-    where: { userId: user.id, cityId, status: "queued" },
-  });
-  const MAX_TRAIN_QUEUE = 3;
-  if (active + n > MAX_TRAIN_QUEUE) {
-    return { ok: false, error: await pe("errInvalidAmount") };
-  }
-  const cap = soldierCap(city.barracksLevel);
-  const willHave = city.soldiers + active + n;
-  if (willHave > cap) {
-    return { ok: false, error: await pe("errBarracksFull") };
-  }
+  try {
+    await prisma.$transaction(async (tx) => {
+      const active = await tx.trainingJob.count({
+        where: { userId: user.id, cityId, status: "queued" },
+      });
+      if (active >= 3) {
+        throw Object.assign(new Error("queue"), { code: "QUEUE" as const });
+      }
 
-  const tc = trainCostPerSoldier(unlocks);
-  const add = spec.costAddon ?? {};
-  const w = (tc.wood + (add.wood ?? 0)) * n;
-  const i = (tc.iron + (add.iron ?? 0)) * n;
-  const o = (unlocks.oil ? (add.oil ?? 0) : 0) * n;
-  const f = (tc.food + (add.food ?? 0)) * n;
-  if (city.wood < w || city.iron < i || city.oil < o || city.food < f) {
-    return { ok: false, error: await pe("errInsufficient") };
+      const queuedAgg = await tx.trainingJob.aggregate({
+        where: { userId: user.id, cityId, status: "queued" },
+        _sum: { quantity: true },
+      });
+      const queuedSoldiers = queuedAgg._sum.quantity ?? 0;
+      const cap = soldierCap(city.barracksLevel);
+      if (city.soldiers + queuedSoldiers + n > cap) {
+        throw Object.assign(new Error("barracks"), { code: "BARRACKS" as const });
+      }
+
+      const tc = trainCostPerSoldier(unlocks);
+      const add = spec.costAddon ?? {};
+      const w = (tc.wood + (add.wood ?? 0)) * n;
+      const i = (tc.iron + (add.iron ?? 0)) * n;
+      const o = (unlocks.oil ? (add.oil ?? 0) : 0) * n;
+      const f = (tc.food + (add.food ?? 0)) * n;
+      if (city.wood < w || city.iron < i || city.oil < o || city.food < f) {
+        throw Object.assign(new Error("res"), { code: "RES" as const });
+      }
+
+      await tx.city.update({
+        where: { id: cityId },
+        data: {
+          wood: city.wood - w,
+          iron: city.iron - i,
+          oil: city.oil - o,
+          food: city.food - f,
+        },
+      });
+
+      await enqueueTrainingJobsTx(tx, {
+        userId: user.id,
+        cityId,
+        unitId,
+        amount: n,
+      });
+    });
+  } catch (e: unknown) {
+    const code =
+      e && typeof e === "object" && "code" in e
+        ? (e as { code?: string }).code
+        : undefined;
+    if (code === "QUEUE") {
+      return { ok: false, error: await pe("errTrainQueueFull") };
+    }
+    if (code === "BARRACKS") {
+      return { ok: false, error: await pe("errBarracksFull") };
+    }
+    if (code === "RES") {
+      return { ok: false, error: await pe("errInsufficient") };
+    }
+    throw e;
   }
-
-  await prisma.city.update({
-    where: { id: cityId },
-    data: {
-      wood: city.wood - w,
-      iron: city.iron - i,
-      oil: city.oil - o,
-      food: city.food - f,
-    },
-  });
-
-  await enqueueTrainingJobs({
-    userId: user.id,
-    cityId,
-    unitId,
-    amount: n,
-  });
 
   paths();
   return { ok: true };

@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "Alliance" ADD COLUMN "maxMembers" INTEGER NOT NULL DEFAULT 50;
+
+-- AlterTable
+ALTER TABLE "TrainingJob" ADD COLUMN "quantity" INTEGER NOT NULL DEFAULT 1;

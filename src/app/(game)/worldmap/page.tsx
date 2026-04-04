@@ -1,8 +1,5 @@
 import { FleetSendForm } from "@/components/game/FleetSendForm";
-import { StrategicWorldMap } from "@/components/game/StrategicWorldMap";
 import { WorldMap2D, type MapCityPoint } from "@/components/game/WorldMap2D";
-import type { StrategicWorldMapData } from "@/config/strategic-world-map.types";
-import strategicWorldMapData from "@/data/strategic-world-map.json";
 import { getDictionary } from "@/i18n/dictionaries";
 import { getCurrentUser } from "@/lib/current-user";
 import { getLocale } from "@/lib/locale";
@@ -10,6 +7,28 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
+
+function coordBoundsFromRows(
+  rows: { coordX: number; coordY: number }[],
+): { minX: number; maxX: number; minY: number; maxY: number } {
+  if (rows.length === 0) {
+    return { minX: 0, maxX: 1, minY: 0, maxY: 1 };
+  }
+  let minX = Infinity;
+  let maxX = -Infinity;
+  let minY = Infinity;
+  let maxY = -Infinity;
+  for (const c of rows) {
+    minX = Math.min(minX, c.coordX);
+    maxX = Math.max(maxX, c.coordX);
+    minY = Math.min(minY, c.coordY);
+    maxY = Math.max(maxY, c.coordY);
+  }
+  if (!Number.isFinite(minX)) {
+    return { minX: 0, maxX: 1, minY: 0, maxY: 1 };
+  }
+  return { minX, maxX, minY, maxY };
+}
 
 export default async function WorldmapPage() {
   const locale = await getLocale();
@@ -24,7 +43,7 @@ export default async function WorldmapPage() {
     orderBy: { name: "asc" },
   });
 
-  const strategicData = strategicWorldMapData as unknown as StrategicWorldMapData;
+  const coordBounds = coordBoundsFromRows(rows);
 
   const points: MapCityPoint[] = rows.map((c) => ({
     id: c.id,
@@ -44,22 +63,9 @@ export default async function WorldmapPage() {
       >
         {p.worldmapTitle}
       </h2>
-      <p className="mb-2 max-w-3xl text-sm leading-relaxed text-zinc-200">
+      <p className="mb-4 max-w-3xl text-sm leading-relaxed text-zinc-200">
         {p.worldmapIntro}
       </p>
-      <p className="mb-4 text-xs text-zinc-400">{p.worldmapNoTileMap}</p>
-
-      <div className="mb-8">
-        <StrategicWorldMap
-          data={strategicData}
-          locale={locale === "en" ? "en" : "tr"}
-        />
-        <p className="mt-2 text-[11px] text-zinc-500">
-          {locale === "en"
-            ? "Draft strategic layer — factions, chokepoints, energy basins, tech hubs, and logistics routes are data-driven (JSON)."
-            : "Taslak stratejik katman — bloklar, dar geçitler, enerji havzaları, teknoloji üsleri ve lojistik hatlar JSON verisinden beslenir."}
-        </p>
-      </div>
 
       <h3 className="mb-2 text-sm font-semibold text-amber-200/90">
         {p.worldmapAllPlayers}
@@ -67,6 +73,7 @@ export default async function WorldmapPage() {
       {points.length > 0 ? (
         <WorldMap2D
           points={points}
+          coordBounds={coordBounds}
           legendYou={p.worldmapLegendYou}
           legendOther={p.worldmapLegendOther}
           planeHint={p.worldmapPlaneHint}

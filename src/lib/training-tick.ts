@@ -1,6 +1,6 @@
 import { UNITS } from "@/config/units";
 import { prisma } from "@/lib/prisma";
-import type { City, User } from "@prisma/client";
+import type { City, Prisma, User } from "@prisma/client";
 
 function unitSeconds(unitId: string): number {
   const u = UNITS.find((x) => x.id === unitId);
@@ -14,7 +14,7 @@ export async function applyTrainingJobs(user: User & { cities: City[] }) {
   const now = new Date();
   const jobs = await prisma.trainingJob.findMany({
     where: { userId: user.id, status: "queued", completesAt: { lte: now } },
-    select: { id: true, cityId: true, unitId: true },
+    select: { id: true, cityId: true, unitId: true, quantity: true },
     take: 200,
   });
   if (jobs.length === 0) return;
@@ -24,8 +24,9 @@ export async function applyTrainingJobs(user: User & { cities: City[] }) {
   const ids: string[] = [];
   for (const j of jobs) {
     ids.push(j.id);
+    const q = Math.max(1, j.quantity ?? 1);
     const k = `${j.cityId}\0${j.unitId}`;
-    byCityUnit.set(k, (byCityUnit.get(k) ?? 0) + 1);
+    byCityUnit.set(k, (byCityUnit.get(k) ?? 0) + q);
   }
 
   await prisma.$transaction(async (tx) => {
@@ -63,59 +64,56 @@ export type EnqueueArgs = {
   amount: number;
 };
 
-export async function enqueueTrainingJobs({
-  userId,
-  cityId,
-  unitId,
-  amount,
-}: EnqueueArgs) {
-  const n = Math.max(1, Math.min(3, Math.floor(amount)));
-  const dur = unitSeconds(unitId);
+const MAX_TRAIN_QUEUE = 3;
+
+/**
+ * Tek kuyruk kaydı: 1–50 birim, toplam süre = birim süresi × adet.
+ * `countActive` dışarıda doğrulanmış olmalı (< 3).
+ */
+export async function enqueueTrainingJobsTx(
+  tx: Prisma.TransactionClient,
+  { userId, cityId, unitId, amount }: EnqueueArgs,
+) {
+  const n = Math.max(1, Math.min(50, Math.floor(amount)));
+  const unitDur = unitSeconds(unitId);
+  const totalDurationSec = unitDur * n;
   const now = Date.now();
 
+  const active = await tx.trainingJob.findMany({
+    where: { userId, cityId, status: "queued" },
+    orderBy: { completesAt: "desc" },
+    take: 1,
+    select: { completesAt: true },
+  });
+  const lastCompleteMs = active[0]?.completesAt.getTime() ?? now;
+  const startMs = Math.max(now, lastCompleteMs);
+  const startsAt = new Date(startMs);
+  const completesAt = new Date(startMs + totalDurationSec * 1000);
+
+  await tx.trainingJob.create({
+    data: {
+      userId,
+      cityId,
+      unitId,
+      quantity: n,
+      durationSec: totalDurationSec,
+      startsAt,
+      completesAt,
+      status: "queued",
+    },
+  });
+  return { added: n };
+}
+
+/** Tek oyuncu işlemi için tam transaction sarmalayıcı (test / basit çağrılar). */
+export async function enqueueTrainingJobs(args: EnqueueArgs) {
   return prisma.$transaction(async (tx) => {
-    const active = await tx.trainingJob.findMany({
-      where: { userId, cityId, status: "queued" },
-      orderBy: { completesAt: "desc" },
-      take: 1,
-      select: { completesAt: true },
-    });
     const countActive = await tx.trainingJob.count({
-      where: { userId, cityId, status: "queued" },
+      where: { userId: args.userId, cityId: args.cityId, status: "queued" },
     });
-    const MAX_QUEUE = 3;
-    const room = Math.max(0, MAX_QUEUE - countActive);
-    const toAdd = Math.min(n, room);
-    if (toAdd < 1) return { added: 0 };
-
-    const lastCompleteMs = active[0]?.completesAt.getTime() ?? now;
-    let startMs = Math.max(now, lastCompleteMs);
-
-    const rows: {
-      userId: string;
-      cityId: string;
-      unitId: string;
-      durationSec: number;
-      startsAt: Date;
-      completesAt: Date;
-      status: string;
-    }[] = [];
-    for (let i = 0; i < toAdd; i++) {
-      const startsAt = new Date(startMs);
-      const completesAt = new Date(startMs + dur * 1000);
-      rows.push({
-        userId,
-        cityId,
-        unitId,
-        durationSec: dur,
-        startsAt,
-        completesAt,
-        status: "queued",
-      });
-      startMs = completesAt.getTime();
+    if (countActive >= MAX_TRAIN_QUEUE) {
+      return { added: 0 };
     }
-
-    await tx.trainingJob.createMany({ data: rows });
-    return { added: toAdd };
+    return enqueueTrainingJobsTx(tx, args);
   });
 }

@@ -32,9 +32,19 @@ export async function POST(req: Request) {
 
   const alliance = await prisma.alliance.findUnique({
     where: { id: allianceId },
+    include: {
+      _count: { select: { members: true } },
+    },
   });
   if (!alliance) {
     return NextResponse.json({ error: "İttifak bulunamadı." }, { status: 404 });
+  }
+
+  if (alliance._count.members >= alliance.maxMembers) {
+    return NextResponse.json(
+      { error: "İttifak üye limiti dolu." },
+      { status: 400 },
+    );
   }
 
   if (alliance.inviteOnly) {

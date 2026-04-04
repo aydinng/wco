@@ -35,7 +35,7 @@ export default async function OverviewPage() {
         const j = await prisma.trainingJob.findFirst({
           where: { userId: user.id, cityId: c.id, status: "queued" },
           orderBy: { completesAt: "asc" },
-          select: { unitId: true, completesAt: true },
+          select: { unitId: true, completesAt: true, quantity: true },
         });
         if (!j) return { cityId: c.id, prodLabel: p.overviewNone, prodEtaSec: 0 };
         const eta = Math.max(
@@ -43,9 +43,12 @@ export default async function OverviewPage() {
           Math.ceil((new Date(j.completesAt).getTime() - now) / 1000),
         );
         const unitName = getUnitSpec(j.unitId)?.name ?? j.unitId;
+        const q = j.quantity ?? 1;
+        const prodLabel =
+          q > 1 ? `${q}× ${unitName}` : unitName;
         return {
           cityId: c.id,
-          prodLabel: unitName,
+          prodLabel,
           prodEtaSec: eta,
         };
       }),

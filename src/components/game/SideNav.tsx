@@ -1,7 +1,6 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { Suspense } from "react";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { ServerDateTime } from "@/components/game/ServerClock";
 import {
@@ -20,8 +19,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
-import { ProductionCitySelect } from "@/components/game/ProductionCitySelect";
-
 type GameNavProps = {
   locale: AppLocale;
   labels: Dictionary["game"];
@@ -36,8 +33,6 @@ type GameNavProps = {
   };
   /** Çıkışın altında skor + sıra */
   scoreLine?: { total: number; rank: number } | null;
-  /** Asker üretimi sayfası için hızlı şehir seçimi */
-  productionCities?: { id: string; name: string }[];
   activeMissions?: { label: string; etaSec: number }[];
   activeMissionsTitle?: string;
   etaLabel?: string;
@@ -74,7 +69,6 @@ export function SideNav({
   serverDateLabel,
   profile,
   scoreLine,
-  productionCities,
   activeMissions,
   activeMissionsTitle,
   etaLabel,
@@ -175,17 +169,6 @@ export function SideNav({
             ))}
           </nav>
 
-          {productionCities && productionCities.length > 0 && (
-            <Suspense fallback={null}>
-              <ProductionCitySelect
-                cities={productionCities}
-                label={
-                  locale === "en" ? "Production city" : "Üretim şehri"
-                }
-              />
-            </Suspense>
-          )}
-
           {blackSectionTitle(labels.menuLeaderMenu)}
           <nav
             className="mb-4 w-full space-y-1.5 text-xs"
@@ -227,16 +210,16 @@ export function SideNav({
             </div>
             {scoreLine ? (
               <div
-                className="mt-3 w-full rounded border border-black bg-black px-2 py-2 text-[11px] text-[#FFFF00]"
+                className="mt-3 w-full rounded border border-black bg-black px-2 py-2.5 text-[#FFFF00]"
                 style={WARCITY_FONT}
               >
-                <div className="font-bold text-red-500">
+                <div className="text-xs font-bold text-red-500 sm:text-sm">
                   {locale === "en" ? "Score" : "Skor"}
                 </div>
-                <div className="tabular-nums text-[#FFFF00]">
+                <div className="text-base font-semibold tabular-nums text-[#FFFF00] sm:text-lg">
                   {scoreLine.total.toLocaleString(locale === "en" ? "en-US" : "tr-TR")}
                 </div>
-                <div className="mt-1 text-[10px] text-zinc-400">
+                <div className="mt-1 text-xs text-zinc-400">
                   {locale === "en" ? "Your rank:" : "Sıran:"}{" "}
                   <span className="font-semibold text-[#FFFF00]">
                     #{scoreLine.rank}

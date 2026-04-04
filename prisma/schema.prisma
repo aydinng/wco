@@ -89,6 +89,8 @@ model Alliance {
   founderId  String
   founder    User     @relation("AllianceFounder", fields: [founderId], references: [id], onDelete: Cascade)
   inviteOnly Boolean  @default(false)
+  /// Üye üst sınırı (ileride bonuslarla artırılabilir)
+  maxMembers Int      @default(50)
   createdAt  DateTime @default(now())
 
   members AllianceMember[]
@@ -266,6 +268,8 @@ model TrainingJob {
   city   City   @relation(fields: [cityId], references: [id], onDelete: Cascade)
 
   unitId String
+  /// Bu kuyruk kaydında eğitilecek toplam asker (1–50)
+  quantity    Int @default(1)
   durationSec Int
 
   startsAt DateTime

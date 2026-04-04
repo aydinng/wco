@@ -48,21 +48,6 @@ export default async function StatsPage() {
 
   return (
     <PlaceholderPage title={dict.game.stats}>
-      <p className="mb-4 text-sm text-zinc-400">
-        {locale === "en"
-          ? "Your rank is also shown in the left sidebar under Logout."
-          : "Sıranız ayrıca sol menüde Çıkışın altındaki skor kutusunda gösterilir."}
-      </p>
-      {user && (
-        <p className="mb-4 text-xs text-zinc-500">
-          {locale === "en" ? "You: " : "Sen: "}
-          <span className="text-amber-200/90">{user.username}</span>
-          {" — "}
-          <span className="tabular-nums text-[#FFFF00]">
-            {user.scoreTotal.toLocaleString()}
-          </span>
-        </p>
-      )}
       <StatsRankingsTabs
         playerRows={playerRows}
         allianceRows={allianceRows}

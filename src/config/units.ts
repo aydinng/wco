@@ -366,3 +366,16 @@ export function unlockedUnits(playerEra: string | null | undefined): UnitSpec[] 
   }
   return out;
 }
+
+/** Katalog: tüm çağlardaki birimler (kilit durumu satırda gösterilir). */
+export function catalogUnits(): UnitSpec[] {
+  const seen = new Set<string>();
+  const out: UnitSpec[] = [];
+  for (const u of UNITS) {
+    if (LEGACY_UNIT_IDS.has(u.id)) continue;
+    if (seen.has(u.id)) continue;
+    seen.add(u.id);
+    out.push(u);
+  }
+  return out;
+}

@@ -1,5 +1,64 @@
+import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+
+const DEFAULT_MAX_MEMBERS = 50;
+
+/** Yeni ittifak (kurucu otomatik üye olur) */
+export async function POST(req: Request) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  let body: { name?: string };
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+
+  const name = (body.name ?? "").trim();
+  if (name.length < 2 || name.length > 48) {
+    return NextResponse.json(
+      { error: "İttifak adı 2–48 karakter olmalı." },
+      { status: 400 },
+    );
+  }
+
+  const taken = await prisma.allianceMember.findUnique({
+    where: { userId: session.user.id },
+  });
+  if (taken) {
+    return NextResponse.json(
+      { error: "Zaten bir ittifaktasınız." },
+      { status: 400 },
+    );
+  }
+
+  const dup = await prisma.alliance.findUnique({ where: { name } });
+  if (dup) {
+    return NextResponse.json(
+      { error: "Bu ittifak adı kullanılıyor." },
+      { status: 400 },
+    );
+  }
+
+  const a = await prisma.alliance.create({
+    data: {
+      name,
+      founderId: session.user.id,
+      inviteOnly: false,
+      maxMembers: DEFAULT_MAX_MEMBERS,
+      members: {
+        create: { userId: session.user.id, role: "founder" },
+      },
+    },
+    select: { id: true, name: true },
+  });
+
+  return NextResponse.json({ ok: true, alliance: a });
+}
 
 /** İttifak listesi + üye skor toplamları (istatistik çubuğu için) */
 export async function GET() {

@@ -286,6 +286,8 @@ export type Dictionary = {
     errBuildBusy: string;
     errResearchMax: string;
     errResearchBusy: string;
+    errUnitEraLocked: string;
+    errTrainQueueFull: string;
     trainCostNoIron: string;
     worldmapTitle: string;
     worldmapIntro: string;
@@ -663,11 +665,13 @@ const tr: Dictionary = {
     errBuildBusy: "Bu şehirde yükseltme zaten devam ediyor.",
     errResearchMax: "Araştırma maksimum",
     errResearchBusy: "Zaten bir araştırma sürüyor; bitene kadar bekleyin.",
+    errUnitEraLocked: "Bu birim henüz çağınızda değil.",
+    errTrainQueueFull: "Bu şehirde en fazla 3 üretim kuyruğu olabilir.",
     worldmapTitle: "Dünya",
     worldmapIntro:
-      "Bu ekranda çizgisel harita yok: dünya (X:Y:Z) koordinatları üzerinden konum takibi yapılır. Filo ve diplomasi aynı koordinat modelini kullanır.",
+      "Uydu/taktik görünüm: şehirler X–Y düzleminde konumlanır; tam adres (X:Y:Z) tabloda ve filoda kullanılır. Sektör ızgarası koordinat aralığınıza göre ölçeklenir.",
     worldmapNoTileMap:
-      "Harita karosu / zoom görünümü planlanmıyor; liste ve koordinat girişi ile ilerlenir.",
+      "Koordinatlar canlı veriden çizilir; yakınlaştırma için değer aralığı otomatik ayarlanır.",
     worldmapYourCities: "Şehirlerin",
     worldmapCoord: "Koordinat",
     worldmapFleetCta: "Hedefe ordu göndermek için Filo sayfasını kullan.",
@@ -1041,11 +1045,13 @@ const en: Dictionary = {
     errBuildBusy: "A building upgrade is already in progress in this city.",
     errResearchMax: "Research is at maximum",
     errResearchBusy: "Research is already in progress; wait until it finishes.",
+    errUnitEraLocked: "This unit is not available in your age yet.",
+    errTrainQueueFull: "This city can have at most 3 training queues.",
     worldmapTitle: "World",
     worldmapIntro:
-      "There is no drawn map here: the world uses (X:Y:Z) coordinates. Fleet and diplomacy use the same model.",
+      "Satellite-style board: cities sit on the X–Y plane; full (X:Y:Z) addresses are used in the table and fleet. The sector grid scales to your coordinate range.",
     worldmapNoTileMap:
-      "No tile map or zoom view is planned; you play from lists and coordinate inputs.",
+      "Coordinates are plotted from live data; bounds auto-fit the world.",
     worldmapYourCities: "Your cities",
     worldmapCoord: "Coordinates",
     worldmapFleetCta: "Use the Fleet page to send armies to a target.",
