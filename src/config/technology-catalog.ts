@@ -143,7 +143,8 @@ const RAW: RawTech[] = [
     tier: 1,
     nameTr: "Orta çağ",
     nameEn: "Medieval age",
-    refSec: 0,
+    /** 4 dk 58 sn (298 sn) — level1DurationSec(298,1)=298 */
+    refSec: 298,
     goalTr: "Yeni çağ.",
     goalEn: "New age.",
   },
@@ -216,12 +217,15 @@ export function eraTechResearchCost(entry: Pick<TechCatalogEntry, "eraOrdinal" |
   food: number;
 } {
   const mult = 1 + entry.eraOrdinal * 0.14 + entry.tier * 0.012;
-  return {
-    wood: Math.floor(220 * mult),
-    iron: Math.floor(180 * mult),
-    oil: Math.floor(95 * mult),
-    food: Math.floor(200 * mult),
-  };
+  const wood = Math.floor(220 * mult);
+  const iron = Math.floor(180 * mult);
+  const oil = Math.floor(95 * mult);
+  const food = Math.floor(200 * mult);
+  /** İlk çağ teknolojileri: yalnız odun + besin */
+  if (entry.eraOrdinal === 1) {
+    return { wood, iron: 0, oil: 0, food };
+  }
+  return { wood, iron, oil, food };
 }
 
 const _built = buildCatalog();

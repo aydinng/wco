@@ -131,6 +131,8 @@ export default async function CityDetailPage({
                       key={`${eraId}-${row.buildingId}`}
                       building={row.buildingId}
                       title={locale === "en" ? row.titleEn : row.titleTr}
+                      desc={locale === "en" ? row.descEn : row.descTr}
+                      eraOrdinal={ordinal}
                       cities={cities}
                       unlocks={unlocks}
                       play={p}

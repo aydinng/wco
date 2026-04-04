@@ -116,6 +116,8 @@ export default async function BuildingsPage() {
                       title={
                         locale === "en" ? row.titleEn : row.titleTr
                       }
+                      desc={locale === "en" ? row.descEn : row.descTr}
+                      eraOrdinal={ordinal}
                       cities={cities}
                       unlocks={unlocks}
                       play={p}

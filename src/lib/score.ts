@@ -2,8 +2,17 @@ import type { City, User } from "@prisma/client";
 import { getResourceUnlocks } from "@/config/eras";
 import { hourlyProduction } from "@/lib/economy";
 
+type ScoreOpts = {
+  /** Tamamlanmış çağ teknolojisi sayısı (UserEraTech level ≥ 1) */
+  eraTechCompleted?: number;
+};
+
 /** Oyuncu skor bileşenleri — istatistik çubukları ve sıralama için */
-export function computeUserScores(user: User & { cities: City[] }) {
+export function computeUserScores(
+  user: User & { cities: City[] },
+  opts?: ScoreOpts,
+) {
+  const eraTechCompleted = opts?.eraTechCompleted ?? 0;
   const unlocks = getResourceUnlocks(user.currentEra);
   let prod = 0;
   for (const c of user.cities) {
@@ -12,7 +21,8 @@ export function computeUserScores(user: User & { cities: City[] }) {
       Math.abs(ph.wood) + Math.abs(ph.iron) + Math.abs(ph.oil) + Math.abs(ph.food),
     );
   }
-  const tech = user.researchTier * 2500;
+  const tech =
+    user.researchTier * 2500 + eraTechCompleted * 800;
   let bld = 0;
   for (const c of user.cities) {
     bld +=

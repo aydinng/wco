@@ -63,7 +63,10 @@ export const getCurrentUser = cache(async () => {
     });
     if (fresh) {
       try {
-        const s = computeUserScores(fresh);
+        const eraTechCompleted = await prisma.userEraTech.count({
+          where: { userId: id, level: { gte: 1 } },
+        });
+        const s = computeUserScores(fresh, { eraTechCompleted });
         if (
           s.scoreTotal !== fresh.scoreTotal ||
           s.scoreProduction !== fresh.scoreProduction ||
