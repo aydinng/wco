@@ -54,19 +54,21 @@ export function UpgradeBuildingButton({
 
   return (
     <div className="flex flex-col gap-1">
-      <button
-        type="button"
-        disabled={busy || maxed}
-        onClick={onClick}
-        className="rounded border border-amber-900/50 bg-amber-950/40 px-2 py-1 text-xs text-amber-100 hover:bg-amber-900/50 disabled:opacity-40"
-      >
-        {maxed ? "MAX" : actionLabel}
-      </button>
-      {!maxed && (
-        <span className="text-[10px] font-semibold uppercase tracking-wide text-zinc-400">
-          {parts.join(" · ")}
-        </span>
-      )}
+      <div className="flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          disabled={busy || maxed}
+          onClick={onClick}
+          className="shrink-0 rounded border border-amber-900/50 bg-amber-950/40 px-2 py-1 text-xs text-amber-100 hover:bg-amber-900/50 disabled:opacity-40"
+        >
+          {maxed ? "MAX" : actionLabel}
+        </button>
+        {!maxed && (
+          <span className="text-[10px] font-semibold uppercase leading-snug tracking-wide text-zinc-300">
+            {parts.join(" · ")}
+          </span>
+        )}
+      </div>
       {err && <span className="text-[10px] text-red-400">{err}</span>}
     </div>
   );

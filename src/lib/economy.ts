@@ -1,10 +1,12 @@
 import type { City } from "@prisma/client";
 import type { ResourceUnlocks } from "@/config/eras";
+import type { UnitSpec } from "@/config/units";
 
 export const MAX_BUILDING_LEVEL = 20;
 export const MAX_RESEARCH_TIER = 20;
 
-const BASE = { wood: 10, iron: 8, oil: 5, food: 12 } as const;
+/** Saatlik taban / işçi — erken oyun hissi için kitap tarzı daha yüksek başlangıç üretimi */
+const BASE = { wood: 22, iron: 14, oil: 9, food: 26 } as const;
 
 /**
  * Bina üretim çarpanı — WarCity / Battle of Ages tarzı: seviye 1 taban,
@@ -25,7 +27,7 @@ function buildingMult(level: number) {
  * Demir / petrol için bina şart (0 = üretim yok).
  */
 function woodFoodMult(level: number): number {
-  if (level < 1) return 0.22;
+  if (level < 1) return 0.34;
   return buildingProductionMultiplier(level);
 }
 
@@ -140,7 +142,7 @@ export function hourlyFoodConsumption(
   const pop = Math.max(0, city.population);
   const soldiers = Math.max(0, city.soldiers);
   const br = Math.max(0, city.barracksLevel);
-  const fromPop = pop * 0.28;
+  const fromPop = pop * 0.22;
   const fromSoldiers = soldiers * 2.1;
   const fromBarracks = br * 4.5;
   return Math.floor((fromPop + fromSoldiers + fromBarracks) * eraFactor);
@@ -154,10 +156,10 @@ export function safeInt(n: number): number {
 export function getUpgradeCost(currentLevel: number, unlocks: ResourceUnlocks) {
   const L = Math.max(1, currentLevel);
   const base = {
-    wood: 80 * L * L,
-    iron: 60 * L * L,
-    oil: 40 * L * L,
-    food: 60 * L * L,
+    wood: 65 * L * L,
+    iron: 55 * L * L,
+    oil: 38 * L * L,
+    food: 55 * L * L,
   };
   return {
     wood: base.wood,
@@ -212,8 +214,23 @@ export function suggestedFleetAttack(soldiers: number, barracksLevel: number) {
 
 export function trainCostPerSoldier(unlocks: ResourceUnlocks) {
   return {
-    wood: 5,
-    iron: unlocks.iron ? 20 : 0,
-    food: 25,
+    wood: 8,
+    iron: unlocks.iron ? 18 : 0,
+    food: 22,
+  };
+}
+
+/** Katalog / UI: birim başına toplam hammadde (kilitli çağda demir/petrol 0) */
+export function unitTrainCostPerSoldierTotal(
+  spec: Pick<UnitSpec, "costAddon">,
+  unlocks: ResourceUnlocks,
+) {
+  const tc = trainCostPerSoldier(unlocks);
+  const add = spec.costAddon ?? {};
+  return {
+    wood: tc.wood + (add.wood ?? 0),
+    iron: tc.iron + (add.iron ?? 0),
+    oil: unlocks.oil ? (add.oil ?? 0) : 0,
+    food: tc.food + (add.food ?? 0),
   };
 }

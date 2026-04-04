@@ -105,6 +105,10 @@ export default async function OverviewPage() {
         buildEtaSec: bm?.buildEtaSec ?? 0,
         prodLabel: pm?.prodLabel ?? p.overviewNone,
         prodEtaSec: pm?.prodEtaSec ?? 0,
+        workersWood: c.workersWood,
+        workersIron: c.workersIron,
+        workersOil: c.workersOil,
+        workersFood: c.workersFood,
       };
     });
 
@@ -167,6 +171,9 @@ export default async function OverviewPage() {
           idleShownRed: p.overviewIdleShownRed,
           buildIdle: locale === "en" ? "Idle" : "Boşta",
           armyIdle: locale === "en" ? "Idle" : "Boşta",
+          workersDialogTitle: p.workersTitle,
+          workersSave: p.saveWorkers,
+          workersClose: p.dialogClose,
         }}
       />
     );

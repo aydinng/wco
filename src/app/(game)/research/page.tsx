@@ -70,6 +70,14 @@ export default async function ResearchPage() {
 
   return (
     <div className="rounded border border-[#2a3441]/90 bg-black/35 p-4 backdrop-blur-sm">
+      <div
+        className="sticky top-0 z-20 -mx-4 mb-4 border-b border-amber-900/40 bg-gradient-to-r from-zinc-950/98 via-zinc-900/95 to-zinc-950/98 px-4 py-3 shadow-md backdrop-blur-md"
+        style={{ fontFamily: "var(--font-warcity), serif" }}
+      >
+        <h2 className="text-center text-lg font-bold tracking-wide text-amber-200/95">
+          {locale === "en" ? "Technologies" : "Teknolojiler"}
+        </h2>
+      </div>
       <ResearchStatusStrip
         locale={locale}
         researchJobEndsAtIso={user.researchJobEndsAt?.toISOString() ?? null}

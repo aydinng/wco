@@ -54,9 +54,10 @@ export function WorldMap2D({
         name: `${p.name} — ${p.owner} (${p.tribe}) — ${p.x}:${p.y}`,
         cx: nx,
         cy: ny,
-        r: p.isMine ? 2.8 : 2.1,
-        fill: p.isMine ? "#fbbf24" : "#38bdf8",
+        r: p.isMine ? 3.2 : 2.15,
+        fill: p.isMine ? "#fcd34d" : "#38bdf8",
         stroke: p.isMine ? "#f59e0b" : "#0ea5e9",
+        mine: p.isMine,
       };
     });
 
@@ -80,7 +81,7 @@ export function WorldMap2D({
   }
 
   return (
-    <div className="rounded-xl border border-slate-600/50 bg-gradient-to-br from-slate-950/95 via-[#0c1829]/95 to-emerald-950/40 p-3 shadow-inner ring-1 ring-white/5">
+    <div className="rounded-xl border border-slate-500/60 bg-gradient-to-br from-slate-950 via-[#071a2e] to-emerald-950/50 p-3 shadow-[0_0_40px_-8px_rgba(251,191,36,0.15)] ring-1 ring-amber-900/20">
       <div className="mb-2 flex flex-wrap gap-4 text-xs text-zinc-200">
         <span className="flex items-center gap-1.5">
           <span className="inline-block h-2.5 w-2.5 rounded-sm bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.7)]" />{" "}
@@ -165,7 +166,17 @@ export function WorldMap2D({
         ))}
 
         {circles.map((c) => (
-          <g key={c.key} filter="url(#glowPin)">
+          <g key={c.key} filter="url(#glowPin)" className={c.mine ? "animate-pulse" : undefined}>
+            {c.mine ? (
+              <circle
+                cx={c.cx}
+                cy={c.cy}
+                r={c.r + 1.2}
+                fill="none"
+                stroke="rgba(251,191,36,0.35)"
+                strokeWidth={0.35}
+              />
+            ) : null}
             <rect
               x={c.cx - c.r}
               y={c.cy - c.r}
@@ -173,9 +184,9 @@ export function WorldMap2D({
               height={c.r * 2}
               transform={`rotate(45 ${c.cx} ${c.cy})`}
               fill={c.fill}
-              fillOpacity={0.92}
+              fillOpacity={0.94}
               stroke={c.stroke}
-              strokeWidth={0.4}
+              strokeWidth={c.mine ? 0.55 : 0.4}
             />
             <title>{c.name}</title>
           </g>

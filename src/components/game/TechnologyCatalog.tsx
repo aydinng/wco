@@ -58,20 +58,6 @@ export function TechnologyCatalog({
       id="tech-catalog"
       className="w-full overflow-hidden rounded-lg border border-zinc-700/70"
     >
-      <div
-        className="border-b border-zinc-700/60 bg-black/30 px-3 py-2"
-        style={{ fontFamily: "var(--font-warcity), serif" }}
-      >
-        <h3 className="text-center text-base font-semibold text-amber-200/90">
-          {play.techCatalogTitle}
-        </h3>
-        <p className="mt-1 text-center text-xs text-zinc-500">
-          {locale === "en"
-            ? `Age technologies: up to ${MAX_ERA_TECH_QUEUE} parallel research slots.`
-            : `Çağ teknolojileri: en fazla ${MAX_ERA_TECH_QUEUE} paralel araştırma.`}
-        </p>
-      </div>
-
       <div className="w-full">
         {sections.map((sec) => (
           <div key={sec.eraOrdinal}>

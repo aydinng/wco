@@ -75,3 +75,16 @@ export function researchTierAdvanceDurationSec(opts: {
     maxSec: MAX_RESEARCH_DURATION_SEC,
   });
 }
+
+/** Asker eğitimi: taban süre × adet, imparatorluk araştırması ile kısalır */
+export function unitTrainingTotalDurationSec(opts: {
+  unitTrainSeconds: number;
+  quantity: number;
+  researchTier: number;
+}): number {
+  const raw =
+    Math.max(1, opts.unitTrainSeconds) * Math.max(1, Math.floor(opts.quantity));
+  const bonus = researchSpeedBonusPct(opts.researchTier);
+  const denom = 1 + Math.max(0, bonus) / 100;
+  return Math.max(1, Math.ceil(raw / denom));
+}

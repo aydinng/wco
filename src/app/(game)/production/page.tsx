@@ -2,6 +2,7 @@ import { ProductionCityPicker } from "@/components/game/ProductionCityPicker";
 import { TrainingQueueBar } from "@/components/game/TrainingQueueBar";
 import { UnitCatalog } from "@/components/game/UnitCatalog";
 import { catalogUnits, getUnitSpec } from "@/config/units";
+import { getResourceUnlocks } from "@/config/eras";
 import { getDictionary } from "@/i18n/dictionaries";
 import { getCurrentUser } from "@/lib/current-user";
 import { getLocale } from "@/lib/locale";
@@ -37,6 +38,7 @@ export default async function ProductionPage({
     );
   }
 
+  const unlocks = getResourceUnlocks(user.currentEra);
   const defaultCityId = cities[0]?.id ?? "";
   const selectedCityId =
     sp.city && cities.some((c) => c.id === sp.city) ? sp.city : defaultCityId;
@@ -98,6 +100,7 @@ export default async function ProductionPage({
         play={p}
         locale={locale}
         cityId={selectedCity.id}
+        unlocks={unlocks}
       />
     </div>
   );

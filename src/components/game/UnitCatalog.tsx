@@ -13,10 +13,12 @@ import {
   getEraDisplayName,
   getEraConfig,
   eraIndex,
+  type ResourceUnlocks,
 } from "@/config/eras";
 import type { UnitSpec } from "@/config/units";
 import type { Dictionary } from "@/i18n/dictionaries";
 import type { AppLocale } from "@/lib/locale";
+import { unitTrainCostPerSoldierTotal } from "@/lib/economy";
 import Image from "next/image";
 
 function fmtDuration(sec: number) {
@@ -40,12 +42,27 @@ function purposeText(
   return "Saldırı/Koruma";
 }
 
+function costLine(
+  spec: UnitSpec,
+  unlocks: ResourceUnlocks,
+  locale: AppLocale,
+): string {
+  const c = unitTrainCostPerSoldierTotal(spec, unlocks);
+  const parts: string[] = [];
+  if (c.wood > 0) parts.push(locale === "en" ? `W ${c.wood}` : `O ${c.wood}`);
+  if (c.iron > 0) parts.push(locale === "en" ? `I ${c.iron}` : `D ${c.iron}`);
+  if (c.oil > 0) parts.push(locale === "en" ? `O ${c.oil}` : `P ${c.oil}`);
+  if (c.food > 0) parts.push(locale === "en" ? `F ${c.food}` : `B ${c.food}`);
+  return parts.join(" · ");
+}
+
 type Props = {
   units: UnitSpec[];
   playerEra?: string | null;
   play: Dictionary["play"];
   locale: AppLocale;
   cityId: string;
+  unlocks: ResourceUnlocks;
 };
 
 export function UnitCatalog({
@@ -54,6 +71,7 @@ export function UnitCatalog({
   play,
   locale,
   cityId,
+  unlocks,
 }: Props) {
   if (units.length === 0) return null;
   const pIdx = eraIndex(playerEra);
@@ -123,12 +141,21 @@ export function UnitCatalog({
                           value={fmtDuration(u.trainSeconds)}
                         />
                         <CatalogFieldLine
-                          label={play.catalogFieldAge}
-                          value={String(ageNum)}
+                          label={
+                            locale === "en"
+                              ? "Cost / soldier"
+                              : "Hammadde / asker"
+                          }
+                          value={costLine(u, unlocks, locale)}
+                          valueClassName="text-amber-100/90"
                         />
                         <CatalogFieldLine
                           label={play.catalogFieldPurpose}
                           value={purposeText(u.purpose, locale)}
+                        />
+                        <CatalogFieldLine
+                          label={play.catalogFieldAge}
+                          value={String(ageNum)}
                         />
                       </div>
                     </div>

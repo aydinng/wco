@@ -85,7 +85,7 @@ export default async function ResourcesPage() {
             resFood: p.resFood,
           }}
         />
-        <div className="mt-3 text-xs text-amber-200/80">
+        <div className="mt-3 rounded border border-amber-800/50 bg-zinc-950/90 px-3 py-2 text-sm font-medium text-amber-100/95 shadow-inner">
           {locale === "en" ? (
             <>
               Σ/h: +{safeInt(sumH.wood)}W
@@ -196,13 +196,13 @@ export default async function ResourcesPage() {
                       locale={locale}
                     />
                   </td>
-                  <td className="py-2 pl-2 text-xs text-zinc-400">
+                  <td className="bg-zinc-950/85 py-2 pl-3 text-xs font-semibold text-zinc-100 ring-1 ring-inset ring-amber-900/30">
                     {locale === "en" ? (
                       <>
                         +{safeInt(h.wood)}W
                         {unlocks.iron && ` / +${safeInt(h.iron)}I`}
                         {unlocks.oil && ` / +${safeInt(h.oil)}O`} / +{nf}F
-                        <span className="block text-[10px] text-zinc-500">
+                        <span className="mt-0.5 block text-[10px] font-normal text-zinc-400">
                           ({p.resFood} +{safeInt(h.food)} − {fc})
                         </span>
                       </>
@@ -211,7 +211,7 @@ export default async function ResourcesPage() {
                         +{safeInt(h.wood)}O
                         {unlocks.iron && ` / +${safeInt(h.iron)}D`}
                         {unlocks.oil && ` / +${safeInt(h.oil)}P`} / +{nf}B
-                        <span className="block text-[10px] text-zinc-500">
+                        <span className="mt-0.5 block text-[10px] font-normal text-zinc-400">
                           (B: +{safeInt(h.food)} − {fc})
                         </span>
                       </>

@@ -330,6 +330,7 @@ export async function queueTrainUnit(
         cityId,
         unitId,
         amount: n,
+        researchTier: user.researchTier,
       });
     });
   } catch (e: unknown) {

@@ -44,28 +44,26 @@ export function ResearchStatusStrip({
   const tr = locale === "en";
 
   return (
-    <div className="mb-4 space-y-3 rounded-lg border border-amber-900/45 bg-black/40 px-3 py-3 text-sm">
-      <div>
-        <span className="font-semibold text-amber-200/95">
-          {tr ? "Empire research" : "İmparatorluk araştırması"}
+    <div className="mb-4 space-y-3 rounded-lg border border-amber-900/45 bg-zinc-950/80 px-3 py-3 text-sm shadow-inner ring-1 ring-white/5">
+      <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1 border-b border-zinc-800/90 pb-2">
+        <span className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+          {tr ? "Empire tier" : "İmparatorluk"}
         </span>
         {empireBusy ? (
-          <span className="ml-2 text-zinc-200">
-            {tr ? "Time left:" : "Kalan süre:"}{" "}
+          <span className="text-zinc-200">
+            {tr ? "Time left:" : "Kalan:"}{" "}
             <span className="tabular-nums font-semibold text-amber-100">
               {fmtEta(empireEtaSec)}
             </span>
           </span>
         ) : (
-          <span className="ml-2 text-zinc-500">
-            {tr ? "(idle)" : "(boş)"}
-          </span>
+          <span className="text-zinc-500">{tr ? "(idle)" : "(boş)"}</span>
         )}
       </div>
 
       <div>
         <span className="font-semibold text-amber-200/95">
-          {tr ? "Age tech queue" : "Çağ teknolojisi kuyruğu"}
+          {tr ? "Technology queue" : "Teknoloji kuyruğu"}
         </span>
         <span className="ml-2 tabular-nums text-zinc-400">
           {eraJobs.length}/{maxEraQueue}
@@ -87,7 +85,7 @@ export function ResearchStatusStrip({
           </ul>
         ) : (
           <p className="mt-1 text-xs text-zinc-500">
-            {tr ? "No age-tech research running." : "Çağ teknolojisi araştırması yok."}
+            {tr ? "No research in queue." : "Kuyrukta araştırma yok."}
           </p>
         )}
       </div>

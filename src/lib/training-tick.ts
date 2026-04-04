@@ -1,4 +1,5 @@
 import { UNITS } from "@/config/units";
+import { unitTrainingTotalDurationSec } from "@/lib/duration-scaling";
 import { prisma } from "@/lib/prisma";
 import type { City, Prisma, User } from "@prisma/client";
 
@@ -72,11 +73,21 @@ const MAX_TRAIN_QUEUE = 3;
  */
 export async function enqueueTrainingJobsTx(
   tx: Prisma.TransactionClient,
-  { userId, cityId, unitId, amount }: EnqueueArgs,
+  {
+    userId,
+    cityId,
+    unitId,
+    amount,
+    researchTier = 0,
+  }: EnqueueArgs & { researchTier?: number },
 ) {
   const n = Math.max(1, Math.min(50, Math.floor(amount)));
   const unitDur = unitSeconds(unitId);
-  const totalDurationSec = unitDur * n;
+  const totalDurationSec = unitTrainingTotalDurationSec({
+    unitTrainSeconds: unitDur,
+    quantity: n,
+    researchTier,
+  });
   const now = Date.now();
 
   const active = await tx.trainingJob.findMany({

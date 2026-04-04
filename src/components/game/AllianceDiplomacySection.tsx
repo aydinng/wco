@@ -39,6 +39,7 @@ export function AllianceDiplomacySection({
   const [kickBusy, setKickBusy] = useState<string | null>(null);
   const [inviteName, setInviteName] = useState("");
   const [inviteMsg, setInviteMsg] = useState<string | null>(null);
+  const [leaveBusy, setLeaveBusy] = useState(false);
 
   useEffect(() => {
     setMessages(initialMessages);
@@ -119,29 +120,50 @@ export function AllianceDiplomacySection({
   }
 
   const t = {
-    leaderNote:
-      locale === "en"
-        ? "Alliance leader (founder): invite players by username, remove members. All members can use the alliance chat for requests, attacks, and scouting."
-        : "İttifak lideri (kurucu): kullanıcı adıyla davet gönderebilir, üye çıkarabilir. Tüm üyeler istek, saldırı ve casusluk konularında sohbeti kullanabilir.",
     chatStrip:
       locale === "en" ? "Alliance chat — tap to open" : "İttifak sohbeti — açmak için tıkla",
     roster:
       locale === "en" ? "Members" : "Üyeler",
-    leader:
-      locale === "en" ? "Leader" : "Lider",
     kick:
       locale === "en" ? "Remove" : "Çıkar",
     invitePh:
       locale === "en" ? "Player username" : "Oyuncu adı",
     inviteBtn:
       locale === "en" ? "Send invite" : "Davet gönder",
+    leave:
+      locale === "en" ? "Leave alliance" : "İttifaktan çık",
+    leaveBusy: "…",
   };
+
+  async function leaveAlliance() {
+    if (!window.confirm(
+      locale === "en"
+        ? "Leave this alliance?"
+        : "Bu ittifaktan ayrılmak istiyor musunuz?",
+    )) {
+      return;
+    }
+    setLeaveBusy(true);
+    try {
+      const res = await fetch("/api/alliances/leave", { method: "POST" });
+      if (res.ok) window.location.reload();
+    } finally {
+      setLeaveBusy(false);
+    }
+  }
 
   return (
     <div className="mb-6 space-y-4">
-      <p className="rounded-lg border border-amber-900/40 bg-black/30 px-3 py-2 text-xs leading-relaxed text-zinc-400">
-        {t.leaderNote}
-      </p>
+      <div className="flex flex-wrap justify-end gap-2">
+        <button
+          type="button"
+          disabled={leaveBusy}
+          onClick={() => void leaveAlliance()}
+          className="rounded border border-zinc-600 bg-zinc-900/60 px-3 py-1.5 text-xs font-semibold text-zinc-200 hover:bg-zinc-800 disabled:opacity-50"
+        >
+          {leaveBusy ? t.leaveBusy : t.leave}
+        </button>
+      </div>
 
       <button
         type="button"
@@ -220,11 +242,6 @@ export function AllianceDiplomacySection({
               >
                 <div>
                   <span className="font-medium text-amber-100">{m.username}</span>
-                  {leader ? (
-                    <span className="ml-2 text-xs font-semibold text-yellow-500">
-                      ({t.leader})
-                    </span>
-                  ) : null}
                 </div>
                 {canKick ? (
                   <button

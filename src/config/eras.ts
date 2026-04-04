@@ -173,6 +173,10 @@ export type ResourceUnlocks = {
   oil: boolean;
 };
 
+/**
+ * Demir / petrol hangi çağdan itibaren açılacağını tek yerden ayarlayın
+ * (kitap dengesi — ileride güncellenebilir).
+ */
 export function getResourceUnlocks(
   eraId: string | null | undefined,
 ): ResourceUnlocks {

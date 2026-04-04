@@ -4,6 +4,7 @@ import { LiveStock } from "@/components/game/LiveStock";
 import { ResourceIcon } from "@/components/game/ResourceIcon";
 import { eraOverviewThumbUrl } from "@/config/eras";
 import { OverviewSupportButton } from "@/components/game/OverviewSupportButton";
+import { WorkersAssignButton } from "@/components/game/WorkersAssignButton";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
@@ -29,6 +30,10 @@ type CityRow = {
   buildEtaSec: number;
   prodLabel: string;
   prodEtaSec: number;
+  workersWood: number;
+  workersIron: number;
+  workersOil: number;
+  workersFood: number;
 };
 
 type SupportConfig = {
@@ -73,6 +78,9 @@ type Props = {
     idleShownRed: string;
     buildIdle: string;
     armyIdle: string;
+    workersDialogTitle: string;
+    workersSave: string;
+    workersClose: string;
   };
 };
 
@@ -169,8 +177,35 @@ export function WarCityOverviewLike({
             </option>
           ))}
         </select>
-        <div className="hidden sm:block">
+        <div className="flex flex-wrap items-center justify-end gap-2">
           <PopBar pop={totals.pop} cap={totals.cap} label={labels.population} />
+          {(() => {
+            const sel = cities.find((c) => c.id === selected);
+            if (!sel) return null;
+            return (
+              <WorkersAssignButton
+                cityId={sel.id}
+                population={sel.population}
+                initial={{
+                  workersWood: sel.workersWood,
+                  workersIron: sel.workersIron,
+                  workersOil: sel.workersOil,
+                  workersFood: sel.workersFood,
+                }}
+                saveLabel={labels.workersSave}
+                showIron={unlocks.iron}
+                showOil={unlocks.oil}
+                labels={{
+                  w: labels.wood,
+                  i: labels.iron,
+                  o: labels.oil,
+                  f: labels.food,
+                }}
+                dialogTitle={labels.workersDialogTitle}
+                closeLabel={labels.workersClose}
+              />
+            );
+          })()}
         </div>
       </div>
 

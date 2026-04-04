@@ -23,8 +23,7 @@ export default async function BuildingsPage() {
   const user = await getCurrentUser();
   const cities = user?.cities ?? [];
   const unlocks = getResourceUnlocks(user?.currentEra);
-  const isAdmin = user?.isAdmin === true;
-  const showBonus = isAdmin;
+  const showBonus = false;
 
   if (!user || cities.length === 0) {
     return (
@@ -48,10 +47,6 @@ export default async function BuildingsPage() {
       >
         {p.buildingsTitle}
       </h2>
-      {isAdmin ? (
-        <p className="mb-6 text-xs text-amber-200/80">{p.adminBonusHint}</p>
-      ) : null}
-
       <div className="space-y-12">
         {ERA_ORDER.map((eraId) => {
           const cfg = getEraConfig(eraId);
