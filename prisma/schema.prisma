@@ -45,6 +45,17 @@ model User {
   /// Oyuncunun bulunduğu çağ (kaynak kilidi + arka plan); yeni üye ilk çağdan başlar
   currentEra String @default("ilk_cag")
 
+  /// Skor bileşenleri (istatistik / sıralama)
+  scoreTotal       Int @default(0)
+  scoreProduction  Int @default(0)
+  scoreTech        Int @default(0)
+  scoreBuilding    Int @default(0)
+
+  blockIncomingMessages Boolean @default(false)
+  settingSoundEnabled   Boolean @default(true)
+  settingNotifyBattle   Boolean @default(true)
+  settingCompactTables  Boolean @default(false)
+
   cities       City[]
   fleets       Fleet[]
   battleReports BattleReport[] @relation("AttackerReports")
@@ -53,6 +64,72 @@ model User {
 
   trainingJobs TrainingJob[]
   buildingJobs BuildingJob[]
+
+  sentMessages     DirectMessage[] @relation("SentMessages")
+  receivedMessages DirectMessage[] @relation("ReceivedMessages")
+  adminTickets     AdminTicket[]
+  foundedAlliances Alliance[]      @relation("AllianceFounder")
+  allianceMember   AllianceMember?
+}
+
+model CityUnitStock {
+  id       String @id @default(cuid())
+  cityId   String
+  city     City   @relation(fields: [cityId], references: [id], onDelete: Cascade)
+  unitId   String
+  quantity Int    @default(0)
+
+  @@unique([cityId, unitId])
+  @@index([cityId])
+}
+
+model Alliance {
+  id         String   @id @default(cuid())
+  name       String   @unique
+  founderId  String
+  founder    User     @relation("AllianceFounder", fields: [founderId], references: [id], onDelete: Cascade)
+  inviteOnly Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  members AllianceMember[]
+}
+
+model AllianceMember {
+  id         String   @id @default(cuid())
+  allianceId String
+  alliance   Alliance @relation(fields: [allianceId], references: [id], onDelete: Cascade)
+  userId     String   @unique
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role       String   @default("member")
+  joinedAt   DateTime @default(now())
+
+  @@index([allianceId])
+}
+
+model AdminTicket {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subject   String
+  body      String
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model DirectMessage {
+  id         String    @id @default(cuid())
+  fromUserId String
+  fromUser   User      @relation("SentMessages", fields: [fromUserId], references: [id], onDelete: Cascade)
+  toUserId   String
+  toUser     User      @relation("ReceivedMessages", fields: [toUserId], references: [id], onDelete: Cascade)
+  subject    String
+  body       String
+  createdAt  DateTime  @default(now())
+  readAt     DateTime?
+
+  @@index([toUserId, createdAt])
+  @@index([fromUserId])
 }
 
 model Fleet {
@@ -146,6 +223,7 @@ model City {
   marketIncoming MarketListing[] @relation("BuyerCity")
   trainingJobs TrainingJob[]
   buildingJobs BuildingJob[]
+  cityUnitStocks CityUnitStock[]
 
   @@index([userId])
 }

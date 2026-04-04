@@ -8,32 +8,49 @@ function unitSeconds(unitId: string): number {
 }
 
 /**
- * Tamamlanan üretimleri şehir asker sayısına ekler.
- * Her job 1 adet askerdir; completesAt <= now ise done olur.
+ * Tamamlanan üretimleri şehir asker sayısı ve birim stoklarına ekler.
  */
 export async function applyTrainingJobs(user: User & { cities: City[] }) {
   const now = new Date();
-  const jobs = (await (prisma as any).trainingJob.findMany({
+  const jobs = await prisma.trainingJob.findMany({
     where: { userId: user.id, status: "queued", completesAt: { lte: now } },
-    select: { id: true, cityId: true },
+    select: { id: true, cityId: true, unitId: true },
     take: 200,
-  })) as { id: string; cityId: string }[];
+  });
   if (jobs.length === 0) return;
 
-  const byCity = new Map<string, number>();
+  type Key = string;
+  const byCityUnit = new Map<Key, number>();
+  const ids: string[] = [];
   for (const j of jobs) {
-    byCity.set(j.cityId, (byCity.get(j.cityId) ?? 0) + 1);
+    ids.push(j.id);
+    const k = `${j.cityId}\0${j.unitId}`;
+    byCityUnit.set(k, (byCityUnit.get(k) ?? 0) + 1);
   }
 
   await prisma.$transaction(async (tx) => {
-    for (const [cityId, add] of byCity) {
+    for (const [k, add] of byCityUnit) {
+      const [cityId, unitId] = k.split("\0");
       await tx.city.update({
         where: { id: cityId },
         data: { soldiers: { increment: add } },
       });
+      await tx.cityUnitStock.upsert({
+        where: {
+          cityId_unitId: { cityId, unitId },
+        },
+        create: {
+          cityId,
+          unitId,
+          quantity: add,
+        },
+        update: {
+          quantity: { increment: add },
+        },
+      });
     }
-    await (tx as any).trainingJob.updateMany({
-      where: { id: { in: jobs.map((j: { id: string }) => j.id) } },
+    await tx.trainingJob.updateMany({
+      where: { id: { in: ids } },
       data: { status: "done" },
     });
   });
@@ -43,13 +60,9 @@ export type EnqueueArgs = {
   userId: string;
   cityId: string;
   unitId: string;
-  amount: number; // 1..10
+  amount: number;
 };
 
-/**
- * Kuyruğa N adet job ekler, job'lar ardışık completesAt alır.
- * Maks 3 aktif (queued) job/city.
- */
 export async function enqueueTrainingJobs({
   userId,
   cityId,
@@ -61,13 +74,13 @@ export async function enqueueTrainingJobs({
   const now = Date.now();
 
   return prisma.$transaction(async (tx) => {
-    const active = await (tx as any).trainingJob.findMany({
+    const active = await tx.trainingJob.findMany({
       where: { userId, cityId, status: "queued" },
       orderBy: { completesAt: "desc" },
       take: 1,
       select: { completesAt: true },
     });
-    const countActive = await (tx as any).trainingJob.count({
+    const countActive = await tx.trainingJob.count({
       where: { userId, cityId, status: "queued" },
     });
     const MAX_QUEUE = 3;
@@ -102,8 +115,7 @@ export async function enqueueTrainingJobs({
       startMs = completesAt.getTime();
     }
 
-    await (tx as any).trainingJob.createMany({ data: rows });
+    await tx.trainingJob.createMany({ data: rows });
     return { added: toAdd };
   });
 }
-

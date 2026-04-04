@@ -227,6 +227,43 @@ async function main() {
     });
   }
 
+  const existingAlliance = await prisma.alliance.findUnique({
+    where: { name: "4 Knights" },
+  });
+  if (!existingAlliance) {
+    await prisma.alliance.create({
+      data: {
+        name: "4 Knights",
+        founderId: user.id,
+        inviteOnly: false,
+        members: { create: { userId: user.id, role: "founder" } },
+      },
+    });
+  }
+
+  const turksA = await prisma.alliance.findUnique({ where: { name: "Turks" } });
+  if (!turksA) {
+    const turksLeader = await prisma.user.upsert({
+      where: { username: "turks_leader" },
+      create: {
+        username: "turks_leader",
+        passwordHash: await bcrypt.hash("bot123", 10),
+        tribeName: "Turks",
+        nationName: "Turkey",
+        registrationCountry: "tr",
+      },
+      update: {},
+    });
+    await prisma.alliance.create({
+      data: {
+        name: "Turks",
+        founderId: turksLeader.id,
+        inviteOnly: true,
+        members: { create: { userId: turksLeader.id, role: "founder" } },
+      },
+    });
+  }
+
   console.log(
     "Seed OK: admin (yönetici) şifre =",
     adminPassword,

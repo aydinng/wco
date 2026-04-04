@@ -1,3 +1,4 @@
+import { FleetSendForm } from "@/components/game/FleetSendForm";
 import { WorldMap2D, type MapCityPoint } from "@/components/game/WorldMap2D";
 import { getDictionary } from "@/i18n/dictionaries";
 import { getCurrentUser } from "@/lib/current-user";
@@ -57,6 +58,29 @@ export default async function WorldmapPage() {
         <p className="text-sm text-zinc-500">{p.worldmapNoCities}</p>
       )}
 
+      {me && me.cities.length > 0 && (
+        <div className="mt-6 rounded-lg border border-amber-900/40 bg-black/30 p-4">
+          <h3
+            className="mb-3 text-sm font-semibold text-amber-200/90"
+            style={{ fontFamily: "var(--font-warcity), serif" }}
+          >
+            {locale === "en" ? "Send fleet" : "Filo gönder"}
+          </h3>
+          <FleetSendForm
+            cities={me.cities.map((c) => ({
+              id: c.id,
+              name: c.name,
+              coordX: c.coordX,
+              coordY: c.coordY,
+              coordZ: c.coordZ,
+              soldiers: c.soldiers,
+              barracksLevel: c.barracksLevel,
+            }))}
+            play={p}
+          />
+        </div>
+      )}
+
       <div className="mt-6 overflow-x-auto rounded-lg border border-[#2a3441]/70 bg-black/20">
         <table className="w-full min-w-[560px] border-collapse text-sm">
           <thead>
@@ -109,7 +133,9 @@ export default async function WorldmapPage() {
             {dict.game.fleet}
           </Link>
           {" — "}
-          {p.worldmapFleetCta}
+          {locale === "en"
+            ? "View troops by city and unit type."
+            : "Şehir ve birim türüne göre askerleri görüntüle."}
         </p>
         <p className="text-xs text-zinc-500">{p.worldmapComingSoon}</p>
       </div>

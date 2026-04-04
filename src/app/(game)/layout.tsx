@@ -5,6 +5,7 @@ import { getEraConfig } from "@/config/eras";
 import { getDictionary } from "@/i18n/dictionaries";
 import { getCurrentUser } from "@/lib/current-user";
 import { getLocale } from "@/lib/locale";
+import { getPlayerRankByUsername } from "@/lib/player-rankings";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -21,6 +22,14 @@ export default async function GameShellLayout({
   const locale = await getLocale();
   const dict = getDictionary(locale);
   const now = Date.now();
+
+  const scoreLine =
+    user && user.username
+      ? {
+          total: user.scoreTotal,
+          rank: (await getPlayerRankByUsername(user.username)) ?? 1,
+        }
+      : null;
 
   const activeMissions =
     user?.id
@@ -72,6 +81,7 @@ export default async function GameShellLayout({
             tribeName: user?.tribeName ?? "",
             registrationCountry: user?.registrationCountry ?? "",
           }}
+          scoreLine={scoreLine}
           productionCities={
             user?.cities?.map((c) => ({ id: c.id, name: c.name })) ?? []
           }

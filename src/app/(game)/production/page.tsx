@@ -41,7 +41,7 @@ export default async function ProductionPage({
   const selectedCity =
     cities.find((c) => c.id === selectedCityId) ?? cities[0]!;
 
-  const jobs = await (prisma as any).trainingJob.findMany({
+  const jobs = await prisma.trainingJob.findMany({
     where: {
       userId: user.id,
       cityId: selectedCity.id,

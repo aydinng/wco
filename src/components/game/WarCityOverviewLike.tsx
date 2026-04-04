@@ -3,6 +3,7 @@
 import { LiveStock } from "@/components/game/LiveStock";
 import { ResourceIcon } from "@/components/game/ResourceIcon";
 import { eraOverviewThumbUrl } from "@/config/eras";
+import { OverviewSupportButton } from "@/components/game/OverviewSupportButton";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
@@ -30,6 +31,24 @@ type CityRow = {
   prodEtaSec: number;
 };
 
+type SupportConfig = {
+  allCities: { id: string; name: string }[];
+  labels: {
+    support: string;
+    fromCity: string;
+    sendRes: string;
+    sendTroops: string;
+    wood: string;
+    iron: string;
+    oil: string;
+    food: string;
+    unit: string;
+    qty: string;
+    submit: string;
+    close: string;
+  };
+};
+
 type Props = {
   locale: string;
   currentEra: string | null | undefined;
@@ -37,6 +56,8 @@ type Props = {
   cities: CityRow[];
   /** İmparatorluk araştırma süresi (sn); 0 = boşta */
   researchEtaSec: number;
+  /** İkinci şehirden itibaren destek butonu */
+  support?: SupportConfig | null;
   labels: {
     wood: string;
     iron: string;
@@ -101,6 +122,7 @@ export function WarCityOverviewLike({
   unlocks,
   cities,
   researchEtaSec,
+  support,
   labels,
 }: Props) {
   const eraThumb = eraOverviewThumbUrl(currentEra);
@@ -175,6 +197,8 @@ export function WarCityOverviewLike({
             const active = c.id === selected;
             const buildSec = Math.max(0, c.buildEtaSec);
             const prodSec = Math.max(0, c.prodEtaSec);
+            const showSupport =
+              support && idx > 0 && support.allCities.length >= 2;
             return (
               <div
                 key={c.id}
@@ -206,6 +230,15 @@ export function WarCityOverviewLike({
                       <span className="text-xs text-zinc-500">
                         ({c.coordX}:{c.coordY}:{c.coordZ})
                       </span>
+                      {showSupport ? (
+                        <OverviewSupportButton
+                          locale={locale}
+                          targetCityId={c.id}
+                          targetName={c.name}
+                          sourceCities={support.allCities}
+                          labels={support.labels}
+                        />
+                      ) : null}
                     </div>
                   </div>
 

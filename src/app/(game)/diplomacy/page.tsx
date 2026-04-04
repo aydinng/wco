@@ -1,46 +1,32 @@
-import { PlaceholderPage } from "@/components/game/PlaceholderPage";
+import { JoinAlliancePanel } from "@/components/game/JoinAlliancePanel";
 import { StatsRankingsTabs } from "@/components/game/StatsRankingsTabs";
+import { PlaceholderPage } from "@/components/game/PlaceholderPage";
 import { getDictionary } from "@/i18n/dictionaries";
+import { getAllianceRankingRows } from "@/lib/alliance-rankings";
+import { getCurrentUser } from "@/lib/current-user";
 import { getLocale } from "@/lib/locale";
-import Link from "next/link";
+import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
-
-const MOCK_ALLIANCES = [
-  {
-    rank: 1,
-    name: "4 Knights",
-    founder: "Leader1",
-    prod: 100,
-    tech: 58,
-    bld: 41,
-    total: 72,
-  },
-  {
-    rank: 2,
-    name: "Turks",
-    founder: "Leader2",
-    prod: 88,
-    tech: 72,
-    bld: 65,
-    total: 68,
-  },
-  {
-    rank: 3,
-    name: "odtü",
-    founder: "Leader3",
-    prod: 65,
-    tech: 80,
-    bld: 55,
-    total: 61,
-  },
-];
 
 export default async function DiplomacyPage() {
   const locale = await getLocale();
   const dict = getDictionary(locale);
+  const user = await getCurrentUser();
 
-  const inAlliance = false;
+  const allianceRows = await getAllianceRankingRows();
+
+  const joinList = await prisma.alliance.findMany({
+    orderBy: { name: "asc" },
+    select: {
+      id: true,
+      name: true,
+      inviteOnly: true,
+      founder: { select: { username: true } },
+    },
+  });
+
+  const inAlliance = !!user?.allianceMember;
 
   const labels =
     locale === "en"
@@ -60,7 +46,7 @@ export default async function DiplomacyPage() {
           tabPlayers: "Oyuncu sıralaması",
           tabAlliances: "İttifak sıralaması",
           colRank: "Sıra",
-          colName: "İttifak",
+          colName: "İttifak Adı",
           colScore: "Skor",
           colFounder: "Kurucu",
           colProd: "Üretim",
@@ -71,38 +57,33 @@ export default async function DiplomacyPage() {
 
   return (
     <PlaceholderPage title={dict.game.diplomacy}>
-      {!inAlliance && (
-        <div className="mb-6 rounded border border-amber-800/50 bg-amber-950/20 px-4 py-3 text-center">
-          <Link
-            href="#ittifaklar"
-            className="text-sm font-semibold text-amber-200 underline hover:text-amber-100"
-          >
-            {locale === "en" ? "Join an alliance" : "İttifaka katıl"}
-          </Link>
-        </div>
-      )}
+      <JoinAlliancePanel
+        locale={locale}
+        alreadyInAlliance={inAlliance}
+        alliances={joinList.map((a) => ({
+          id: a.id,
+          name: a.name,
+          founder: a.founder.username,
+          inviteOnly: a.inviteOnly,
+        }))}
+      />
 
-      <div id="ittifaklar" className="relative">
-        <h2
-          className="mb-2 text-center text-sm font-bold uppercase tracking-wide text-red-500/90"
-          style={{ fontFamily: "var(--font-warcity), serif" }}
-        >
-          {locale === "en"
-            ? "Top 50 alliance scores (by member totals)"
-            : "İlk 50 ittifak skorları (üyelerin skorları toplamına göre)"}
-        </h2>
-        <StatsRankingsTabs
-          playerRows={[]}
-          allianceRows={MOCK_ALLIANCES}
-          initialTab="a"
-          labels={labels}
-        />
-        <p className="mt-4 text-xs text-zinc-500">
-          {locale === "en"
-            ? "Placeholder data — your alliance UI will plug in here."
-            : "Örnek liste — gerçek ittifak verisi bağlanınca güncellenecek."}
-        </p>
-      </div>
+      <h2
+        className="mb-2 text-center text-sm font-bold uppercase tracking-wide text-red-600"
+        style={{ fontFamily: "var(--font-warcity), serif" }}
+      >
+        {locale === "en"
+          ? "Top 50 alliance scores (by member totals)"
+          : "İlk 50 İttifak Skorları Dağılımı (Üyelerin Skorları Toplamına Göre Sıralanmıştır)"}
+      </h2>
+      <StatsRankingsTabs
+        playerRows={[]}
+        allianceRows={allianceRows}
+        allianceOnly
+        initialTab="a"
+        labels={labels}
+        classic
+      />
     </PlaceholderPage>
   );
 }

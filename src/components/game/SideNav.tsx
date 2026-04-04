@@ -34,6 +34,8 @@ type GameNavProps = {
     tribeName: string;
     registrationCountry: string;
   };
+  /** Çıkışın altında skor + sıra */
+  scoreLine?: { total: number; rank: number } | null;
   /** Asker üretimi sayfası için hızlı şehir seçimi */
   productionCities?: { id: string; name: string }[];
   activeMissions?: { label: string; etaSec: number }[];
@@ -71,6 +73,7 @@ export function SideNav({
   serverNow,
   serverDateLabel,
   profile,
+  scoreLine,
   productionCities,
   activeMissions,
   activeMissionsTitle,
@@ -222,6 +225,25 @@ export function SideNav({
                 {labels.logout}
               </button>
             </div>
+            {scoreLine ? (
+              <div
+                className="mt-3 w-full rounded border border-black bg-black px-2 py-2 text-[11px] text-[#FFFF00]"
+                style={WARCITY_FONT}
+              >
+                <div className="font-bold text-red-500">
+                  {locale === "en" ? "Score" : "Skor"}
+                </div>
+                <div className="tabular-nums text-[#FFFF00]">
+                  {scoreLine.total.toLocaleString(locale === "en" ? "en-US" : "tr-TR")}
+                </div>
+                <div className="mt-1 text-[10px] text-zinc-400">
+                  {locale === "en" ? "Your rank:" : "Sıran:"}{" "}
+                  <span className="font-semibold text-[#FFFF00]">
+                    #{scoreLine.rank}
+                  </span>
+                </div>
+              </div>
+            ) : null}
           </nav>
 
           {blackSectionTitle(labels.menuLeadership)}

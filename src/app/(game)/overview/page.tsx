@@ -32,7 +32,7 @@ export default async function OverviewPage() {
     const now = Date.now();
     const firstJobByCity = await Promise.all(
       cities.map(async (c) => {
-        const j = await (prisma as any).trainingJob.findFirst({
+        const j = await prisma.trainingJob.findFirst({
           where: { userId: user.id, cityId: c.id, status: "queued" },
           orderBy: { completesAt: "asc" },
           select: { unitId: true, completesAt: true },
@@ -54,7 +54,7 @@ export default async function OverviewPage() {
 
     const firstBuildByCity = await Promise.all(
       cities.map(async (c) => {
-        const b = await (prisma as any).buildingJob.findFirst({
+        const b = await prisma.buildingJob.findFirst({
           where: { userId: user.id, cityId: c.id, status: "queued" },
           orderBy: { completesAt: "asc" },
           select: { buildingId: true, toLevel: true, completesAt: true },
@@ -112,6 +112,43 @@ export default async function OverviewPage() {
         unlocks={unlocks}
         cities={viewCities}
         researchEtaSec={0}
+        support={
+          cities.length >= 2 && researchTier >= 1
+            ? {
+                allCities: cities.map((c) => ({ id: c.id, name: c.name })),
+                labels:
+                  locale === "en"
+                    ? {
+                        support: "Support",
+                        fromCity: "From city",
+                        sendRes: "Resources",
+                        sendTroops: "Troops",
+                        wood: "Wood",
+                        iron: "Iron",
+                        oil: "Oil",
+                        food: "Food",
+                        unit: "Unit type",
+                        qty: "Amount",
+                        submit: "Send",
+                        close: "Close",
+                      }
+                    : {
+                        support: "Destek",
+                        fromCity: "Gönderen şehir",
+                        sendRes: "Hammadde",
+                        sendTroops: "Asker",
+                        wood: "Odun",
+                        iron: "Demir",
+                        oil: "Petrol",
+                        food: "Besin",
+                        unit: "Birim",
+                        qty: "Adet",
+                        submit: "Gönder",
+                        close: "Kapat",
+                      },
+              }
+            : null
+        }
         labels={{
           wood: p.resWood,
           iron: p.resIron,

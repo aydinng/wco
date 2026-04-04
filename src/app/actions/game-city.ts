@@ -125,7 +125,7 @@ export async function upgradeBuilding(
     return { ok: false, error: await pe("errBuildingLocked") };
   }
 
-  const active = await (prisma as any).buildingJob.findFirst({
+  const active = await prisma.buildingJob.findFirst({
     where: { userId: user.id, cityId, status: "queued" },
     select: { id: true },
   });
@@ -163,7 +163,7 @@ export async function upgradeBuilding(
         food: city.food - cost.food,
       },
     });
-    await (tx as any).buildingJob.create({
+    await tx.buildingJob.create({
       data: {
         userId: user.id,
         cityId,
@@ -280,7 +280,7 @@ export async function queueTrainUnit(
     return { ok: false, error: await pe("errBuildingLocked") };
   }
 
-  const active = await (prisma as any).trainingJob.count({
+  const active = await prisma.trainingJob.count({
     where: { userId: user.id, cityId, status: "queued" },
   });
   const MAX_TRAIN_QUEUE = 3;

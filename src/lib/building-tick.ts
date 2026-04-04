@@ -7,7 +7,7 @@ import type { City, User } from "@prisma/client";
  */
 export async function applyBuildingJobs(user: User & { cities: City[] }) {
   const now = new Date();
-  const jobs = (await (prisma as any).buildingJob.findMany({
+  const jobs = (await prisma.buildingJob.findMany({
     where: { userId: user.id, status: "queued", completesAt: { lte: now } },
     select: { id: true, cityId: true, buildingId: true, toLevel: true },
     take: 100,
@@ -33,7 +33,7 @@ export async function applyBuildingJobs(user: User & { cities: City[] }) {
         data: { [field]: j.toLevel },
       });
     }
-    await (tx as any).buildingJob.updateMany({
+    await tx.buildingJob.updateMany({
       where: { id: { in: jobs.map((j: { id: string }) => j.id) } },
       data: { status: "done" },
     });
