@@ -10,10 +10,11 @@ import { ResourceIcon } from "@/components/game/ResourceIcon";
 import { UnitTrainRow } from "@/components/game/UnitTrainRow";
 import {
   ERA_ORDER,
+  eraBackgroundUrl,
   eraOrdinalNumber,
-  getEraDisplayName,
-  getEraConfig,
   eraIndex,
+  getEraConfig,
+  getEraDisplayName,
   type ResourceUnlocks,
 } from "@/config/eras";
 import type { UnitSpec } from "@/config/units";
@@ -127,12 +128,39 @@ export function UnitCatalog({
 
   return (
     <div className="mb-2 w-full space-y-8 overflow-hidden rounded-lg border border-zinc-700/70">
-      {sections.map(({ eraId, list, eraName }) => (
+      {sections.map(({ eraId, list, eraName }) => {
+        const cfg = getEraConfig(eraId);
+        const bg = eraBackgroundUrl(eraId);
+        const ordinal = eraOrdinalNumber(eraId);
+        return (
         <div key={eraId}>
-          <div className="mb-2 w-full rounded bg-red-800 px-3 py-2 text-center shadow-inner">
-            <span className="text-sm font-bold tracking-wide text-white">
-              {eraName}
-            </span>
+          <div
+            className="relative mb-2 w-full overflow-hidden rounded-lg border-2 shadow-lg"
+            style={{
+              borderColor: cfg.banner.borderColor,
+              boxShadow: `0 0 22px ${cfg.banner.glow}`,
+            }}
+          >
+            <div className="relative h-20 w-full sm:h-24">
+              <Image
+                src={bg}
+                alt=""
+                fill
+                className="object-cover object-center"
+                sizes="(max-width: 1280px) 100vw, 1280px"
+                priority={eraId === "ilk_cag"}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
+              <div className="absolute inset-0 ring-1 ring-inset ring-white/10" />
+              <div className="absolute bottom-1.5 left-2 right-2 text-center">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
+                  {locale === "en" ? `Age ${ordinal}` : `Çağ ${ordinal}`}
+                </p>
+                <p className="text-[11px] font-bold leading-tight text-white drop-shadow-md">
+                  {eraName}
+                </p>
+              </div>
+            </div>
           </div>
           <div>
             {list.map((u) => {
@@ -224,7 +252,8 @@ export function UnitCatalog({
             })}
           </div>
         </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

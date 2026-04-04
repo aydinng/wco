@@ -73,12 +73,12 @@ export const ERAS: Record<EraId, EraConfig> = {
     id: "yeniden_dogus",
     name: "Rönesans Çağı",
     nameEn: "Renaissance Age",
-    backgroundFile: "bg-yeniden_dogus.svg",
+    backgroundFile: "bg-yeniden_dogus.png",
     banner: {
-      titleColor: "#fff0dd",
-      subtitleColor: "#d4b896",
-      borderColor: "#8b6914",
-      glow: "rgba(212, 175, 55, 0.3)",
+      titleColor: "#fff4e6",
+      subtitleColor: "#e8d4b8",
+      borderColor: "#b45309",
+      glow: "rgba(234, 88, 12, 0.45)",
     },
   },
   sanayi: {
