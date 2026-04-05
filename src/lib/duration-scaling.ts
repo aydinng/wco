@@ -4,8 +4,8 @@
  * Hızlandırma satın alma yok; R yalnızca mevcut bonuslardan (ör. imparatorluk araştırması).
  */
 
-/** Seviye başına süre çarpanı (her seviye belirgin uzar) */
-export const DURATION_LEVEL_COEFF = 1.3;
+/** Seviye başına süre çarpanı (kitap tarzı: her hedef seviye belirgin uzar) */
+export const DURATION_LEVEL_COEFF = 1.36;
 
 /** Araştırma: üst süre tavanı (kitap: 24h–168h; tek iş için üst sınır 168 saat) */
 export const MAX_RESEARCH_DURATION_SEC = 168 * 3600;
@@ -32,7 +32,12 @@ export function scaledDurationSec(opts: {
   const raw = opts.baseSec * Math.pow(coeff, L - 1);
   const denom = 1 + Math.max(0, opts.speedBonusPct) / 100;
   const t = raw / denom;
-  return Math.min(opts.maxSec, Math.max(1, Math.ceil(t)));
+  /** Üst üste yuvarlanınca komşu seviyeler aynı görünmesin diye seviye başına küçük ek */
+  const levelStepBonusSec = Math.max(0, L - 1) * 8;
+  return Math.min(
+    opts.maxSec,
+    Math.max(1, Math.ceil(t) + levelStepBonusSec),
+  );
 }
 
 /**

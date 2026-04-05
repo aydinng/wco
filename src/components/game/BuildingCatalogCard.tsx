@@ -95,14 +95,27 @@ export function BuildingCatalogCard({
   const levelStr = maxLv < 1 ? play.levelNone : String(maxLv);
 
   const capLv = maxLevelForBuilding(building);
-  const nextDurSec =
-    locked || maxLv >= capLv
-      ? undefined
-      : buildingUpgradeDurationSec({
-          buildingId: building,
-          toLevel: maxLv + 1,
-          researchTier,
-        });
+  /** Her şehir için bir sonraki yükseltmenin hedef seviyesi (lv+1); maxLv kullanılmaz — çok şehirde yanlış süre gösterimini önler */
+  const perCityNextDurations = cities
+    .map((c) => {
+      const lv = levelFor(c, building);
+      if (locked || lv >= capLv) return null;
+      return buildingUpgradeDurationSec({
+        buildingId: building,
+        toLevel: lv + 1,
+        researchTier,
+      });
+    })
+    .filter((x): x is number => x != null);
+  const uniqueDurSorted = [...new Set(perCityNextDurations)].sort(
+    (a, b) => a - b,
+  );
+  const timeFieldValue =
+    uniqueDurSorted.length === 0
+      ? "—"
+      : uniqueDurSorted.length === 1
+        ? formatCountdownSeconds(uniqueDurSorted[0], locale)
+        : `${formatCountdownSeconds(uniqueDurSorted[0], locale)} – ${formatCountdownSeconds(uniqueDurSorted[uniqueDurSorted.length - 1]!, locale)}`;
 
   return (
     <div
@@ -135,11 +148,9 @@ export function BuildingCatalogCard({
           <CatalogFieldLine
             label={play.catalogFieldTime}
             value={
-              locked || maxLv >= capLv
+              locked || maxLv >= capLv || perCityNextDurations.length === 0
                 ? "—"
-                : nextDurSec != null && nextDurSec > 0
-                  ? formatCountdownSeconds(nextDurSec, locale)
-                  : "—"
+                : timeFieldValue
             }
             labelClassName={SKY}
             valueClassName={SKY_VAL}
@@ -167,6 +178,16 @@ export function BuildingCatalogCard({
         <div className="flex min-w-0 flex-col items-stretch justify-center gap-3 sm:items-end">
           {cities.map((c) => {
             const lv = levelFor(c, building);
+            const rowDurSec =
+              !locked && lv < capLv
+                ? buildingUpgradeDurationSec({
+                    buildingId: building,
+                    toLevel: lv + 1,
+                    researchTier,
+                  })
+                : null;
+            const showRowDur =
+              uniqueDurSorted.length > 1 && rowDurSec != null && rowDurSec > 0;
             return (
               <div key={c.id} className="w-full max-w-[22rem] sm:ml-auto">
                 {locked ? (
@@ -174,7 +195,13 @@ export function BuildingCatalogCard({
                     {play.errBuildingLocked}
                   </span>
                 ) : (
-                  <UpgradeBuildingButton
+                  <>
+                    {showRowDur ? (
+                      <div className="mb-1 text-right text-[10px] tabular-nums text-sky-200/85">
+                        {c.name}: {formatCountdownSeconds(rowDurSec, locale)}
+                      </div>
+                    ) : null}
+                    <UpgradeBuildingButton
                     cityId={c.id}
                     building={building}
                     currentLevel={lv}
@@ -185,6 +212,7 @@ export function BuildingCatalogCard({
                     ilkCagWoodFoodOnly={eraIndex(currentEra) < 1}
                     currentEra={currentEra}
                   />
+                  </>
                 )}
               </div>
             );

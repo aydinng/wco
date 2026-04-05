@@ -41,9 +41,9 @@ export function scaledEraTechDurationSec(
 ): number {
   const base = Math.max(0, entry.durationSec);
   /** Her mevcut seviye için süre belirgin şekilde uzar (tekrarlanan araştırmalar). */
-  const scaled = Math.round(
-    base * (1 + Math.max(0, currentLevelBeforeResearch) * 0.16),
-  );
+  const lv = Math.max(0, currentLevelBeforeResearch);
+  /** Tekrarlayan çağ teknolojilerinde süre seviye ile belirgin uzar */
+  const scaled = Math.round(base * (1 + lv * 0.2) + lv * 12);
   if (scaled === 0) return 0;
   return Math.min(H48, Math.max(1, scaled));
 }
@@ -317,8 +317,10 @@ const RAW: RawTech[] = [
     nameTr: "Sosyalizm",
     nameEn: "Socialism",
     refSec: 3 * M + 20,
-    goalTr: "İmparatorluk refahı ve nüfus büyümesi.",
-    goalEn: "Empire welfare and population growth.",
+    goalTr:
+      "İmparatorluk nüfusu: her seviye +0,5 kişi/saat (seviye 4 → +2/saat).",
+    goalEn:
+      "Empire population: +0.5 people/hour per level (level 4 → +2/h).",
   },
   {
     id: "internet",
