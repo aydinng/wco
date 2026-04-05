@@ -43,6 +43,7 @@ export type Dictionary = {
     loginColRank: string;
     loginColCountry: string;
     loginColPlayer: string;
+    loginColScore: string;
     /** Klasik sol menü */
     navHome: string;
     /** Giriş ekranı (referans görsel) — üst başlık */
@@ -393,6 +394,7 @@ const tr: Dictionary = {
     loginColRank: "Sıra",
     loginColCountry: "Ülke",
     loginColPlayer: "Oyuncu",
+    loginColScore: "Skor",
     navHome: "Ana Sayfa",
     loginWelcomeTitle: "War of City'ye Hoş Geldiniz",
     loginIntroParagraph1:
@@ -786,6 +788,7 @@ const en: Dictionary = {
     loginColRank: "Rank",
     loginColCountry: "Country",
     loginColPlayer: "Player",
+    loginColScore: "Score",
     navHome: "Home",
     loginWelcomeTitle: "Welcome to War of City",
     loginIntroParagraph1:

@@ -135,3 +135,78 @@ export async function startEraTechResearch(
   paths();
   return { ok: true };
 }
+
+export async function cancelEraTechResearch(
+  jobId: string,
+): Promise<EraTechActionResult> {
+  const session = await auth();
+  const userId = session?.user?.id;
+  if (!userId) return { ok: false, error: "Giriş gerekli" };
+
+  const job = await prisma.eraTechResearchJob.findFirst({
+    where: { id: jobId, userId, status: "queued" },
+  });
+  if (!job) return { ok: false, error: "İş bulunamadı." };
+
+  const entry = getTechByKey(job.techKey);
+  if (!entry) return { ok: false, error: "Geçersiz teknoloji" };
+
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) return { ok: false, error: "Kullanıcı yok" };
+
+  const city = await prisma.city.findFirst({
+    where: { id: job.cityId, userId },
+  });
+  if (!city) return { ok: false, error: "Şehir bulunamadı" };
+
+  const existing = await prisma.userEraTech.findUnique({
+    where: { userId_techKey: { userId, techKey: job.techKey } },
+  });
+  const currentLv = existing?.level ?? 0;
+  const nextLevel = currentLv + 1;
+  const unlocks = getResourceUnlocks(user.currentEra);
+  let cost = eraTechResearchCost(entry, nextLevel);
+  if (entry.eraOrdinal === 1) {
+    cost = { ...cost, iron: 0, oil: 0 };
+  } else {
+    if (!unlocks.iron) cost = { ...cost, iron: 0 };
+    if (!unlocks.oil) cost = { ...cost, oil: 0 };
+  }
+
+  const now = new Date();
+  const wasActive = job.completesAt != null;
+
+  await prisma.$transaction(async (tx) => {
+    await tx.city.update({
+      where: { id: city.id },
+      data: {
+        wood: city.wood + cost.wood,
+        iron: city.iron + cost.iron,
+        oil: city.oil + cost.oil,
+        food: city.food + cost.food,
+      },
+    });
+    await tx.eraTechResearchJob.update({
+      where: { id: jobId },
+      data: { status: "cancelled" },
+    });
+  });
+
+  if (wasActive) {
+    const pending = await prisma.eraTechResearchJob.findFirst({
+      where: { userId, status: "queued", completesAt: null },
+      orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+    });
+    if (pending) {
+      await prisma.eraTechResearchJob.update({
+        where: { id: pending.id },
+        data: {
+          completesAt: new Date(now.getTime() + pending.durationSec * 1000),
+        },
+      });
+    }
+  }
+
+  paths();
+  return { ok: true };
+}

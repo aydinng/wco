@@ -1,4 +1,5 @@
 import { GameAutoRefresh } from "@/components/game/GameAutoRefresh";
+import { PresencePing } from "@/components/game/PresencePing";
 import { SideNav } from "@/components/game/SideNav";
 import { TopBanner } from "@/components/game/TopBanner";
 import { BRAND } from "@/config/brand";
@@ -94,6 +95,7 @@ export default async function GameShellLayout({
           etaLabel="ETA"
         />
         <main className="min-w-0 flex-1">
+          {user?.id ? <PresencePing /> : null}
           {completionHint ? (
             <GameAutoRefresh
               nextCompletionIso={

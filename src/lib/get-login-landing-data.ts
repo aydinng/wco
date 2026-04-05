@@ -9,8 +9,13 @@ export type LoginLandingData = {
     registrationCountry: string;
     createdAt: Date;
   } | null;
-  topCountries: { rank: number; countryId: string }[];
-  topPlayers: { rank: number; username: string; countryId: string }[];
+  topCountries: { rank: number; countryId: string; score: number }[];
+  topPlayers: {
+    rank: number;
+    username: string;
+    countryId: string;
+    score: number;
+  }[];
 };
 
 const emptyLandingData: LoginLandingData = {
@@ -25,14 +30,16 @@ export async function getLoginLandingData(): Promise<LoginLandingData> {
   const whereRegistered = { passwordHash: { not: null } as const };
 
   try {
-    const [totalRegistered, allUsers, lastUser] = await Promise.all([
+    const onlineThreshold = new Date(Date.now() - 5 * 60 * 1000);
+
+    const [totalRegistered, allUsers, lastUser, onlineCount] = await Promise.all([
       prisma.user.count({ where: whereRegistered }),
       prisma.user.findMany({
         where: whereRegistered,
         select: {
           username: true,
           registrationCountry: true,
-          cities: { select: { wood: true, iron: true, oil: true, food: true } },
+          scoreTotal: true,
         },
       }),
       prisma.user.findFirst({
@@ -40,11 +47,17 @@ export async function getLoginLandingData(): Promise<LoginLandingData> {
         where: whereRegistered,
         select: { username: true, registrationCountry: true, createdAt: true },
       }),
+      prisma.user.count({
+        where: {
+          ...whereRegistered,
+          lastSeenAt: { gte: onlineThreshold },
+        },
+      }),
     ]);
 
     return {
       totalRegistered,
-      onlineCount: 0,
+      onlineCount,
       lastUser,
       topCountries: aggregateTopCountries(allUsers, 5),
       topPlayers: aggregateTopPlayers(allUsers, 5),

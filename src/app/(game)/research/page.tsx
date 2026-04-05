@@ -41,8 +41,10 @@ export default async function ResearchPage() {
     eraTechRows.map((r) => [r.techKey, r.level]),
   );
   const activeEraTechJobs = eraJobList.map((j) => ({
+    id: j.id,
     techKey: j.techKey,
     completesAt: j.completesAt?.toISOString() ?? null,
+    cityId: j.cityId,
   }));
 
   const eraJobsForStrip = eraJobList.map((j) => {

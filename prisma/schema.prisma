@@ -51,6 +51,11 @@ model User {
   scoreTech        Int @default(0)
   scoreBuilding    Int @default(0)
 
+  /// Son istek (oyunda çevrim içi sayımı için; /api/presence/ping)
+  lastSeenAt DateTime?
+
+  @@index([lastSeenAt])
+
   blockIncomingMessages Boolean @default(false)
   settingSoundEnabled   Boolean @default(true)
   settingNotifyBattle   Boolean @default(true)

@@ -11,6 +11,8 @@ import {
   isIlkCagCoreBuilding,
   maxLevelForBuilding,
 } from "@/lib/economy";
+import { buildingUpgradeDurationSec } from "@/lib/duration-scaling";
+import { formatCountdownSeconds } from "@/lib/format-countdown";
 import type { AppLocale } from "@/lib/locale";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -27,6 +29,8 @@ type Props = {
   ilkCagWoodFoodOnly?: boolean;
   /** Sunucu ile aynı kaynak: `currentEra` verilirse ilk çağ maliyeti buna göre de hesaplanır */
   currentEra?: string | null;
+  /** İmparatorluk araştırma seviyesi — bir sonraki yükseltme süresi */
+  researchTier: number;
 };
 
 export function UpgradeBuildingButton({
@@ -39,6 +43,7 @@ export function UpgradeBuildingButton({
   locale,
   ilkCagWoodFoodOnly = false,
   currentEra,
+  researchTier,
 }: Props) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
@@ -60,6 +65,15 @@ export function UpgradeBuildingButton({
   const showIron = !woodFoodOnly && unlocks.iron && cost.iron > 0;
   const showOil = !woodFoodOnly && unlocks.oil && cost.oil > 0;
 
+  const nextDurSec =
+    !maxed && currentLevel < cap
+      ? buildingUpgradeDurationSec({
+          buildingId: building,
+          toLevel: currentLevel + 1,
+          researchTier,
+        })
+      : 0;
+
   async function onClick() {
     setErr(null);
     setBusy(true);
@@ -74,7 +88,13 @@ export function UpgradeBuildingButton({
 
   return (
     <div className="flex w-full min-w-0 flex-col gap-1.5">
-      <div className="flex w-full min-w-0 flex-row flex-wrap items-center justify-end gap-2">
+      <div className="flex w-full min-w-0 flex-col items-stretch gap-1">
+        {!maxed && nextDurSec > 0 ? (
+          <div className="text-right text-[10px] tabular-nums text-sky-200/90">
+            {formatCountdownSeconds(nextDurSec, locale)}
+          </div>
+        ) : null}
+        <div className="flex w-full min-w-0 flex-row flex-wrap items-center justify-end gap-2">
         {maxed ? (
           <span
             className="shrink-0 rounded border border-emerald-800/70 bg-emerald-950/35 px-3 py-1.5 text-center text-sm font-semibold text-emerald-100/95"
@@ -116,6 +136,7 @@ export function UpgradeBuildingButton({
             </button>
           </>
         )}
+        </div>
       </div>
       {err ? (
         <span className="max-w-[20rem] text-right text-xs text-red-400">

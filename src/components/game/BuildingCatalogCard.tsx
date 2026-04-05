@@ -211,6 +211,7 @@ export function BuildingCatalogCard({
                     locale={locale}
                     ilkCagWoodFoodOnly={eraIndex(currentEra) < 1}
                     currentEra={currentEra}
+                    researchTier={researchTier}
                   />
                   </>
                 )}

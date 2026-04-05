@@ -1,6 +1,9 @@
 "use client";
 
-import { startEraTechResearch } from "@/app/actions/era-tech";
+import {
+  cancelEraTechResearch,
+  startEraTechResearch,
+} from "@/app/actions/era-tech";
 import { CatalogFieldLine } from "@/components/game/CatalogGameRow";
 import {
   CATALOG_MIDDLE_COL,
@@ -32,6 +35,13 @@ function fmtEta(sec: number) {
   return `${m}:${String(r).padStart(2, "0")}`;
 }
 
+type EraJob = {
+  id: string;
+  techKey: string;
+  completesAt: string | null;
+  cityId: string;
+};
+
 type Props = {
   entry: TechCatalogEntry;
   locale: AppLocale;
@@ -39,7 +49,7 @@ type Props = {
   playerEra: string;
   cityId: string;
   level: number;
-  activeJobs: { techKey: string; completesAt: string | null }[];
+  activeJobs: EraJob[];
   maxQueue: number;
 };
 
@@ -111,13 +121,30 @@ export function EraTechResearchRow({
     }
   }
 
+  async function onCancel() {
+    if (!thisJob?.id) return;
+    setErr(null);
+    setBusy(true);
+    try {
+      const r = await cancelEraTechResearch(thisJob.id);
+      if (!r.ok) setErr(r.error);
+      else router.refresh();
+    } finally {
+      setBusy(false);
+    }
+  }
+
   const labels = {
     research: locale === "en" ? "Research" : "Araştır",
     done: locale === "en" ? "Completed" : "Tamamlandı",
     locked: locale === "en" ? "Locked" : "Kilitli",
     queued: locale === "en" ? "Queue full" : "Kuyruk dolu",
     level: locale === "en" ? "Level" : "Seviye",
+    cancel: locale === "en" ? "Cancel" : "İptal",
   };
+
+  const showIron = unlocks.iron && cost.iron > 0;
+  const showOil = unlocks.oil && cost.oil > 0;
 
   let button: ReactNode;
   if (lockedByEra) {
@@ -140,26 +167,46 @@ export function EraTechResearchRow({
     );
   } else if (thisJob && waitingInLine) {
     button = (
-      <div className="flex flex-col items-center gap-1 px-1 text-center">
-        <span className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
-          {locale === "en" ? "In queue" : "Sırada"}
-        </span>
-        <span className="text-[11px] leading-tight text-zinc-400">
-          {locale === "en"
-            ? "Timer starts when the first job finishes"
-            : "İlk iş bitince süre başlar"}
-        </span>
+      <div className="flex w-full min-w-0 flex-col items-end gap-2 sm:flex-row sm:items-center sm:justify-end">
+        <div className="flex flex-col items-end gap-1 text-right">
+          <span className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+            {locale === "en" ? "In queue" : "Sırada"}
+          </span>
+          <span className="max-w-[14rem] text-[11px] leading-tight text-zinc-400">
+            {locale === "en"
+              ? "Timer starts when the first job finishes"
+              : "İlk iş bitince süre başlar"}
+          </span>
+        </div>
+        <button
+          type="button"
+          disabled={busy}
+          onClick={onCancel}
+          className="shrink-0 rounded border border-red-800/70 bg-red-950/40 px-3 py-2 text-xs font-semibold text-red-100 hover:bg-red-900/50 disabled:opacity-40"
+        >
+          {labels.cancel}
+        </button>
       </div>
     );
   } else if (thisJob) {
     button = (
-      <div className="flex flex-col items-center gap-1 text-center">
-        <span className="text-xs font-semibold uppercase tracking-wide text-amber-400/90">
-          {locale === "en" ? "Researching" : "Araştırılıyor"}
-        </span>
-        <span className="tabular-nums text-lg font-semibold text-amber-100">
-          {fmtEta(etaSec)}
-        </span>
+      <div className="flex w-full min-w-0 flex-col items-end gap-2 sm:flex-row sm:items-center sm:justify-end">
+        <div className="flex flex-col items-end gap-1 text-right">
+          <span className="text-xs font-semibold uppercase tracking-wide text-amber-400/90">
+            {locale === "en" ? "Researching" : "Araştırılıyor"}
+          </span>
+          <span className="tabular-nums text-lg font-semibold text-amber-100">
+            {fmtEta(etaSec)}
+          </span>
+        </div>
+        <button
+          type="button"
+          disabled={busy}
+          onClick={onCancel}
+          className="shrink-0 rounded border border-red-800/70 bg-red-950/40 px-3 py-2 text-xs font-semibold text-red-100 hover:bg-red-900/50 disabled:opacity-40"
+        >
+          {labels.cancel}
+        </button>
       </div>
     );
   } else {
@@ -168,43 +215,50 @@ export function EraTechResearchRow({
         type="button"
         disabled={busy}
         onClick={onResearch}
-        className="min-w-[7rem] shrink-0 rounded border border-amber-600/90 bg-amber-950/50 px-4 py-2 text-center text-sm font-semibold text-amber-100 shadow-inner hover:bg-amber-900/45 disabled:opacity-50"
+        className="shrink-0 rounded border border-amber-900/50 bg-amber-950/40 px-3 py-2 text-sm font-semibold text-amber-100 hover:bg-amber-900/50 disabled:opacity-40"
       >
         {busy ? "…" : labels.research}
       </button>
     );
   }
 
-  const costPanel =
+  const costRow =
     !lockedByEra && !done && !thisJob ? (
-      <div
-        className="flex min-w-0 flex-1 flex-wrap items-center justify-end gap-x-3 gap-y-1 rounded-md border-2 border-amber-700/55 bg-gradient-to-br from-amber-950/50 to-black/50 px-3 py-2 shadow-inner"
-        style={{ fontFamily: "var(--font-warcity), serif" }}
-      >
-        <span className="inline-flex flex-wrap items-center gap-x-3 gap-y-1 text-sm font-semibold tabular-nums text-amber-50">
-          <span className="inline-flex items-center gap-1">
-            <ResourceIcon kind="wood" />
-            {cost.wood}
-          </span>
-          {unlocks.iron && cost.iron > 0 ? (
-            <span className="inline-flex items-center gap-1">
-              <ResourceIcon kind="iron" />
-              {cost.iron}
+      <>
+        {nextDurSec > 0 ? (
+          <div className="w-full text-right text-[10px] tabular-nums text-sky-200/90">
+            {durLabel}
+          </div>
+        ) : null}
+        <div className="flex w-full min-w-0 flex-row flex-wrap items-center justify-end gap-2">
+          <div className="flex min-w-0 flex-1 flex-wrap items-center justify-end gap-x-2 gap-y-0.5 text-xs tabular-nums text-zinc-400">
+            <span className="inline-flex items-center gap-0.5">
+              <ResourceIcon kind="wood" />
+              {cost.wood}
             </span>
-          ) : null}
-          {unlocks.oil && cost.oil > 0 ? (
-            <span className="inline-flex items-center gap-1">
-              <ResourceIcon kind="oil" />
-              {cost.oil}
+            {showIron ? (
+              <span className="inline-flex items-center gap-0.5">
+                <ResourceIcon kind="iron" />
+                {cost.iron}
+              </span>
+            ) : null}
+            {showOil ? (
+              <span className="inline-flex items-center gap-0.5">
+                <ResourceIcon kind="oil" />
+                {cost.oil}
+              </span>
+            ) : null}
+            <span className="inline-flex items-center gap-0.5">
+              <ResourceIcon kind="food" />
+              {cost.food}
             </span>
-          ) : null}
-          <span className="inline-flex items-center gap-1">
-            <ResourceIcon kind="food" />
-            {cost.food}
-          </span>
-        </span>
-      </div>
-    ) : null;
+          </div>
+          {button}
+        </div>
+      </>
+    ) : (
+      <div className="flex w-full justify-end">{button}</div>
+    );
 
   return (
     <div
@@ -258,11 +312,8 @@ export function EraTechResearchRow({
           />
         </div>
 
-        <div className="flex min-w-0 flex-col items-stretch justify-center gap-2 sm:items-end">
-          <div className="flex w-full min-w-0 flex-col items-stretch justify-end gap-2 sm:flex-row sm:items-center">
-            {costPanel}
-            <div className="flex justify-end">{button}</div>
-          </div>
+        <div className="flex min-w-0 flex-col items-stretch justify-center gap-1.5 sm:items-end">
+          <div className="flex w-full min-w-0 flex-col gap-1">{costRow}</div>
           {err ? (
             <p className="max-w-[14rem] text-right text-xs text-red-400">{err}</p>
           ) : null}
