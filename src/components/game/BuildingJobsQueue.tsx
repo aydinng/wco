@@ -1,10 +1,11 @@
 "use client";
 
+import { cancelBuildingJob } from "@/app/actions/game-city";
 import { buildingJobSummaryLine } from "@/lib/building-i18n";
 import { formatCountdownSeconds } from "@/lib/format-countdown";
 import type { AppLocale } from "@/lib/locale";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useCountdownIso } from "@/components/game/useCountdownIso";
 
 export type BuildingJobQueueItem = {
@@ -15,6 +16,43 @@ export type BuildingJobQueueItem = {
   buildingId: string;
   toLevel: number;
 };
+
+function CancelJobButton({
+  jobId,
+  locale,
+}: {
+  jobId: string;
+  locale: AppLocale;
+}) {
+  const router = useRouter();
+  const [busy, setBusy] = useState(false);
+  const tr = locale !== "en";
+
+  async function onCancel() {
+    setBusy(true);
+    try {
+      const r = await cancelBuildingJob(jobId);
+      if (!r.ok) {
+        window.alert(r.error);
+        return;
+      }
+      router.refresh();
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      disabled={busy}
+      onClick={onCancel}
+      className="shrink-0 rounded border border-zinc-600/60 bg-black/30 px-1.5 py-0.5 text-[10px] text-zinc-400 hover:border-red-800/60 hover:text-red-300 disabled:opacity-40"
+    >
+      {busy ? "…" : tr ? "İptal" : "Cancel"}
+    </button>
+  );
+}
 
 function ActiveQueueRow({
   job,
@@ -52,9 +90,12 @@ function ActiveQueueRow({
           </span>
           {job.cityName}
         </span>
-        <span className="tabular-nums font-semibold text-amber-200">
-          {sec > 0 ? formatCountdownSeconds(sec, locale) : tr ? "0 sn" : "0s"}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="tabular-nums font-semibold text-amber-200">
+            {sec > 0 ? formatCountdownSeconds(sec, locale) : tr ? "0 sn" : "0s"}
+          </span>
+          <CancelJobButton jobId={job.id} locale={locale} />
+        </div>
       </div>
       <p className="mt-0.5 text-xs text-zinc-300">{line}</p>
       <p className="mt-1 text-[10px] text-emerald-400/90">
@@ -83,9 +124,12 @@ function PendingQueueRow({
           </span>
           {job.cityName}
         </span>
-        <span className="text-xs font-medium uppercase tracking-wide text-zinc-500">
-          {tr ? "Sırada" : "Queued"}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-zinc-500">
+            {tr ? "Sırada" : "Queued"}
+          </span>
+          <CancelJobButton jobId={job.id} locale={locale} />
+        </div>
       </div>
       <p className="mt-0.5 text-xs text-zinc-400">{line}</p>
       <p className="mt-1 text-[10px] leading-snug text-zinc-500">
@@ -114,7 +158,7 @@ export function BuildingJobsQueue({
   return (
     <div className="mb-6 space-y-2">
       <p
-        className="text-center text-xs font-semibold uppercase tracking-wide text-amber-600/90"
+        className="text-center text-xs text-amber-200/90"
         style={{ fontFamily: "var(--font-warcity), serif" }}
       >
         {heading}

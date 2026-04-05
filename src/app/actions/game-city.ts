@@ -10,6 +10,7 @@ import {
   getResearchCost,
   getUpgradeCost,
   MAX_BUILDING_LEVEL,
+  maxLevelForBuilding,
   MAX_RESEARCH_TIER,
   soldierCap,
   trainCostPerSoldier,
@@ -160,7 +161,8 @@ export async function upgradeBuilding(
 
   const field = BUILDING_FIELD[building];
   const cur = city[field as keyof typeof city] as number;
-  if (cur >= MAX_BUILDING_LEVEL) {
+  const cap = maxLevelForBuilding(building);
+  if (cur >= cap) {
     return { ok: false, error: await pe("errBuildingMax") };
   }
   const cost = getUpgradeCost(cur, unlocks, {
@@ -206,6 +208,68 @@ export async function upgradeBuilding(
       },
     });
   });
+  paths();
+  return { ok: true };
+}
+
+export async function cancelBuildingJob(jobId: string): Promise<ActionResult> {
+  const session = await auth();
+  const userId = session?.user?.id;
+  if (!userId) return { ok: false, error: await pe("errLogin") };
+
+  const job = await prisma.buildingJob.findFirst({
+    where: { id: jobId, userId, status: "queued" },
+  });
+  if (!job) return { ok: false, error: await pe("errCity") };
+
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) return { ok: false, error: await pe("errUser") };
+
+  const city = await prisma.city.findFirst({
+    where: { id: job.cityId, userId },
+  });
+  if (!city) return { ok: false, error: await pe("errCity") };
+
+  const unlocks = getResourceUnlocks(user.currentEra);
+  const cost = getUpgradeCost(job.fromLevel, unlocks, {
+    ilkCagWoodFoodOnly: eraIndex(user.currentEra) < 1,
+  });
+
+  const now = new Date();
+  const wasActive = job.completesAt != null;
+
+  await prisma.$transaction(async (tx) => {
+    await tx.city.update({
+      where: { id: city.id },
+      data: {
+        wood: city.wood + cost.wood,
+        iron: city.iron + cost.iron,
+        oil: city.oil + cost.oil,
+        food: city.food + cost.food,
+      },
+    });
+    await tx.buildingJob.update({
+      where: { id: jobId },
+      data: { status: "cancelled" },
+    });
+  });
+
+  if (wasActive) {
+    const pending = await prisma.buildingJob.findFirst({
+      where: { userId, status: "queued", completesAt: null },
+      orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+    });
+    if (pending) {
+      await prisma.buildingJob.update({
+        where: { id: pending.id },
+        data: {
+          startsAt: now,
+          completesAt: new Date(now.getTime() + pending.durationSec * 1000),
+        },
+      });
+    }
+  }
+
   paths();
   return { ok: true };
 }

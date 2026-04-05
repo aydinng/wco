@@ -11,7 +11,7 @@ import type { Dictionary } from "@/i18n/dictionaries";
 import { buildingImagePath } from "@/config/buildings";
 import { eraIndex, type ResourceUnlocks } from "@/config/eras";
 import { buildingUpgradeDurationSec } from "@/lib/duration-scaling";
-import { MAX_BUILDING_LEVEL } from "@/lib/economy";
+import { maxLevelForBuilding } from "@/lib/economy";
 import type { City } from "@prisma/client";
 import type { AppLocale } from "@/lib/locale";
 import { formatCountdownSeconds } from "@/lib/format-countdown";
@@ -89,21 +89,15 @@ export function BuildingCatalogCard({
   const locked = isBuildingLocked(building, unlocks, currentEra);
   const img = buildingImagePath(building);
 
-  const resourceLabels = {
-    wood: play.resWood,
-    iron: play.resIron,
-    oil: play.resOil,
-    food: play.resFood,
-  };
-
   const maxLv = cities.reduce(
     (m, c) => Math.max(m, levelFor(c, building)),
     0,
   );
   const levelStr = maxLv < 1 ? play.levelNone : String(maxLv);
 
+  const capLv = maxLevelForBuilding(building);
   const nextDurSec =
-    locked || maxLv >= MAX_BUILDING_LEVEL
+    locked || maxLv >= capLv
       ? undefined
       : buildingUpgradeDurationSec({
           buildingId: building,
@@ -140,7 +134,7 @@ export function BuildingCatalogCard({
           <CatalogFieldLine
             label={play.catalogFieldTime}
             value={
-              locked || maxLv >= MAX_BUILDING_LEVEL
+              locked || maxLv >= capLv
                 ? "—"
                 : nextDurSec != null && nextDurSec > 0
                   ? formatCountdownSeconds(nextDurSec, locale)
@@ -190,7 +184,6 @@ export function BuildingCatalogCard({
                     upgradeLabel={play.upgrade}
                     unlocks={unlocks}
                     locale={locale}
-                    resourceLabels={resourceLabels}
                     ilkCagWoodFoodOnly={eraIndex(currentEra) < 1}
                   />
                 )}

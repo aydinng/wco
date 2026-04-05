@@ -5,6 +5,12 @@ import type { UnitSpec } from "@/config/units";
 export const MAX_BUILDING_LEVEL = 20;
 export const MAX_RESEARCH_TIER = 20;
 
+/** Kışla ve araştırma kulübesi yalnızca 1. seviyeye kadar. */
+export function maxLevelForBuilding(building: string): number {
+  if (building === "barracks" || building === "researchLodge") return 1;
+  return MAX_BUILDING_LEVEL;
+}
+
 /** Saatlik taban / işçi — erken oyun hissi için kitap tarzı daha yüksek başlangıç üretimi */
 const BASE = { wood: 22, iron: 14, oil: 9, food: 26 } as const;
 
