@@ -1,4 +1,5 @@
 import type { City } from "@prisma/client";
+import { eraTechResearchCost } from "@/config/technology-catalog";
 import { eraIndex, type ResourceUnlocks } from "@/config/eras";
 import type { UnitSpec } from "@/config/units";
 
@@ -225,19 +226,16 @@ export function getUpgradeCost(
     buildingId?: string;
   },
 ) {
-  const L = Math.max(1, currentLevel);
-  const base = {
-    wood: 65 * L * L,
-    iron: 55 * L * L,
-    oil: 38 * L * L,
-    food: 55 * L * L,
-  };
-  const onlyWF = isUpgradeWoodFoodOnly(opts);
+  /** Hedef seviye (ör. 4→5 için 5); maliyet her yükseltmede artar */
+  const tl = Math.max(1, currentLevel + 1);
+  const tier = Math.min(30, tl);
+  const wf = isUpgradeWoodFoodOnly(opts);
+  const raw = eraTechResearchCost({ eraOrdinal: wf ? 1 : 2, tier }, tl);
   return {
-    wood: base.wood,
-    iron: onlyWF ? 0 : !unlocks.iron ? 0 : base.iron,
-    oil: onlyWF ? 0 : !unlocks.oil ? 0 : base.oil,
-    food: base.food,
+    wood: raw.wood,
+    iron: wf ? 0 : !unlocks.iron ? 0 : raw.iron,
+    oil: wf ? 0 : !unlocks.oil ? 0 : raw.oil,
+    food: raw.food,
   };
 }
 
@@ -247,18 +245,16 @@ export function getResearchCost(
   opts?: { ilkCagWoodFoodOnly?: boolean; currentEra?: string | null },
 ) {
   const t = Math.max(1, nextTier);
-  const base = {
-    wood: 200 * t * t,
-    iron: 200 * t * t,
-    oil: 100 * t * t,
-    food: 150 * t * t,
-  };
-  const onlyWF = isFirstAgeResourceOpts(opts);
+  const first = isFirstAgeResourceOpts(opts);
+  const raw = eraTechResearchCost(
+    { eraOrdinal: first ? 1 : 3, tier: Math.min(30, t) },
+    t,
+  );
   return {
-    wood: base.wood,
-    iron: onlyWF ? 0 : !unlocks.iron ? 0 : base.iron,
-    oil: onlyWF ? 0 : !unlocks.oil ? 0 : base.oil,
-    food: base.food,
+    wood: raw.wood,
+    iron: first ? 0 : !unlocks.iron ? 0 : raw.iron,
+    oil: first ? 0 : !unlocks.oil ? 0 : raw.oil,
+    food: raw.food,
   };
 }
 
@@ -281,9 +277,14 @@ export function soldierCap(barracksLevel: number) {
   return Math.floor(base * barracksLevel * mult);
 }
 
-/** Filo saldırı gücü için öneri (MVP) */
-export function suggestedFleetAttack(soldiers: number, barracksLevel: number) {
-  return Math.max(0, soldiers * 12 + barracksLevel * 80);
+/** Filo saldırı gücü için öneri; Sadelik her seviye +1 saldırı (filo bonusu) */
+export function suggestedFleetAttack(
+  soldiers: number,
+  barracksLevel: number,
+  sadelikLevel: number = 0,
+) {
+  const sad = Math.max(0, Math.floor(sadelikLevel));
+  return Math.max(0, soldiers * 12 + barracksLevel * 80 + sad);
 }
 
 export function trainCostPerSoldier(unlocks: ResourceUnlocks) {

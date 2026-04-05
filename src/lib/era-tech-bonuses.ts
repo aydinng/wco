@@ -24,9 +24,7 @@ export function eraTechResourceMultipliers(
   let oil = 1;
   let food = 1;
 
-  const sad = lv("sadelik", levels);
-  wood *= 1 + 0.012 * sad;
-
+  /** Sadelik: filo saldırı gücü (suggestedFleetAttack +seviye); odun çarpanı yok */
   const moss = lv("moss_cultivation", levels);
   food *= 1 + 0.08 * Math.min(moss, 40);
 

@@ -23,6 +23,17 @@ export default async function WorldmapPage() {
   const p = dict.play;
   const me = await getCurrentUser();
 
+  const sadelikRow =
+    me?.id != null
+      ? await prisma.userEraTech.findUnique({
+          where: {
+            userId_techKey: { userId: me.id, techKey: "sadelik" },
+          },
+          select: { level: true },
+        })
+      : null;
+  const sadelikLevel = sadelikRow?.level ?? 0;
+
   const rows = await prisma.city.findMany({
     include: {
       user: { select: { id: true, username: true, tribeName: true } },
@@ -128,6 +139,7 @@ export default async function WorldmapPage() {
               barracksLevel: c.barracksLevel,
             }))}
             play={p}
+            sadelikLevel={sadelikLevel}
           />
         </div>
       )}

@@ -4,8 +4,8 @@
  * Hızlandırma satın alma yok; R yalnızca mevcut bonuslardan (ör. imparatorluk araştırması).
  */
 
-/** Seviye başına süre çarpanı (1.2–1.5 bandı) */
-export const DURATION_LEVEL_COEFF = 1.22;
+/** Seviye başına süre çarpanı (her seviye belirgin uzar) */
+export const DURATION_LEVEL_COEFF = 1.3;
 
 /** Araştırma: üst süre tavanı (kitap: 24h–168h; tek iş için üst sınır 168 saat) */
 export const MAX_RESEARCH_DURATION_SEC = 168 * 3600;
@@ -78,7 +78,7 @@ export function researchTierAdvanceDurationSec(opts: {
   /** Araştırma kulübesi: şehirlerdeki seviye toplamına göre ek hız % */
   researchLodgeBonusPct?: number;
 }): number {
-  const base = 120; // ~2 dk taban (tier 1); K ile üst tier’larda uzar
+  const base = 220; // taban (tier 1); K ile üst tier’larda uzar
   const lodge = Math.max(0, opts.researchLodgeBonusPct ?? 0);
   return scaledDurationSec({
     baseSec: base,

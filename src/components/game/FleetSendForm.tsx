@@ -18,21 +18,33 @@ export type FleetCityOption = {
 type Props = {
   cities: FleetCityOption[];
   play: Dictionary["play"];
+  /** Sadelik teknolojisi seviyesi — her seviye filo öneri saldırısına +1 */
+  sadelikLevel?: number;
 };
 
-function suggestedAttack(c: FleetCityOption | undefined) {
+function suggestedAttack(
+  c: FleetCityOption | undefined,
+  sadelikLevel: number,
+) {
   if (!c) return 1000;
-  return Math.max(100, suggestedFleetAttack(c.soldiers, c.barracksLevel));
+  return Math.max(
+    100,
+    suggestedFleetAttack(c.soldiers, c.barracksLevel, sadelikLevel),
+  );
 }
 
-export function FleetSendForm({ cities, play }: Props) {
+export function FleetSendForm({
+  cities,
+  play,
+  sadelikLevel = 0,
+}: Props) {
   const router = useRouter();
   const [fromCityId, setFromCityId] = useState(cities[0]?.id ?? "");
   const [toCoordX, setToCoordX] = useState(22);
   const [toCoordY, setToCoordY] = useState(3);
   const [toCoordZ, setToCoordZ] = useState(3);
   const [attackPower, setAttackPower] = useState(() =>
-    suggestedAttack(cities[0]),
+    suggestedAttack(cities[0], sadelikLevel),
   );
   const [defensePower, setDefensePower] = useState(800);
   const [defenderDefense, setDefenderDefense] = useState(900);
@@ -41,8 +53,8 @@ export function FleetSendForm({ cities, play }: Props) {
 
   useEffect(() => {
     const c = cities.find((x) => x.id === fromCityId);
-    setAttackPower(suggestedAttack(c));
-  }, [fromCityId, cities]);
+    setAttackPower(suggestedAttack(c, sadelikLevel));
+  }, [fromCityId, cities, sadelikLevel]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();

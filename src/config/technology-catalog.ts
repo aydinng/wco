@@ -40,7 +40,10 @@ export function scaledEraTechDurationSec(
   currentLevelBeforeResearch: number,
 ): number {
   const base = Math.max(0, entry.durationSec);
-  const scaled = Math.round(base * (1 + Math.max(0, currentLevelBeforeResearch) * 0.07));
+  /** Her mevcut seviye için süre belirgin şekilde uzar (tekrarlanan araştırmalar). */
+  const scaled = Math.round(
+    base * (1 + Math.max(0, currentLevelBeforeResearch) * 0.16),
+  );
   if (scaled === 0) return 0;
   return Math.min(H48, Math.max(1, scaled));
 }
@@ -161,9 +164,10 @@ const RAW: RawTech[] = [
     tier: 10,
     nameTr: "Sadelik",
     nameEn: "Simplicity",
-    refSec: 0,
-    goalTr: "Odun üretimi: her seviye ~+%1,2 (yığılır).",
-    goalEn: "Wood production: ~+1.2% per level (stacks).",
+    /** tier 10 → level1DurationSec ≈ 30 dk; seviye atladıkça scaledEraTechDurationSec ile uzar */
+    refSec: 180000,
+    goalTr: "Filo +1.",
+    goalEn: "Fleet +1.",
   },
   {
     id: "orta_cag_unlock",
@@ -313,8 +317,8 @@ const RAW: RawTech[] = [
     nameTr: "Sosyalizm",
     nameEn: "Socialism",
     refSec: 3 * M + 20,
-    goalTr: "İmparatorluk nüfusu: her seviye +0,5 kişi/saat (yığılır).",
-    goalEn: "Empire population: +0.5/hour per level (stacks).",
+    goalTr: "İmparatorluk refahı ve nüfus büyümesi.",
+    goalEn: "Empire welfare and population growth.",
   },
   {
     id: "internet",
@@ -369,7 +373,7 @@ export function sortTechCatalog(entries: TechCatalogEntry[]): TechCatalogEntry[]
  * Hammadde maliyeti: çağ ve tier ile ölçeklenir; tekrarlanan araştırmada `targetLevel` ile artar.
  */
 export function eraTechResearchCost(
-  entry: Pick<TechCatalogEntry, "eraOrdinal" | "tier">,
+  entry: Pick<TechCatalogEntry, "eraOrdinal" | "tier"> & { id?: string },
   targetLevel: number = 1,
 ): {
   wood: number;
@@ -378,8 +382,12 @@ export function eraTechResearchCost(
   food: number;
 } {
   const tl = Math.max(1, Math.floor(targetLevel));
-  const repeatScale = 1 + (tl - 1) * 0.12;
-  const mult = (1 + entry.eraOrdinal * 0.14 + entry.tier * 0.012) * repeatScale;
+  let repeatScale = 1 + (tl - 1) * 0.22;
+  if (entry.id === "sadelik") {
+    repeatScale *= 1 + (tl - 1) * 0.1;
+  }
+  const mult =
+    (1 + entry.eraOrdinal * 0.14 + entry.tier * 0.012) * repeatScale;
   const wood = Math.floor(220 * mult);
   const iron = Math.floor(180 * mult);
   const oil = Math.floor(95 * mult);
