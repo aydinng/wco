@@ -165,9 +165,14 @@ export async function upgradeBuilding(
   if (cur >= cap) {
     return { ok: false, error: await pe("errBuildingMax") };
   }
-  const cost = getUpgradeCost(cur, unlocks, {
-    ilkCagWoodFoodOnly: eraIndex(user.currentEra) < 1,
+  const firstAge = eraIndex(user.currentEra) < 1;
+  let cost = getUpgradeCost(cur, unlocks, {
+    ilkCagWoodFoodOnly: firstAge,
+    currentEra: user.currentEra,
   });
+  if (firstAge) {
+    cost = { ...cost, iron: 0, oil: 0 };
+  }
   if (!canAfford(city, cost)) {
     return { ok: false, error: await pe("errInsufficient") };
   }
@@ -231,9 +236,14 @@ export async function cancelBuildingJob(jobId: string): Promise<ActionResult> {
   if (!city) return { ok: false, error: await pe("errCity") };
 
   const unlocks = getResourceUnlocks(user.currentEra);
-  const cost = getUpgradeCost(job.fromLevel, unlocks, {
-    ilkCagWoodFoodOnly: eraIndex(user.currentEra) < 1,
+  const firstAge = eraIndex(user.currentEra) < 1;
+  let cost = getUpgradeCost(job.fromLevel, unlocks, {
+    ilkCagWoodFoodOnly: firstAge,
+    currentEra: user.currentEra,
   });
+  if (firstAge) {
+    cost = { ...cost, iron: 0, oil: 0 };
+  }
 
   const now = new Date();
   const wasActive = job.completesAt != null;
@@ -298,9 +308,14 @@ export async function advanceResearch(payCityId: string): Promise<ActionResult> 
   }
 
   const nextTier = user.researchTier + 1;
-  const cost = getResearchCost(nextTier, unlocks, {
-    ilkCagWoodFoodOnly: eraIndex(user.currentEra) < 1,
+  const firstAgeResearch = eraIndex(user.currentEra) < 1;
+  let cost = getResearchCost(nextTier, unlocks, {
+    ilkCagWoodFoodOnly: firstAgeResearch,
+    currentEra: user.currentEra,
   });
+  if (firstAgeResearch) {
+    cost = { ...cost, iron: 0, oil: 0 };
+  }
   if (!canAfford(city, cost)) {
     return { ok: false, error: await pe("errInsufficient") };
   }

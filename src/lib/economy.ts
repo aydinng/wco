@@ -1,6 +1,16 @@
 import type { City } from "@prisma/client";
-import type { ResourceUnlocks } from "@/config/eras";
+import { eraIndex, type ResourceUnlocks } from "@/config/eras";
 import type { UnitSpec } from "@/config/units";
+
+/** İlk çağ bina / araştırma: yalnız odun + besin (çağ veya bayrak) */
+function isFirstAgeResourceOpts(opts?: {
+  ilkCagWoodFoodOnly?: boolean;
+  currentEra?: string | null;
+}) {
+  if (opts?.ilkCagWoodFoodOnly === true) return true;
+  if (opts?.currentEra != null && eraIndex(opts.currentEra) < 1) return true;
+  return false;
+}
 
 export const MAX_BUILDING_LEVEL = 20;
 export const MAX_RESEARCH_TIER = 20;
@@ -46,6 +56,9 @@ export function researchMultiplier(researchTier: number) {
   return 1 + researchTier * 0.05;
 }
 
+/** Üst sınır: computePopCap ve sivil +10 ile uyumlu */
+export const MAX_POP_CAP = 8000;
+
 export function computePopCap(city: {
   townHallLevel: number;
   barracksLevel: number;
@@ -54,7 +67,7 @@ export function computePopCap(city: {
   const th = Math.max(0, city.townHallLevel);
   const br = Math.max(0, city.barracksLevel);
   const cl = Math.max(0, city.civilLodgeLevel ?? 0);
-  return Math.min(8000, 140 + th * 50 + br * 20 + cl * 10);
+  return Math.min(MAX_POP_CAP, 140 + th * 50 + br * 20 + cl * 10);
 }
 
 /** DB’deki popCap ile formülü birleştir (eski kayıtlar için) */
@@ -182,7 +195,7 @@ export function safeInt(n: number): number {
 export function getUpgradeCost(
   currentLevel: number,
   unlocks: ResourceUnlocks,
-  opts?: { ilkCagWoodFoodOnly?: boolean },
+  opts?: { ilkCagWoodFoodOnly?: boolean; currentEra?: string | null },
 ) {
   const L = Math.max(1, currentLevel);
   const base = {
@@ -191,11 +204,11 @@ export function getUpgradeCost(
     oil: 38 * L * L,
     food: 55 * L * L,
   };
-  const onlyWF = opts?.ilkCagWoodFoodOnly === true;
+  const onlyWF = isFirstAgeResourceOpts(opts);
   return {
     wood: base.wood,
-    iron: onlyWF || !unlocks.iron ? 0 : base.iron,
-    oil: onlyWF || !unlocks.oil ? 0 : base.oil,
+    iron: onlyWF ? 0 : !unlocks.iron ? 0 : base.iron,
+    oil: onlyWF ? 0 : !unlocks.oil ? 0 : base.oil,
     food: base.food,
   };
 }
@@ -203,7 +216,7 @@ export function getUpgradeCost(
 export function getResearchCost(
   nextTier: number,
   unlocks: ResourceUnlocks,
-  opts?: { ilkCagWoodFoodOnly?: boolean },
+  opts?: { ilkCagWoodFoodOnly?: boolean; currentEra?: string | null },
 ) {
   const t = Math.max(1, nextTier);
   const base = {
@@ -212,11 +225,11 @@ export function getResearchCost(
     oil: 100 * t * t,
     food: 150 * t * t,
   };
-  const onlyWF = opts?.ilkCagWoodFoodOnly === true;
+  const onlyWF = isFirstAgeResourceOpts(opts);
   return {
     wood: base.wood,
-    iron: onlyWF || !unlocks.iron ? 0 : base.iron,
-    oil: onlyWF || !unlocks.oil ? 0 : base.oil,
+    iron: onlyWF ? 0 : !unlocks.iron ? 0 : base.iron,
+    oil: onlyWF ? 0 : !unlocks.oil ? 0 : base.oil,
     food: base.food,
   };
 }

@@ -53,9 +53,9 @@ export const ERA_BUILDING_CATALOG: Record<EraId, EraBuildingRow[]> = {
       titleTr: "Sivil kulübesi",
       titleEn: "Civil lodge",
       descTr:
-        "Nüfus yönetimi: seviye başına +10 nüfus üst sınırı.",
+        "Her yükseltmede şehir nüfusuna +10; üst sınır da seviye başına artar.",
       descEn:
-        "+10 population cap per level.",
+        "+10 city population per upgrade; cap also rises per level.",
     },
   ],
   orta_cag: [

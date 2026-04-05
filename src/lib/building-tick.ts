@@ -1,6 +1,6 @@
+import { effectivePopCap, MAX_POP_CAP } from "@/lib/economy";
 import { prisma } from "@/lib/prisma";
 import type { City, User } from "@prisma/client";
-
 /**
  * Tamamlanan bina işlerini uygular; ardından sırada bekleyen tek işi başlatır
  * (aynı anda yalnızca birinin completesAt’i işler).
@@ -37,10 +37,33 @@ export async function applyBuildingJobs(user: User & { cities: City[] }) {
     for (const j of jobs) {
       const field = fieldById[j.buildingId];
       if (!field) continue;
-      await tx.city.update({
+      const cityBefore = await tx.city.findUnique({
         where: { id: j.cityId },
-        data: { [field]: j.toLevel },
       });
+      if (!cityBefore) continue;
+
+      if (j.buildingId === "civilLodge") {
+        const newPop = Math.min(cityBefore.population + 10, MAX_POP_CAP);
+        const cap = effectivePopCap({
+          popCap: cityBefore.popCap,
+          townHallLevel: cityBefore.townHallLevel,
+          barracksLevel: cityBefore.barracksLevel,
+          civilLodgeLevel: j.toLevel,
+        });
+        await tx.city.update({
+          where: { id: j.cityId },
+          data: {
+            [field]: j.toLevel,
+            population: newPop,
+            popCap: Math.min(MAX_POP_CAP, Math.max(cap, newPop)),
+          },
+        });
+      } else {
+        await tx.city.update({
+          where: { id: j.cityId },
+          data: { [field]: j.toLevel },
+        });
+      }
       await tx.buildingJob.update({
         where: { id: j.id },
         data: { status: "done" },

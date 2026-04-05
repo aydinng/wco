@@ -4,7 +4,6 @@ import {
   CATALOG_MIDDLE_COL,
   CATALOG_NAME_COL,
   CATALOG_ROW_GRID_TECH,
-  CATALOG_TITLE_YELLOW,
 } from "@/components/game/catalog-layout";
 import { UpgradeBuildingButton } from "@/components/game/UpgradeBuildingButton";
 import type { Dictionary } from "@/i18n/dictionaries";
@@ -127,7 +126,9 @@ export function BuildingCatalogCard({
               sizes="56px"
             />
           </div>
-          <span className={CATALOG_TITLE_YELLOW}>{title}</span>
+          <span className="line-clamp-2 min-h-[2.75rem] w-full max-w-[9.5rem] text-center text-sm font-medium leading-tight text-zinc-100 sm:text-base">
+            {title}
+          </span>
         </div>
 
         <div className={CATALOG_MIDDLE_COL}>
@@ -168,9 +169,6 @@ export function BuildingCatalogCard({
             const lv = levelFor(c, building);
             return (
               <div key={c.id} className="w-full max-w-[22rem] sm:ml-auto">
-                <span className="mb-1 block text-center text-xs font-medium text-amber-200/90 sm:text-right">
-                  {c.name}
-                </span>
                 {locked ? (
                   <span className="block text-center text-[11px] text-amber-600/90 sm:text-right">
                     {play.errBuildingLocked}
@@ -185,6 +183,7 @@ export function BuildingCatalogCard({
                     unlocks={unlocks}
                     locale={locale}
                     ilkCagWoodFoodOnly={eraIndex(currentEra) < 1}
+                    currentEra={currentEra}
                   />
                 )}
               </div>

@@ -4,7 +4,7 @@ import {
   type BuildingId,
   upgradeBuilding,
 } from "@/app/actions/game-city";
-import type { ResourceUnlocks } from "@/config/eras";
+import { eraIndex, type ResourceUnlocks } from "@/config/eras";
 import { ResourceIcon } from "@/components/game/ResourceIcon";
 import { getUpgradeCost, maxLevelForBuilding } from "@/lib/economy";
 import type { AppLocale } from "@/lib/locale";
@@ -19,8 +19,10 @@ type Props = {
   upgradeLabel: string;
   unlocks: ResourceUnlocks;
   locale: AppLocale;
-  /** İlk çağda inşaat yalnız odun + besin; demir gösterilmez ve maliyete girmez */
+  /** İlk çağ: yalnız odun + besin; demir/petrol yok */
   ilkCagWoodFoodOnly?: boolean;
+  /** Sunucu ile aynı kaynak: `currentEra` verilirse ilk çağ maliyeti buna göre de hesaplanır */
+  currentEra?: string | null;
 };
 
 export function UpgradeBuildingButton({
@@ -32,6 +34,7 @@ export function UpgradeBuildingButton({
   unlocks,
   locale,
   ilkCagWoodFoodOnly = false,
+  currentEra,
 }: Props) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
@@ -40,11 +43,15 @@ export function UpgradeBuildingButton({
   const maxed = currentLevel >= cap;
   const cost = getUpgradeCost(currentLevel, unlocks, {
     ilkCagWoodFoodOnly,
+    currentEra,
   });
   const actionLabel = currentLevel < 1 ? buildLabel : upgradeLabel;
   const tr = locale !== "en";
-  const showIron = !ilkCagWoodFoodOnly && unlocks.iron && cost.iron > 0;
-  const showOil = !ilkCagWoodFoodOnly && unlocks.oil && cost.oil > 0;
+  const firstAge =
+    ilkCagWoodFoodOnly === true ||
+    (currentEra != null && eraIndex(currentEra) < 1);
+  const showIron = !firstAge && unlocks.iron && cost.iron > 0;
+  const showOil = !firstAge && unlocks.oil && cost.oil > 0;
 
   async function onClick() {
     setErr(null);
@@ -59,32 +66,8 @@ export function UpgradeBuildingButton({
   }
 
   return (
-    <div className="flex w-full min-w-0 flex-col gap-2">
-      <div className="flex w-full min-w-0 flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:justify-end">
-        {!maxed && (
-          <div className="flex min-w-0 flex-1 flex-wrap items-center justify-end gap-x-3 gap-y-1 text-sm tabular-nums text-zinc-200">
-            <span className="inline-flex items-center gap-1">
-              <ResourceIcon kind="wood" />
-              {cost.wood}
-            </span>
-            {showIron ? (
-              <span className="inline-flex items-center gap-1">
-                <ResourceIcon kind="iron" />
-                {cost.iron}
-              </span>
-            ) : null}
-            {showOil ? (
-              <span className="inline-flex items-center gap-1">
-                <ResourceIcon kind="oil" />
-                {cost.oil}
-              </span>
-            ) : null}
-            <span className="inline-flex items-center gap-1">
-              <ResourceIcon kind="food" />
-              {cost.food}
-            </span>
-          </div>
-        )}
+    <div className="flex w-full min-w-0 flex-col gap-1.5">
+      <div className="flex w-full min-w-0 flex-row flex-wrap items-center justify-end gap-2">
         {maxed ? (
           <span
             className="shrink-0 rounded border border-emerald-800/70 bg-emerald-950/35 px-3 py-1.5 text-center text-sm font-semibold text-emerald-100/95"
@@ -93,14 +76,38 @@ export function UpgradeBuildingButton({
             {tr ? "Tamamlandı" : "Completed"}
           </span>
         ) : (
-          <button
-            type="button"
-            disabled={busy}
-            onClick={onClick}
-            className="shrink-0 rounded border border-amber-900/50 bg-amber-950/40 px-3 py-2 text-sm font-semibold text-amber-100 hover:bg-amber-900/50 disabled:opacity-40"
-          >
-            {busy ? "…" : actionLabel}
-          </button>
+          <>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={onClick}
+              className="shrink-0 rounded border border-amber-900/50 bg-amber-950/40 px-3 py-2 text-sm font-semibold text-amber-100 hover:bg-amber-900/50 disabled:opacity-40"
+            >
+              {busy ? "…" : actionLabel}
+            </button>
+            <div className="flex min-w-0 flex-wrap items-center justify-end gap-x-2 gap-y-0.5 text-xs tabular-nums text-zinc-400">
+              <span className="inline-flex items-center gap-0.5">
+                <ResourceIcon kind="wood" />
+                {cost.wood}
+              </span>
+              {showIron ? (
+                <span className="inline-flex items-center gap-0.5">
+                  <ResourceIcon kind="iron" />
+                  {cost.iron}
+                </span>
+              ) : null}
+              {showOil ? (
+                <span className="inline-flex items-center gap-0.5">
+                  <ResourceIcon kind="oil" />
+                  {cost.oil}
+                </span>
+              ) : null}
+              <span className="inline-flex items-center gap-0.5">
+                <ResourceIcon kind="food" />
+                {cost.food}
+              </span>
+            </div>
+          </>
         )}
       </div>
       {err ? (
