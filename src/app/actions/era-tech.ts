@@ -1,10 +1,13 @@
 "use server";
 
 import { auth } from "@/auth";
+import { applyCompletedEraTech } from "@/lib/era-tech-completion";
 import {
   eraTechResearchCost,
   getTechByKey,
+  isOneShotEraTech,
   requiredEraIndexForTech,
+  scaledEraTechDurationSec,
 } from "@/config/technology-catalog";
 import { eraIndex, getResourceUnlocks } from "@/config/eras";
 import { canAfford } from "@/lib/economy";
@@ -45,8 +48,17 @@ export async function startEraTechResearch(
   const existing = await prisma.userEraTech.findUnique({
     where: { userId_techKey: { userId, techKey } },
   });
-  if (existing && existing.level >= 1) {
+  const oneShot = isOneShotEraTech(entry);
+  if (oneShot && existing && existing.level >= 1) {
     return { ok: false, error: "Bu teknoloji zaten tamamlandı." };
+  }
+
+  const dupTech = await prisma.eraTechResearchJob.findFirst({
+    where: { userId, techKey, status: "queued" },
+    select: { id: true },
+  });
+  if (dupTech) {
+    return { ok: false, error: "Bu teknoloji için zaten kuyrukta iş var." };
   }
 
   const MAX_ERA_TECH_QUEUE = 2;
@@ -65,8 +77,10 @@ export async function startEraTechResearch(
     select: { id: true },
   });
 
+  const currentLv = existing?.level ?? 0;
+  const nextLevel = currentLv + 1;
   const unlocks = getResourceUnlocks(user.currentEra);
-  const cost = eraTechResearchCost(entry);
+  const cost = eraTechResearchCost(entry, nextLevel);
   if (!unlocks.oil && cost.oil > 0) {
     return { ok: false, error: "Bu çağda petrol kullanılamaz." };
   }
@@ -74,7 +88,7 @@ export async function startEraTechResearch(
     return { ok: false, error: "Yetersiz kaynak" };
   }
 
-  const dur = entry.durationSec;
+  const dur = scaledEraTechDurationSec(entry, currentLv);
 
   await prisma.$transaction(async (tx) => {
     await tx.city.update({
@@ -88,11 +102,7 @@ export async function startEraTechResearch(
     });
 
     if (dur < 1) {
-      await tx.userEraTech.upsert({
-        where: { userId_techKey: { userId, techKey } },
-        create: { userId, techKey, level: 1 },
-        update: { level: 1 },
-      });
+      await applyCompletedEraTech(tx, userId, techKey);
     } else {
       const completesAt: Date | null = hasActiveEraJob
         ? null

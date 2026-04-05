@@ -102,11 +102,14 @@ export function BuildingCatalogCard({
   );
   const levelStr = maxLv < 1 ? play.levelNone : String(maxLv);
 
-  const durationLevel1Sec = buildingUpgradeDurationSec({
-    buildingId: building,
-    toLevel: 1,
-    researchTier,
-  });
+  const nextDurSec =
+    locked || maxLv >= MAX_BUILDING_LEVEL
+      ? undefined
+      : buildingUpgradeDurationSec({
+          buildingId: building,
+          toLevel: maxLv + 1,
+          researchTier,
+        });
 
   return (
     <div
@@ -136,7 +139,13 @@ export function BuildingCatalogCard({
         <div className={CATALOG_MIDDLE_COL}>
           <CatalogFieldLine
             label={play.catalogFieldTime}
-            value={formatCountdownSeconds(durationLevel1Sec, locale)}
+            value={
+              locked || maxLv >= MAX_BUILDING_LEVEL
+                ? "—"
+                : nextDurSec != null && nextDurSec > 0
+                  ? formatCountdownSeconds(nextDurSec, locale)
+                  : "—"
+            }
             labelClassName={SKY}
             valueClassName={SKY_VAL}
           />
@@ -163,20 +172,8 @@ export function BuildingCatalogCard({
         <div className="flex min-w-0 flex-col items-stretch justify-center gap-3 sm:items-end">
           {cities.map((c) => {
             const lv = levelFor(c, building);
-            const maxed = lv >= MAX_BUILDING_LEVEL;
-            const nextDurSec =
-              maxed || locked
-                ? undefined
-                : buildingUpgradeDurationSec({
-                    buildingId: building,
-                    toLevel: lv + 1,
-                    researchTier,
-                  });
             return (
-              <div
-                key={c.id}
-                className="w-full max-w-[22rem] rounded border border-zinc-700/50 bg-black/25 px-2 py-2 sm:ml-auto"
-              >
+              <div key={c.id} className="w-full max-w-[22rem] sm:ml-auto">
                 <span className="mb-1 block text-center text-xs font-medium text-amber-200/90 sm:text-right">
                   {c.name}
                 </span>
@@ -194,8 +191,6 @@ export function BuildingCatalogCard({
                     unlocks={unlocks}
                     locale={locale}
                     resourceLabels={resourceLabels}
-                    durationSec={nextDurSec}
-                    timeLabel={play.catalogFieldTime}
                   />
                 )}
               </div>

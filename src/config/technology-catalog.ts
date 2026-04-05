@@ -17,6 +17,34 @@ export type TechCatalogEntry = {
   imageSrc: string;
 };
 
+/**
+ * Katalog `eraOrdinal`: 1 = İlk çağ, 2 = Orta çağ, … `ERA_ORDER` ile hizalı.
+ * Orta çağ (2) teknolojileri yalnızca bir kez araştırılabilir; diğer çağlarda sınırsız tekrar.
+ */
+export const MEDIEVAL_ERA_ORDINAL = 2;
+
+/** Tek seferlik: orta çağ sütunundaki tüm teknolojiler + “Orta çağ” çağ kilidi. */
+export function isOneShotEraTech(
+  entry: Pick<TechCatalogEntry, "id" | "eraOrdinal">,
+): boolean {
+  return (
+    entry.eraOrdinal === MEDIEVAL_ERA_ORDINAL || entry.id === "orta_cag_unlock"
+  );
+}
+
+const H48 = 48 * 3600;
+
+/** Tekrarlanan araştırmalarda süre ölçeği (mevcut seviye = bu araştırmadan önce). */
+export function scaledEraTechDurationSec(
+  entry: Pick<TechCatalogEntry, "durationSec">,
+  currentLevelBeforeResearch: number,
+): number {
+  const base = Math.max(0, entry.durationSec);
+  const scaled = Math.round(base * (1 + Math.max(0, currentLevelBeforeResearch) * 0.07));
+  if (scaled === 0) return 0;
+  return Math.min(H48, Math.max(1, scaled));
+}
+
 /** Referans süre (saniye) ve tier — seviye 1 süresi hesaplanır */
 type RawTech = {
   id: string;
@@ -145,8 +173,68 @@ const RAW: RawTech[] = [
     nameEn: "Medieval age",
     /** 4 dk 58 sn (298 sn) — level1DurationSec(298,1)=298 */
     refSec: 298,
-    goalTr: "Yeni çağ.",
-    goalEn: "New age.",
+    goalTr: "Orta çağı açar; yeni binalar ve orta çağ teknolojileri.",
+    goalEn: "Unlocks the Medieval age, buildings, and medieval technologies.",
+  },
+  {
+    id: "kilise_mimari",
+    eraOrdinal: 2,
+    tier: 4,
+    nameTr: "Kilise mimarisi",
+    nameEn: "Church architecture",
+    refSec: 45 * M,
+    goalTr: "İnanç ve düzen; şehir savunmasına küçük katkı.",
+    goalEn: "Faith and order; small defensive benefit.",
+  },
+  {
+    id: "su_kemeri",
+    eraOrdinal: 2,
+    tier: 5,
+    nameTr: "Su kemeri",
+    nameEn: "Aqueduct",
+    refSec: 50 * M,
+    goalTr: "Temiz su; besin üretimine destek.",
+    goalEn: "Clean water; supports food production.",
+  },
+  {
+    id: "zirh_dovme",
+    eraOrdinal: 2,
+    tier: 6,
+    nameTr: "Zırh dövme",
+    nameEn: "Armor smithing",
+    refSec: 55 * M,
+    goalTr: "Piyade ve süvariye dayanıklı zırh.",
+    goalEn: "Sturdy armor for infantry and cavalry.",
+  },
+  {
+    id: "sovalye_efe",
+    eraOrdinal: 2,
+    tier: 7,
+    nameTr: "Şövalye eğitimi",
+    nameEn: "Knight training",
+    refSec: 62 * M,
+    goalTr: "Ağır süvari ve disiplin.",
+    goalEn: "Heavy cavalry and discipline.",
+  },
+  {
+    id: "lonca_duzeni",
+    eraOrdinal: 2,
+    tier: 8,
+    nameTr: "Lonca düzeni",
+    nameEn: "Guild order",
+    refSec: 68 * M,
+    goalTr: "Zanaat ve ticaret verimliliği.",
+    goalEn: "Craft and trade efficiency.",
+  },
+  {
+    id: "ilk_universite",
+    eraOrdinal: 2,
+    tier: 9,
+    nameTr: "İlk üniversite",
+    nameEn: "First university",
+    refSec: 75 * M,
+    goalTr: "Hukuk, tıp ve teoloji; bilgi birikimi.",
+    goalEn: "Law, medicine, theology; knowledge stock.",
   },
   {
     id: "sosyalizm",
@@ -208,15 +296,20 @@ export function sortTechCatalog(entries: TechCatalogEntry[]): TechCatalogEntry[]
 }
 
 /**
- * Hammadde maliyeti: çağ ve tier ile ölçeklenir (kitap / klasik strateji hissi).
+ * Hammadde maliyeti: çağ ve tier ile ölçeklenir; tekrarlanan araştırmada `targetLevel` ile artar.
  */
-export function eraTechResearchCost(entry: Pick<TechCatalogEntry, "eraOrdinal" | "tier">): {
+export function eraTechResearchCost(
+  entry: Pick<TechCatalogEntry, "eraOrdinal" | "tier">,
+  targetLevel: number = 1,
+): {
   wood: number;
   iron: number;
   oil: number;
   food: number;
 } {
-  const mult = 1 + entry.eraOrdinal * 0.14 + entry.tier * 0.012;
+  const tl = Math.max(1, Math.floor(targetLevel));
+  const repeatScale = 1 + (tl - 1) * 0.12;
+  const mult = (1 + entry.eraOrdinal * 0.14 + entry.tier * 0.012) * repeatScale;
   const wood = Math.floor(220 * mult);
   const iron = Math.floor(180 * mult);
   const oil = Math.floor(95 * mult);

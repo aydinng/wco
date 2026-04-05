@@ -8,14 +8,18 @@ import {
   CATALOG_ROW_GRID_TECH,
   CATALOG_TITLE_YELLOW,
 } from "@/components/game/catalog-layout";
+import { ResourceIcon } from "@/components/game/ResourceIcon";
 import type { TechCatalogEntry } from "@/config/technology-catalog";
 import {
   eraTechResearchCost,
+  isOneShotEraTech,
   requiredEraIndexForTech,
+  scaledEraTechDurationSec,
 } from "@/config/technology-catalog";
-import { eraIndex } from "@/config/eras";
+import { eraIndex, getResourceUnlocks } from "@/config/eras";
 import type { Dictionary } from "@/i18n/dictionaries";
 import type { AppLocale } from "@/lib/locale";
+import { formatCountdownSeconds } from "@/lib/format-countdown";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
@@ -61,17 +65,27 @@ export function EraTechResearchRow({
 
   const need = requiredEraIndexForTech(entry.eraOrdinal);
   const lockedByEra = eraIndex(playerEra) < need;
-  const done = level >= 1;
-  const cost = eraTechResearchCost(entry);
+  const oneShot = isOneShotEraTech(entry);
+  const done = oneShot && level >= 1;
+
+  const nextLevel = Math.max(0, level) + 1;
+  const cost = eraTechResearchCost(entry, nextLevel);
+  const unlocks = getResourceUnlocks(playerEra);
+  const nextDurSec = scaledEraTechDurationSec(entry, level);
 
   const name = locale === "en" ? entry.nameEn : entry.nameTr;
-  const durLabel = locale === "en" ? entry.durationEn : entry.durationTr;
   const goal = locale === "en" ? entry.goalEn : entry.goalTr;
   const ageStr = String(entry.eraOrdinal);
 
+  const durLabel =
+    nextDurSec < 1
+      ? locale === "en"
+        ? "Instant"
+        : "Anında"
+      : formatCountdownSeconds(nextDurSec, locale);
+
   const thisJob = activeJobs.find((j) => j.techKey === entry.id) ?? null;
-  const queueFull =
-    activeJobs.length >= maxQueue && !thisJob;
+  const queueFull = activeJobs.length >= maxQueue && !thisJob;
 
   const waitingInLine = thisJob != null && thisJob.completesAt == null;
 
@@ -102,10 +116,7 @@ export function EraTechResearchRow({
     done: locale === "en" ? "Completed" : "Tamamlandı",
     locked: locale === "en" ? "Locked" : "Kilitli",
     queued: locale === "en" ? "Queue full" : "Kuyruk dolu",
-    cost:
-      locale === "en"
-        ? `Cost: ${cost.wood} W · ${cost.iron} I · ${cost.oil} O · ${cost.food} F`
-        : `Maliyet: ${cost.wood} O · ${cost.iron} D · ${cost.oil} P · ${cost.food} B`,
+    level: locale === "en" ? "Level" : "Seviye",
   };
 
   let button: ReactNode;
@@ -157,12 +168,46 @@ export function EraTechResearchRow({
         type="button"
         disabled={busy}
         onClick={onResearch}
-        className="min-w-[7rem] rounded border border-amber-600/90 bg-amber-950/50 px-4 py-2 text-center text-sm font-semibold text-amber-100 shadow-inner hover:bg-amber-900/45 disabled:opacity-50"
+        className="min-w-[7rem] shrink-0 rounded border border-amber-600/90 bg-amber-950/50 px-4 py-2 text-center text-sm font-semibold text-amber-100 shadow-inner hover:bg-amber-900/45 disabled:opacity-50"
       >
         {busy ? "…" : labels.research}
       </button>
     );
   }
+
+  const costPanel =
+    !lockedByEra && !done && !thisJob ? (
+      <div
+        className="flex min-w-0 flex-1 flex-wrap items-center justify-end gap-x-3 gap-y-1 rounded-md border-2 border-amber-700/55 bg-gradient-to-br from-amber-950/50 to-black/50 px-3 py-2 shadow-inner"
+        style={{ fontFamily: "var(--font-warcity), serif" }}
+      >
+        <span className="text-xs font-semibold uppercase tracking-wide text-amber-200/90">
+          {locale === "en" ? "Cost" : "Maliyet"}
+        </span>
+        <span className="inline-flex flex-wrap items-center gap-x-3 gap-y-1 text-sm font-semibold tabular-nums text-amber-50">
+          <span className="inline-flex items-center gap-1">
+            <ResourceIcon kind="wood" />
+            {cost.wood}
+          </span>
+          {unlocks.iron && cost.iron > 0 ? (
+            <span className="inline-flex items-center gap-1">
+              <ResourceIcon kind="iron" />
+              {cost.iron}
+            </span>
+          ) : null}
+          {unlocks.oil && cost.oil > 0 ? (
+            <span className="inline-flex items-center gap-1">
+              <ResourceIcon kind="oil" />
+              {cost.oil}
+            </span>
+          ) : null}
+          <span className="inline-flex items-center gap-1">
+            <ResourceIcon kind="food" />
+            {cost.food}
+          </span>
+        </span>
+      </div>
+    ) : null;
 
   return (
     <div
@@ -203,8 +248,8 @@ export function EraTechResearchRow({
             valueClassName="text-sky-100"
           />
           <CatalogFieldLine
-            label={play.catalogFieldLevel}
-            value={String(Math.min(1, Math.max(0, level)))}
+            label={labels.level}
+            value={String(Math.max(0, level))}
             labelClassName="text-sky-400"
             valueClassName="text-sky-100"
           />
@@ -216,15 +261,13 @@ export function EraTechResearchRow({
           />
         </div>
 
-        <div className="flex min-w-0 flex-col items-center justify-center gap-2">
-          {button}
-          {!lockedByEra && !done ? (
-            <p className="max-w-[18rem] text-center text-[11px] leading-tight text-zinc-500">
-              {labels.cost}
-            </p>
-          ) : null}
+        <div className="flex min-w-0 flex-col items-stretch justify-center gap-2 sm:items-end">
+          <div className="flex w-full min-w-0 flex-col items-stretch justify-end gap-2 sm:flex-row sm:items-center">
+            {costPanel}
+            <div className="flex justify-end">{button}</div>
+          </div>
           {err ? (
-            <p className="max-w-[14rem] text-center text-xs text-red-400">{err}</p>
+            <p className="max-w-[14rem] text-right text-xs text-red-400">{err}</p>
           ) : null}
         </div>
       </div>

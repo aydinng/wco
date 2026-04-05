@@ -1,3 +1,4 @@
+import { applyCompletedEraTech } from "@/lib/era-tech-completion";
 import { prisma } from "@/lib/prisma";
 
 /**
@@ -18,17 +19,7 @@ export async function applyEraTechJobs(userId: string) {
 
   await prisma.$transaction(async (tx) => {
     for (const j of jobs) {
-      await tx.userEraTech.upsert({
-        where: {
-          userId_techKey: { userId: j.userId, techKey: j.techKey },
-        },
-        create: {
-          userId: j.userId,
-          techKey: j.techKey,
-          level: 1,
-        },
-        update: { level: 1 },
-      });
+      await applyCompletedEraTech(tx, j.userId, j.techKey);
       await tx.eraTechResearchJob.update({
         where: { id: j.id },
         data: { status: "done" },
