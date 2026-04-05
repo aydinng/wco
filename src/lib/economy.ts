@@ -96,23 +96,18 @@ export function hourlyProduction(
   const ironOn = unlocks.iron;
   const oilOn = unlocks.oil;
   const shLv = Math.max(0, city.shepherdLodgeLevel ?? 0);
-  /** +0,1 besin / işçi / dakika → saatte 6 × işçi × seviye çarpanı */
-  const shepherdFoodHourly =
-    shLv >= 1
-      ? Math.floor(
-          city.workersFood *
-            6 *
-            buildingProductionMultiplier(shLv) *
-            r,
-        )
-      : 0;
+  /** Çoban kulübesi: seviye başına +0,1 besin/dk → saatte 6 × seviye × araştırma */
+  const shepherdFoodHourly = Math.floor(6 * shLv * r);
+
+  const lmLv = Math.max(0, city.lumberMillLevel);
+  /** Oduncu kulübesi: seviye başına +0,1 odun/dk → saatte 6 × seviye × araştırma */
+  const lumberLodgeWoodFlat = Math.floor(6 * lmLv * r);
+
+  const woodFromWorkers = Math.floor(
+    city.workersWood * BASE.wood * woodFoodMult(city.lumberMillLevel) * r,
+  );
   return {
-    wood: Math.floor(
-      city.workersWood *
-        BASE.wood *
-        woodFoodMult(city.lumberMillLevel) *
-        r,
-    ),
+    wood: woodFromWorkers + lumberLodgeWoodFlat,
     iron: ironOn
       ? Math.floor(
           city.workersIron *
@@ -178,7 +173,11 @@ export function safeInt(n: number): number {
   return Math.floor(Math.max(0, n));
 }
 
-export function getUpgradeCost(currentLevel: number, unlocks: ResourceUnlocks) {
+export function getUpgradeCost(
+  currentLevel: number,
+  unlocks: ResourceUnlocks,
+  opts?: { ilkCagWoodFoodOnly?: boolean },
+) {
   const L = Math.max(1, currentLevel);
   const base = {
     wood: 65 * L * L,
@@ -186,10 +185,11 @@ export function getUpgradeCost(currentLevel: number, unlocks: ResourceUnlocks) {
     oil: 38 * L * L,
     food: 55 * L * L,
   };
+  const onlyWF = opts?.ilkCagWoodFoodOnly === true;
   return {
     wood: base.wood,
-    iron: unlocks.iron ? base.iron : 0,
-    oil: unlocks.oil ? base.oil : 0,
+    iron: onlyWF || !unlocks.iron ? 0 : base.iron,
+    oil: onlyWF || !unlocks.oil ? 0 : base.oil,
     food: base.food,
   };
 }
@@ -197,6 +197,7 @@ export function getUpgradeCost(currentLevel: number, unlocks: ResourceUnlocks) {
 export function getResearchCost(
   nextTier: number,
   unlocks: ResourceUnlocks,
+  opts?: { ilkCagWoodFoodOnly?: boolean },
 ) {
   const t = Math.max(1, nextTier);
   const base = {
@@ -205,10 +206,11 @@ export function getResearchCost(
     oil: 100 * t * t,
     food: 150 * t * t,
   };
+  const onlyWF = opts?.ilkCagWoodFoodOnly === true;
   return {
     wood: base.wood,
-    iron: unlocks.iron ? base.iron : 0,
-    oil: unlocks.oil ? base.oil : 0,
+    iron: onlyWF || !unlocks.iron ? 0 : base.iron,
+    oil: onlyWF || !unlocks.oil ? 0 : base.oil,
     food: base.food,
   };
 }

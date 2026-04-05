@@ -281,6 +281,7 @@ export type Dictionary = {
     errBuildingMax: string;
     errInsufficient: string;
     errBarracksFull: string;
+    errNoBarracks: string;
     errInvalidAmount: string;
     errBuildingLocked: string;
     errBuildBusy: string;
@@ -289,6 +290,7 @@ export type Dictionary = {
     buildingQueueEmpty: string;
     errResearchMax: string;
     errResearchBusy: string;
+    errResearchLodgeRequired: string;
     errUnitEraLocked: string;
     errTrainQueueFull: string;
     trainCostNoIron: string;
@@ -665,6 +667,7 @@ const tr: Dictionary = {
     errBuildingMax: "Bina maksimum seviyede",
     errInsufficient: "Yetersiz kaynak",
     errBarracksFull: "Kışla kapasitesi dolu",
+    errNoBarracks: "Asker eğitmek için önce kışla inşa edin.",
     errInvalidAmount: "Geçersiz miktar",
     errBuildingLocked: "Bu çağda bu bina yok",
     errBuildBusy: "Bu şehirde yükseltme zaten devam ediyor.",
@@ -674,6 +677,8 @@ const tr: Dictionary = {
     buildingQueueEmpty: "Kuyrukta bina yükseltmesi yok.",
     errResearchMax: "Araştırma maksimum",
     errResearchBusy: "Zaten bir araştırma sürüyor; bitene kadar bekleyin.",
+    errResearchLodgeRequired:
+      "Araştırma kulübesi inşa edilmeden teknoloji araştırılamaz.",
     errUnitEraLocked: "Bu birim henüz çağınızda değil.",
     errTrainQueueFull: "Bu şehirde en fazla 3 üretim kuyruğu olabilir.",
     worldmapTitle: "Dünya",
@@ -1052,6 +1057,7 @@ const en: Dictionary = {
     errBuildingMax: "Building is at max level",
     errInsufficient: "Not enough resources",
     errBarracksFull: "Barracks capacity full",
+    errNoBarracks: "Build barracks before training soldiers.",
     errInvalidAmount: "Invalid amount",
     errBuildingLocked: "This building is not available in your age",
     errBuildBusy: "A building upgrade is already in progress in this city.",
@@ -1061,6 +1067,8 @@ const en: Dictionary = {
     buildingQueueEmpty: "No building upgrades in the queue.",
     errResearchMax: "Research is at maximum",
     errResearchBusy: "Research is already in progress; wait until it finishes.",
+    errResearchLodgeRequired:
+      "You need at least one research lodge to conduct technology research.",
     errUnitEraLocked: "This unit is not available in your age yet.",
     errTrainQueueFull: "This city can have at most 3 training queues.",
     worldmapTitle: "World",

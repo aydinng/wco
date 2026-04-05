@@ -6,11 +6,11 @@ function assetUrl(path: string): string {
 
 export function buildingImagePath(id: BuildingId): string {
   const map: Record<BuildingId, string> = {
-    townHall: "/buildings/town-hall.jpg",
-    lumberMill: assetUrl("/buildings/taş-ocagi.jpg"),
+    townHall: "/buildings/civil-lodge.svg",
+    lumberMill: "/buildings/lumber-mill.svg",
     ironMine: "/buildings/iron-mine.svg",
     oilWell: "/buildings/oil-well.svg",
-    farm: assetUrl("/buildings/avcı-kulubesi.jpg"),
+    farm: "/buildings/farm.svg",
     barracks: assetUrl("/buildings/kışla.jpg"),
     researchLodge: "/buildings/research-lodge.svg",
     shepherdLodge: "/buildings/shepherd-lodge.svg",

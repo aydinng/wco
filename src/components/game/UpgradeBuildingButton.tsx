@@ -25,6 +25,8 @@ type Props = {
     oil: string;
     food: string;
   };
+  /** İlk çağda inşaat yalnız odun + besin */
+  ilkCagWoodFoodOnly?: boolean;
 };
 
 export function UpgradeBuildingButton({
@@ -36,12 +38,15 @@ export function UpgradeBuildingButton({
   unlocks,
   locale,
   resourceLabels,
+  ilkCagWoodFoodOnly = false,
 }: Props) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const maxed = currentLevel >= MAX_BUILDING_LEVEL;
-  const cost = getUpgradeCost(currentLevel, unlocks);
+  const cost = getUpgradeCost(currentLevel, unlocks, {
+    ilkCagWoodFoodOnly,
+  });
   const actionLabel = currentLevel < 1 ? buildLabel : upgradeLabel;
   const tr = locale !== "en";
 
@@ -65,9 +70,6 @@ export function UpgradeBuildingButton({
             className="flex min-w-0 flex-1 flex-wrap items-center justify-end gap-x-3 gap-y-1 rounded-md border-2 border-amber-700/55 bg-gradient-to-br from-amber-950/45 to-black/45 px-3 py-2 shadow-inner"
             style={{ fontFamily: "var(--font-warcity), serif" }}
           >
-            <span className="text-xs font-semibold uppercase tracking-wide text-amber-200/90">
-              {tr ? "Maliyet" : "Cost"}
-            </span>
             <span className="inline-flex flex-wrap items-center justify-end gap-x-3 gap-y-1 text-sm font-semibold tabular-nums text-amber-50">
               <span className="inline-flex items-center gap-1">
                 <ResourceIcon kind="wood" />

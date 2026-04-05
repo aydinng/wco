@@ -40,6 +40,18 @@ export async function startEraTechResearch(
   const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user) return { ok: false, error: "Kullanıcı yok" };
 
+  const anyResearchLodge = await prisma.city.findFirst({
+    where: { userId, researchLodgeLevel: { gte: 1 } },
+    select: { id: true },
+  });
+  if (!anyResearchLodge) {
+    return {
+      ok: false,
+      error:
+        "Araştırma kulübesi inşa edilmeden teknoloji araştırılamaz.",
+    };
+  }
+
   const needIdx = requiredEraIndexForTech(entry.eraOrdinal);
   if (eraIndex(user.currentEra) < needIdx) {
     return { ok: false, error: "Bu teknoloji için çağınız yeterli değil." };

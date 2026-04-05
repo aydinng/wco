@@ -191,6 +191,7 @@ export function BuildingCatalogCard({
                     unlocks={unlocks}
                     locale={locale}
                     resourceLabels={resourceLabels}
+                    ilkCagWoodFoodOnly={eraIndex(currentEra) < 1}
                   />
                 )}
               </div>

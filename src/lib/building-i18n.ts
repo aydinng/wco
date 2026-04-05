@@ -5,7 +5,7 @@ const NAMES: Record<
   { tr: string; en: string }
 > = {
   townHall: { tr: "Belediye", en: "Town hall" },
-  lumberMill: { tr: "Kereste fabrikası", en: "Lumber mill" },
+  lumberMill: { tr: "Oduncu kulübesi", en: "Lumberjack lodge" },
   ironMine: { tr: "Demir madeni", en: "Iron mine" },
   oilWell: { tr: "Petrol kuyusu", en: "Oil well" },
   farm: { tr: "Çiftlik", en: "Farm" },

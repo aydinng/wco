@@ -13,70 +13,79 @@ export type EraBuildingRow = {
 export const ERA_BUILDING_CATALOG: Record<EraId, EraBuildingRow[]> = {
   ilk_cag: [
     {
-      buildingId: "townHall",
-      titleTr: "Köy Meydanı",
-      titleEn: "Village square",
-      descTr:
-        "Yerleşimin yönetim ve nüfus merkezi. Nüfus tavanını büyütür; diğer yapılar için temel oluşturur.",
-      descEn:
-        "Your settlement’s civic and population hub. Raises population cap and anchors growth.",
-    },
-    {
       buildingId: "lumberMill",
-      titleTr: "Taş Ocağı",
-      titleEn: "Stone quarry",
+      titleTr: "Oduncu kulübesi",
+      titleEn: "Lumberjack lodge",
       descTr:
-        "Taş ve odun hammaddesini çıkarır; işçi başına üretim seviye ile artar.",
+        "Odun üretimi: işçi başına taban üretim + seviye başına dakikada +0,1 odun (saatlik hesapta).",
       descEn:
-        "Extracts stone and timber; output per worker rises with level.",
-    },
-    {
-      buildingId: "farm",
-      titleTr: "Avcı Kulübesi",
-      titleEn: "Hunter’s lodge",
-      descTr:
-        "Av ve toplayıcılıkla besin sağlar; nüfus ve ordunun gıda ihtiyacını karşılar.",
-      descEn:
-        "Provides food through hunting and gathering for your people and armies.",
+        "Wood: base worker output plus +0.1 wood per minute per building level (applied hourly).",
     },
     {
       buildingId: "barracks",
       titleTr: "Kışla",
       titleEn: "Barracks",
       descTr:
-        "Asker eğitir ve garnizon kapasitesini belirler. Seviye arttıkça üst asker limiti artar.",
+        "Asker eğitmek için gereklidir. Kışla olmadan asker üretilemez. Garnizon kapasitesini yükseltir.",
       descEn:
-        "Trains troops and sets garrison capacity. Higher levels raise soldier caps.",
+        "Required to train soldiers. No training without barracks. Raises garrison capacity.",
     },
     {
       buildingId: "researchLodge",
       titleTr: "Araştırma kulübesi",
       titleEn: "Research lodge",
       descTr:
-        "İmparatorluk teknoloji araştırmasını hızlandırır; teknoloji bulmaya ve araştırma sürelerini kısaltmaya yarar.",
+        "İmparatorluk teknolojisi ve çağ araştırması için gereklidir; kulübe olmadan araştırma yapılamaz.",
       descEn:
-        "Speeds empire technology research; helps discover tech and shorten research times.",
+        "Required for empire and era technology research; no research without this building.",
     },
     {
       buildingId: "shepherdLodge",
       titleTr: "Çoban kulübesi",
       titleEn: "Shepherd lodge",
       descTr:
-        "Hayvancılık: besin üretimine ek olarak işçi başına dakikada +0,1 besin (saatlik üretimde işlenir).",
+        "Seviye başına dakikada +0,1 besin üretim katkısı (saatlik hesapta).",
       descEn:
-        "Extra +0.1 food per worker per minute (applied in hourly production).",
+        "+0.1 food per minute per level (applied to hourly production).",
     },
     {
       buildingId: "civilLodge",
       titleTr: "Sivil kulübesi",
       titleEn: "Civil lodge",
       descTr:
-        "Nüfus yönetimi: seviye başına +10 nüfus limiti.",
+        "Nüfus yönetimi: seviye başına +10 nüfus üst sınırı.",
       descEn:
         "+10 population cap per level.",
     },
   ],
   orta_cag: [
+    {
+      buildingId: "townHall",
+      titleTr: "Belediye",
+      titleEn: "Town hall",
+      descTr:
+        "Yönetim merkezi ve nüfus tavanı; seviye başına nüfus limitini güçlendirir.",
+      descEn:
+        "Civic hub and population cap; strengthens per-level pop limits.",
+    },
+    {
+      buildingId: "farm",
+      titleTr: "Tarla",
+      titleEn: "Farm",
+      descTr:
+        "Besin üretimi; işçi ve seviye ile çarpanlı tarım çıktısı.",
+      descEn:
+        "Food production; scales with workers and building level.",
+    },
+    {
+      buildingId: "lumberMill",
+      titleTr: "Orman işletmesi",
+      titleEn: "Timber yard",
+      descTr:
+        "Odun üretimini genişletir; oduncu bonusları devam eder.",
+      descEn:
+        "Expands timber output; lumber lodge bonuses continue.",
+    },
     {
       buildingId: "ironMine",
       titleTr: "Demir madeni",

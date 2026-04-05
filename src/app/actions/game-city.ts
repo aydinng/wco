@@ -46,6 +46,8 @@ type PlayErr = keyof Pick<
   | "errResearchBusy"
   | "errUnitEraLocked"
   | "errTrainQueueFull"
+  | "errResearchLodgeRequired"
+  | "errNoBarracks"
 >;
 
 async function pe(key: PlayErr): Promise<string> {
@@ -161,7 +163,9 @@ export async function upgradeBuilding(
   if (cur >= MAX_BUILDING_LEVEL) {
     return { ok: false, error: await pe("errBuildingMax") };
   }
-  const cost = getUpgradeCost(cur, unlocks);
+  const cost = getUpgradeCost(cur, unlocks, {
+    ilkCagWoodFoodOnly: eraIndex(user.currentEra) < 1,
+  });
   if (!canAfford(city, cost)) {
     return { ok: false, error: await pe("errInsufficient") };
   }
@@ -214,6 +218,14 @@ export async function advanceResearch(payCityId: string): Promise<ActionResult> 
   const fresh = await flushResearchJob(user.id);
   if (fresh) user = fresh;
 
+  const anyResearchLodge = await prisma.city.findFirst({
+    where: { userId: user.id, researchLodgeLevel: { gte: 1 } },
+    select: { id: true },
+  });
+  if (!anyResearchLodge) {
+    return { ok: false, error: await pe("errResearchLodgeRequired") };
+  }
+
   if (user.researchTier >= MAX_RESEARCH_TIER) {
     return { ok: false, error: await pe("errResearchMax") };
   }
@@ -222,7 +234,9 @@ export async function advanceResearch(payCityId: string): Promise<ActionResult> 
   }
 
   const nextTier = user.researchTier + 1;
-  const cost = getResearchCost(nextTier, unlocks);
+  const cost = getResearchCost(nextTier, unlocks, {
+    ilkCagWoodFoodOnly: eraIndex(user.currentEra) < 1,
+  });
   if (!canAfford(city, cost)) {
     return { ok: false, error: await pe("errInsufficient") };
   }
@@ -271,6 +285,9 @@ export async function trainSoldiers(
   const { city, unlocks } = r;
   const n = Math.max(0, Math.floor(amount));
   if (n < 1) return { ok: false, error: await pe("errInvalidAmount") };
+  if (city.barracksLevel < 1) {
+    return { ok: false, error: await pe("errNoBarracks") };
+  }
   const cap = soldierCap(city.barracksLevel);
   if (city.soldiers + n > cap) {
     return { ok: false, error: await pe("errBarracksFull") };

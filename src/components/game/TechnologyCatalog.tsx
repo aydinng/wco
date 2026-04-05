@@ -4,7 +4,6 @@ import type { TechCatalogEntry } from "@/config/technology-catalog";
 import {
   ERA_ORDER,
   eraBackgroundUrl,
-  eraOrdinalNumber,
   getEraConfig,
   getEraDisplayName,
 } from "@/config/eras";
@@ -70,7 +69,6 @@ export function TechnologyCatalog({
           const eraId = ERA_ORDER[sec.eraOrdinal - 1];
           const cfg = eraId ? getEraConfig(eraId) : null;
           const bg = eraId ? eraBackgroundUrl(eraId) : null;
-          const ordinal = eraId ? eraOrdinalNumber(eraId) : sec.eraOrdinal;
           return (
           <div key={sec.eraOrdinal}>
             {cfg && bg ? (
@@ -91,14 +89,6 @@ export function TechnologyCatalog({
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
                   <div className="absolute inset-0 ring-1 ring-inset ring-white/10" />
-                  <div className="absolute bottom-1.5 left-2 right-2 text-center">
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
-                      {locale === "en" ? `Age ${ordinal}` : `Çağ ${ordinal}`}
-                    </p>
-                    <p className="text-[11px] font-bold leading-tight text-white drop-shadow-md">
-                      {sec.eraName}
-                    </p>
-                  </div>
                 </div>
               </div>
             ) : (

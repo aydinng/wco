@@ -181,9 +181,6 @@ export function EraTechResearchRow({
         className="flex min-w-0 flex-1 flex-wrap items-center justify-end gap-x-3 gap-y-1 rounded-md border-2 border-amber-700/55 bg-gradient-to-br from-amber-950/50 to-black/50 px-3 py-2 shadow-inner"
         style={{ fontFamily: "var(--font-warcity), serif" }}
       >
-        <span className="text-xs font-semibold uppercase tracking-wide text-amber-200/90">
-          {locale === "en" ? "Cost" : "Maliyet"}
-        </span>
         <span className="inline-flex flex-wrap items-center gap-x-3 gap-y-1 text-sm font-semibold tabular-nums text-amber-50">
           <span className="inline-flex items-center gap-1">
             <ResourceIcon kind="wood" />
