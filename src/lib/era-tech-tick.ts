@@ -1,4 +1,5 @@
 import { applyCompletedEraTech } from "@/lib/era-tech-completion";
+import { healUserEraFromTechProgress } from "@/lib/era-tech-heal";
 import { prisma } from "@/lib/prisma";
 
 /**
@@ -15,7 +16,10 @@ export async function applyEraTechJobs(userId: string) {
     },
     take: 50,
   });
-  if (jobs.length === 0) return;
+  if (jobs.length === 0) {
+    await healUserEraFromTechProgress(userId);
+    return;
+  }
 
   await prisma.$transaction(async (tx) => {
     for (const j of jobs) {
@@ -39,4 +43,6 @@ export async function applyEraTechJobs(userId: string) {
       },
     });
   }
+
+  await healUserEraFromTechProgress(userId);
 }

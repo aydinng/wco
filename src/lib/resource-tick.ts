@@ -1,8 +1,13 @@
 import { eraIndex, getResourceUnlocks } from "@/config/eras";
 import {
+  effectivePopCap,
   hourlyFoodConsumption,
   hourlyProduction,
 } from "@/lib/economy";
+import {
+  eraTechResourceMultipliers,
+  hourlyPopulationBonusFromEraTech,
+} from "@/lib/era-tech-bonuses";
 import { prisma } from "@/lib/prisma";
 import type { City, User } from "@prisma/client";
 
@@ -21,6 +26,7 @@ function lastTickMs(city: City): number {
 
 /**
  * Şehirler arası saatlik üretim ve besin tüketimini uygular (offline süre max 7 gün).
+ * Çağ teknolojisi çarpanları ve sosyalizm nüfus artışı dahildir.
  */
 export async function applyResourceTicksFromSnapshot(
   user: User & { cities: City[] },
@@ -30,6 +36,18 @@ export async function applyResourceTicksFromSnapshot(
   const eIdx = eraIndex(user.currentEra);
   const now = Date.now();
 
+  const techRows = await prisma.userEraTech.findMany({
+    where: { userId: user.id },
+  });
+  const eraTechLevels = Object.fromEntries(
+    techRows.map((r) => [r.techKey, r.level]),
+  );
+  const mult = eraTechResourceMultipliers(eraTechLevels);
+  const hourlyPopBonus = hourlyPopulationBonusFromEraTech(eraTechLevels);
+
+  const pops = user.cities.map((c) => Math.max(0, c.population));
+  const totalPop = pops.reduce((a, b) => a + b, 0) || 1;
+
   for (const city of user.cities) {
     const last = lastTickMs(city);
     const hoursRaw = (now - last) / 3600000;
@@ -37,15 +55,24 @@ export async function applyResourceTicksFromSnapshot(
     const capped = Math.min(hoursRaw, MAX_TICK_HOURS);
     const ph = hourlyProduction(city, user.researchTier, unlocks);
     const foodCons = hourlyFoodConsumption(city, eIdx);
-    const w = Number.isFinite(ph.wood) ? ph.wood : 0;
-    const ir = Number.isFinite(ph.iron) ? ph.iron : 0;
-    const oi = Number.isFinite(ph.oil) ? ph.oil : 0;
-    const fd = Number.isFinite(ph.food) ? ph.food : 0;
+    const w = Number.isFinite(ph.wood) ? ph.wood * mult.wood : 0;
+    const ir = Number.isFinite(ph.iron) ? ph.iron * mult.iron : 0;
+    const oi = Number.isFinite(ph.oil) ? ph.oil * mult.oil : 0;
+    const fd = Number.isFinite(ph.food) ? ph.food * mult.food : 0;
     const fc = Number.isFinite(foodCons) ? foodCons : 0;
     const deltaWood = Math.floor(w * capped);
     const deltaIron = Math.floor(ir * capped);
     const deltaOil = Math.floor(oi * capped);
     const deltaFood = Math.floor(fd * capped - fc * capped);
+
+    const share = Math.max(0, city.population) / totalPop;
+    const deltaPop = Math.floor(hourlyPopBonus * capped * share);
+    const cap = effectivePopCap(city);
+    const newPop =
+      deltaPop > 0
+        ? Math.min(cap, city.population + deltaPop)
+        : city.population;
+
     await prisma.city.update({
       where: { id: city.id },
       data: {
@@ -53,6 +80,7 @@ export async function applyResourceTicksFromSnapshot(
         iron: city.iron + deltaIron,
         oil: city.oil + deltaOil,
         food: Math.max(0, city.food + deltaFood),
+        population: newPop,
         lastResourceTick: new Date(now),
       },
     });

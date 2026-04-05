@@ -46,4 +46,10 @@ export async function applyCompletedEraTech(
       data: { currentEra: "orta_cag" },
     });
   }
+  if (techKey === "yeniden_dogus_unlock") {
+    await tx.user.update({
+      where: { id: userId },
+      data: { currentEra: "yeniden_dogus" },
+    });
+  }
 }

@@ -3,6 +3,7 @@ import { applyResourceTicksFromSnapshot } from "@/lib/resource-tick";
 import { applyBuildingJobs } from "@/lib/building-tick";
 import { applyTrainingJobs } from "@/lib/training-tick";
 import { applyResearchJobs } from "@/lib/research-tick";
+import { healUserEraFromTechProgress } from "@/lib/era-tech-heal";
 import { applyEraTechJobs } from "@/lib/era-tech-tick";
 import { syncLegacySoldiersToUnitStocks } from "@/lib/ensure-unit-stocks";
 import { computeUserScores } from "@/lib/score";
@@ -15,11 +16,22 @@ export const getCurrentUser = cache(async () => {
   if (!id) return null;
 
   try {
-    const user = await prisma.user.findUnique({
+    let user = await prisma.user.findUnique({
       where: { id },
       include: { cities: { orderBy: { name: "asc" } } },
     });
     if (!user) return null;
+
+    try {
+      await healUserEraFromTechProgress(id);
+      const healed = await prisma.user.findUnique({
+        where: { id },
+        include: { cities: { orderBy: { name: "asc" } } },
+      });
+      if (healed) user = healed;
+    } catch (e) {
+      console.error("[healUserEraFromTechProgress]", e);
+    }
 
     try {
       await applyResourceTicksFromSnapshot(user);
@@ -63,10 +75,14 @@ export const getCurrentUser = cache(async () => {
     });
     if (fresh) {
       try {
-        const eraTechCompleted = await prisma.userEraTech.count({
-          where: { userId: id, level: { gte: 1 } },
+        const eraTechRows = await prisma.userEraTech.findMany({
+          where: { userId: id },
         });
-        const s = computeUserScores(fresh, { eraTechCompleted });
+        const eraTechCompleted = eraTechRows.filter((r) => r.level >= 1).length;
+        const eraTechLevels = Object.fromEntries(
+          eraTechRows.map((r) => [r.techKey, r.level]),
+        );
+        const s = computeUserScores(fresh, { eraTechCompleted, eraTechLevels });
         if (
           s.scoreTotal !== fresh.scoreTotal ||
           s.scoreProduction !== fresh.scoreProduction ||

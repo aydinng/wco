@@ -1,10 +1,16 @@
 import type { City, User } from "@prisma/client";
 import { getResourceUnlocks } from "@/config/eras";
+import {
+  eraTechResourceMultipliers,
+  type EraTechLevels,
+} from "@/lib/era-tech-bonuses";
 import { hourlyProduction } from "@/lib/economy";
 
 type ScoreOpts = {
   /** Tamamlanmış çağ teknolojisi sayısı (UserEraTech level ≥ 1) */
   eraTechCompleted?: number;
+  /** Üretim skorunda çağ teknolojisi çarpanları */
+  eraTechLevels?: EraTechLevels;
 };
 
 /** Oyuncu skor bileşenleri — istatistik çubukları ve sıralama için */
@@ -14,11 +20,17 @@ export function computeUserScores(
 ) {
   const eraTechCompleted = opts?.eraTechCompleted ?? 0;
   const unlocks = getResourceUnlocks(user.currentEra);
+  const mult = opts?.eraTechLevels
+    ? eraTechResourceMultipliers(opts.eraTechLevels)
+    : { wood: 1, iron: 1, oil: 1, food: 1 };
   let prod = 0;
   for (const c of user.cities) {
     const ph = hourlyProduction(c, user.researchTier, unlocks);
     prod += Math.floor(
-      Math.abs(ph.wood) + Math.abs(ph.iron) + Math.abs(ph.oil) + Math.abs(ph.food),
+      Math.abs(ph.wood * mult.wood) +
+        Math.abs(ph.iron * mult.iron) +
+        Math.abs(ph.oil * mult.oil) +
+        Math.abs(ph.food * mult.food),
     );
   }
   const tech =
