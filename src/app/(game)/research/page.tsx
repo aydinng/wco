@@ -31,7 +31,7 @@ export default async function ResearchPage() {
           }),
           prisma.eraTechResearchJob.findMany({
             where: { userId: user.id, status: "queued" },
-            orderBy: { completesAt: "asc" },
+            orderBy: { createdAt: "asc" },
             take: MAX_ERA_QUEUE,
           }),
         ])
@@ -42,7 +42,7 @@ export default async function ResearchPage() {
   );
   const activeEraTechJobs = eraJobList.map((j) => ({
     techKey: j.techKey,
-    completesAt: j.completesAt.toISOString(),
+    completesAt: j.completesAt?.toISOString() ?? null,
   }));
 
   const eraJobsForStrip = eraJobList.map((j) => {
@@ -53,7 +53,7 @@ export default async function ResearchPage() {
         : spec?.nameTr ?? j.techKey;
     return {
       techKey: j.techKey,
-      completesAt: j.completesAt.toISOString(),
+      completesAt: j.completesAt?.toISOString() ?? null,
       name,
     };
   });

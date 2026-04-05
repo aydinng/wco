@@ -18,13 +18,6 @@ import { notFound } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
-function eraHeadingLabel(locale: AppLocale, eraOrdinal: number, eraName: string) {
-  if (locale === "en") {
-    return `Age ${eraOrdinal} · ${eraName}`;
-  }
-  return `Çağ ${eraOrdinal} · ${eraName}`;
-}
-
 export default async function CityDetailPage({
   params,
 }: {
@@ -70,25 +63,24 @@ export default async function CityDetailPage({
         )}
       </div>
 
-      <div className="space-y-12">
+      <div className="w-full overflow-hidden rounded-lg border border-zinc-700/70">
         {ERA_ORDER.map((eraId) => {
           const cfg = getEraConfig(eraId);
           const rows = ERA_BUILDING_CATALOG[eraId];
           const bg = eraBackgroundUrl(eraId);
           const eraName = getEraDisplayName(cfg, locale);
           const ordinal = eraOrdinalNumber(eraId);
-          const heading = eraHeadingLabel(locale, ordinal, eraName);
 
           return (
-            <section key={eraId} className="scroll-mt-4">
+            <div key={eraId} className="scroll-mt-4">
               <div
-                className="relative mb-4 overflow-hidden rounded-xl border-2 shadow-xl"
+                className="relative mb-0 w-full overflow-hidden rounded-none border-b-2 shadow-lg"
                 style={{
                   borderColor: cfg.banner.borderColor,
-                  boxShadow: `0 0 28px ${cfg.banner.glow}`,
+                  boxShadow: `0 0 18px ${cfg.banner.glow}`,
                 }}
               >
-                <div className="relative h-28 w-full sm:h-32">
+                <div className="relative h-20 w-full sm:h-24">
                   <Image
                     src={bg}
                     alt=""
@@ -97,35 +89,27 @@ export default async function CityDetailPage({
                     sizes="(max-width: 1280px) 100vw, 1280px"
                     priority={eraId === "ilk_cag"}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/35 to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 flex items-end justify-between gap-2 px-4 py-3">
-                    <h3
-                      className="text-lg font-bold tracking-wide drop-shadow-md sm:text-xl"
-                      style={{
-                        color: cfg.banner.titleColor,
-                        fontFamily: "var(--font-warcity), serif",
-                      }}
-                    >
-                      {heading}
-                    </h3>
-                    <span
-                      className="tabular-nums text-sm font-semibold text-zinc-300"
-                      style={{ color: cfg.banner.subtitleColor }}
-                    >
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
+                  <div className="absolute inset-0 ring-1 ring-inset ring-white/10" />
+                  <div className="absolute bottom-1.5 left-2 right-2 text-center">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
                       {locale === "en" ? `Age ${ordinal}` : `Çağ ${ordinal}`}
-                    </span>
+                    </p>
+                    <p className="text-[11px] font-bold leading-tight text-white drop-shadow-md">
+                      {eraName}
+                    </p>
                   </div>
                 </div>
               </div>
 
               {rows.length === 0 ? (
-                <p className="rounded border border-[#2a3441]/60 bg-black/20 px-3 py-4 text-sm text-zinc-500">
+                <p className="border-b border-blue-950/70 px-3 py-4 text-sm text-zinc-500">
                   {eraId === "yeniden_dogus"
                     ? p.buildingsEraTechOnly
                     : p.buildingsEraEmpty}
                 </p>
               ) : (
-                <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                <div>
                   {rows.map((row) => (
                     <BuildingCatalogCard
                       key={`${eraId}-${row.buildingId}`}
@@ -138,11 +122,12 @@ export default async function CityDetailPage({
                       play={p}
                       locale={locale}
                       researchTier={user.researchTier}
+                      currentEra={user.currentEra}
                     />
                   ))}
                 </div>
               )}
-            </section>
+            </div>
           );
         })}
       </div>

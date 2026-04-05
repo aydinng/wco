@@ -48,7 +48,8 @@ export const UNITS: UnitSpec[] = [
     carry: 8,
     hp: 22,
     foodPerMinute: 1,
-    imageSrc: "/units/unit-strip.svg",
+    /** Görsel: public/units/mızrakçı.jpg (kendi dosyanızla değiştirin) */
+    imageSrc: "/units/mizrakci.jpg",
   },
   // --- Orta Çağ ---
   {

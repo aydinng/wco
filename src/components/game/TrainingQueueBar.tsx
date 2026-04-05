@@ -44,6 +44,7 @@ export function TrainingQueueBar({
           {jobs.map((j, i) => {
             const end = new Date(j.completesAt).getTime();
             const sec = Math.max(0, Math.ceil((end - clock) / 1000));
+            const active = i === 0;
             return (
               <li
                 key={j.id}
@@ -58,9 +59,15 @@ export function TrainingQueueBar({
                   ) : null}
                   {j.unitName}
                 </span>
-                <span className="shrink-0 tabular-nums text-amber-100/90">
-                  {formatCountdownSeconds(sec, locale)}
-                </span>
+                {active ? (
+                  <span className="shrink-0 tabular-nums text-amber-100/90">
+                    {formatCountdownSeconds(sec, locale)}
+                  </span>
+                ) : (
+                  <span className="shrink-0 text-xs font-medium uppercase tracking-wide text-zinc-500">
+                    {locale === "en" ? "Queued" : "Sırada"}
+                  </span>
+                )}
               </li>
             );
           })}

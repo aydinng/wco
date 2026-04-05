@@ -28,6 +28,7 @@ export function formatBuildingBonusLine(
     const cap = computePopCap({
       townHallLevel: level,
       barracksLevel: city.barracksLevel,
+      civilLodgeLevel: city.civilLodgeLevel,
     });
     return templates.bonusTownHall.replace("{cap}", String(cap));
   }

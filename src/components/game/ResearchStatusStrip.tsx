@@ -4,7 +4,11 @@ import type { AppLocale } from "@/lib/locale";
 import { formatCountdownSeconds } from "@/lib/format-countdown";
 import { useEffect, useState } from "react";
 
-type EraJob = { techKey: string; completesAt: string; name: string };
+type EraJob = {
+  techKey: string;
+  completesAt: string | null;
+  name: string;
+};
 
 export function ResearchStatusStrip({
   locale,
@@ -60,15 +64,26 @@ export function ResearchStatusStrip({
         {eraJobs.length > 0 ? (
           <ul className="mt-2 space-y-1 border-t border-zinc-800/80 pt-2 text-zinc-300">
             {eraJobs.map((j) => {
-              const end = new Date(j.completesAt).getTime();
-              const sec = Math.max(0, Math.ceil((end - now) / 1000));
+              const end = j.completesAt
+                ? new Date(j.completesAt).getTime()
+                : null;
+              const sec =
+                end != null
+                  ? Math.max(0, Math.ceil((end - now) / 1000))
+                  : 0;
               return (
                 <li key={j.techKey} className="flex flex-wrap justify-between gap-2">
                   <span className="text-amber-100/90">{j.name}</span>
-                  <span className="tabular-nums text-zinc-200">
-                    {tr ? "Remaining" : "Kalan"}{" "}
-                    {formatCountdownSeconds(sec, locale)}
-                  </span>
+                  {j.completesAt ? (
+                    <span className="tabular-nums text-zinc-200">
+                      {tr ? "Remaining" : "Kalan"}{" "}
+                      {formatCountdownSeconds(sec, locale)}
+                    </span>
+                  ) : (
+                    <span className="text-xs text-zinc-500">
+                      {tr ? "Queued" : "Sırada"}
+                    </span>
+                  )}
                 </li>
               );
             })}

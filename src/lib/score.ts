@@ -31,7 +31,12 @@ export function computeUserScores(
       c.ironMineLevel +
       c.oilWellLevel +
       c.farmLevel +
-      c.barracksLevel;
+      c.barracksLevel +
+      c.researchLodgeLevel +
+      c.shepherdLodgeLevel +
+      c.civilLodgeLevel +
+      c.bankLevel +
+      c.policeDeptLevel;
   }
   bld *= 150;
   const total = prod + tech + bld;

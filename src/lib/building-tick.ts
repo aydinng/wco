@@ -2,18 +2,20 @@ import { prisma } from "@/lib/prisma";
 import type { City, User } from "@prisma/client";
 
 /**
- * Tamamlanan bina job'larını şehir seviyelerine uygular.
- * MVP: job oluşturulurken hedef seviye hesaplanır, tamamlanınca ilgili level alanına yazılır.
+ * Tamamlanan bina işlerini uygular; ardından sırada bekleyen tek işi başlatır
+ * (aynı anda yalnızca birinin completesAt’i işler).
  */
 export async function applyBuildingJobs(user: User & { cities: City[] }) {
   const now = new Date();
   const jobs = (await prisma.buildingJob.findMany({
-    where: { userId: user.id, status: "queued", completesAt: { lte: now } },
+    where: {
+      userId: user.id,
+      status: "queued",
+      completesAt: { not: null, lte: now },
+    },
     select: { id: true, cityId: true, buildingId: true, toLevel: true },
     take: 100,
   })) as { id: string; cityId: string; buildingId: string; toLevel: number }[];
-
-  if (jobs.length === 0) return;
 
   const fieldById: Record<string, string> = {
     townHall: "townHallLevel",
@@ -22,7 +24,14 @@ export async function applyBuildingJobs(user: User & { cities: City[] }) {
     oilWell: "oilWellLevel",
     farm: "farmLevel",
     barracks: "barracksLevel",
+    researchLodge: "researchLodgeLevel",
+    shepherdLodge: "shepherdLodgeLevel",
+    civilLodge: "civilLodgeLevel",
+    bank: "bankLevel",
+    policeDept: "policeDeptLevel",
   };
+
+  const userIdsToPromote = new Set<string>();
 
   await prisma.$transaction(async (tx) => {
     for (const j of jobs) {
@@ -32,11 +41,27 @@ export async function applyBuildingJobs(user: User & { cities: City[] }) {
         where: { id: j.cityId },
         data: { [field]: j.toLevel },
       });
+      await tx.buildingJob.update({
+        where: { id: j.id },
+        data: { status: "done" },
+      });
+      userIdsToPromote.add(user.id);
     }
-    await tx.buildingJob.updateMany({
-      where: { id: { in: jobs.map((j: { id: string }) => j.id) } },
-      data: { status: "done" },
-    });
   });
-}
 
+  for (const uid of userIdsToPromote) {
+    const pending = await prisma.buildingJob.findFirst({
+      where: { userId: uid, status: "queued", completesAt: null },
+      orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+    });
+    if (!pending) continue;
+    const completesAt = new Date(now.getTime() + pending.durationSec * 1000);
+    await prisma.buildingJob.update({
+      where: { id: pending.id },
+      data: {
+        startsAt: now,
+        completesAt,
+      },
+    });
+  }
+}

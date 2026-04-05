@@ -47,6 +47,11 @@ export const BUILDING_DURATION_BASE_SEC: Record<string, number> = {
   oilWell: 220,
   farm: 140,
   barracks: 240,
+  researchLodge: 109,
+  shepherdLodge: 70,
+  civilLodge: 90,
+  bank: 221,
+  policeDept: 153,
 };
 
 export function buildingUpgradeDurationSec(opts: {
@@ -70,12 +75,15 @@ export function buildingUpgradeDurationSec(opts: {
 export function researchTierAdvanceDurationSec(opts: {
   targetTier: number;
   completedResearchTier: number;
+  /** Araştırma kulübesi: şehirlerdeki seviye toplamına göre ek hız % */
+  researchLodgeBonusPct?: number;
 }): number {
   const base = 120; // ~2 dk taban (tier 1); K ile üst tier’larda uzar
+  const lodge = Math.max(0, opts.researchLodgeBonusPct ?? 0);
   return scaledDurationSec({
     baseSec: base,
     targetLevel: opts.targetTier,
-    speedBonusPct: researchSpeedBonusPct(opts.completedResearchTier),
+    speedBonusPct: researchSpeedBonusPct(opts.completedResearchTier) + lodge,
     maxSec: MAX_RESEARCH_DURATION_SEC,
   });
 }

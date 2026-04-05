@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import { getResourceUnlocks } from "@/config/eras";
+import { eraIndex, getResourceUnlocks } from "@/config/eras";
 import { MARKET_OPEN_DELAY_SEC } from "@/config/game-rules";
 import { getDictionary } from "@/i18n/dictionaries";
 import { getLocale } from "@/lib/locale";
@@ -63,6 +63,19 @@ export async function POST(req: Request) {
 
     if (city.soldiers < quantity) {
       return NextResponse.json({ error: play.errInsufficient }, { status: 400 });
+    }
+
+    if (eraIndex(user.currentEra) < 1) {
+      return NextResponse.json(
+        { error: play.errMarketNeedMedieval },
+        { status: 400 },
+      );
+    }
+    if ((city.bankLevel ?? 0) < 1) {
+      return NextResponse.json(
+        { error: play.errMarketNeedBank },
+        { status: 400 },
+      );
     }
 
     const now = Date.now();

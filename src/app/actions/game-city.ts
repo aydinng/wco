@@ -111,6 +111,11 @@ const BUILDING_FIELD = {
   oilWell: "oilWellLevel",
   farm: "farmLevel",
   barracks: "barracksLevel",
+  researchLodge: "researchLodgeLevel",
+  shepherdLodge: "shepherdLodgeLevel",
+  civilLodge: "civilLodgeLevel",
+  bank: "bankLevel",
+  policeDept: "policeDeptLevel",
 } as const;
 
 export type BuildingId = keyof typeof BUILDING_FIELD;
@@ -128,6 +133,12 @@ export async function upgradeBuilding(
   if (building === "oilWell" && !unlocks.oil) {
     return { ok: false, error: await pe("errBuildingLocked") };
   }
+  if (
+    (building === "bank" || building === "policeDept") &&
+    eraIndex(user.currentEra) < 1
+  ) {
+    return { ok: false, error: await pe("errBuildingLocked") };
+  }
 
   const queueCount = await prisma.buildingJob.count({
     where: { userId: user.id, status: "queued" },
@@ -135,6 +146,15 @@ export async function upgradeBuilding(
   if (queueCount >= 2) {
     return { ok: false, error: await pe("errBuildQueueFull") };
   }
+
+  const hasActive = await prisma.buildingJob.findFirst({
+    where: {
+      userId: user.id,
+      status: "queued",
+      completesAt: { not: null },
+    },
+    select: { id: true },
+  });
 
   const field = BUILDING_FIELD[building];
   const cur = city[field as keyof typeof city] as number;
@@ -153,7 +173,10 @@ export async function upgradeBuilding(
     researchTier: user.researchTier,
   });
   const startsAt = new Date();
-  const completesAt = new Date(Date.now() + durationSec * 1000);
+  /** Aktif iş varken yeni kayıt sırada bekler (completesAt sonra dolar). */
+  const completesAt: Date | null = hasActive
+    ? null
+    : new Date(Date.now() + durationSec * 1000);
 
   await prisma.$transaction(async (tx) => {
     await tx.city.update({
@@ -204,9 +227,19 @@ export async function advanceResearch(payCityId: string): Promise<ActionResult> 
     return { ok: false, error: await pe("errInsufficient") };
   }
 
+  const allCities = await prisma.city.findMany({
+    where: { userId: user.id },
+    select: { researchLodgeLevel: true },
+  });
+  const researchLodgeBonusPct = Math.min(
+    28,
+    allCities.reduce((s, c) => s + c.researchLodgeLevel, 0) * 1.4,
+  );
+
   const durationSec = researchTierAdvanceDurationSec({
     targetTier: nextTier,
     completedResearchTier: user.researchTier,
+    researchLodgeBonusPct,
   });
   const endsAt = new Date(Date.now() + durationSec * 1000);
 

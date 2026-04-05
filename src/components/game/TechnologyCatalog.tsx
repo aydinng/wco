@@ -20,7 +20,7 @@ type Props = {
   currentEra: string;
   defaultCityId: string;
   eraTechLevels: Record<string, number>;
-  activeEraTechJobs: { techKey: string; completesAt: string }[];
+  activeEraTechJobs: { techKey: string; completesAt: string | null }[];
 };
 
 function groupByEra(

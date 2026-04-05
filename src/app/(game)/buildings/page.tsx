@@ -44,13 +44,13 @@ export default async function BuildingsPage() {
 
   const rawJobs = await prisma.buildingJob.findMany({
     where: { userId: user.id, status: "queued" },
-    orderBy: { completesAt: "asc" },
+    orderBy: { createdAt: "asc" },
     take: 2,
     include: { city: { select: { name: true } } },
   });
   const buildingQueueItems: BuildingJobQueueItem[] = rawJobs.map((j) => ({
     id: j.id,
-    completesAtIso: j.completesAt.toISOString(),
+    completesAtIso: j.completesAt?.toISOString() ?? null,
     cityName: j.city.name,
     buildingId: j.buildingId,
     toLevel: j.toLevel,
@@ -58,19 +58,22 @@ export default async function BuildingsPage() {
 
   return (
     <div className="rounded border border-[#2a3441]/90 bg-black/35 p-4 backdrop-blur-sm">
-      <h2
-        className="mb-2 text-center text-lg text-amber-200/90"
+      <div
+        className="sticky top-0 z-20 -mx-4 mb-4 border-b border-amber-900/40 bg-gradient-to-r from-zinc-950/98 via-zinc-900/95 to-zinc-950/98 px-4 py-3 shadow-md backdrop-blur-md"
         style={{ fontFamily: "var(--font-warcity), serif" }}
       >
-        {p.buildingsTitle}
-      </h2>
+        <h2 className="text-center text-lg font-bold tracking-wide text-amber-200/95">
+          {p.buildingsTitle}
+        </h2>
+      </div>
       <BuildingJobsQueue
         jobs={buildingQueueItems}
         locale={locale}
         heading={p.buildingQueueHeading}
         emptyLabel={p.buildingQueueEmpty}
       />
-      <div className="space-y-12">
+
+      <div className="w-full overflow-hidden rounded-lg border border-zinc-700/70">
         {ERA_ORDER.map((eraId) => {
           const cfg = getEraConfig(eraId);
           const rows = ERA_BUILDING_CATALOG[eraId];
@@ -79,15 +82,15 @@ export default async function BuildingsPage() {
           const ordinal = eraOrdinalNumber(eraId);
 
           return (
-            <section key={eraId} className="scroll-mt-4">
+            <div key={eraId} className="scroll-mt-4">
               <div
-                className="relative mb-4 w-full overflow-hidden rounded-lg border-2 shadow-lg"
+                className="relative mb-0 w-full overflow-hidden rounded-none border-b-2 shadow-lg"
                 style={{
                   borderColor: cfg.banner.borderColor,
-                  boxShadow: `0 0 22px ${cfg.banner.glow}`,
+                  boxShadow: `0 0 18px ${cfg.banner.glow}`,
                 }}
               >
-                <div className="relative h-24 w-full">
+                <div className="relative h-20 w-full sm:h-24">
                   <Image
                     src={bg}
                     alt=""
@@ -98,7 +101,7 @@ export default async function BuildingsPage() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
                   <div className="absolute inset-0 ring-1 ring-inset ring-white/10" />
-                  <div className="absolute bottom-2 left-2 right-2 text-center">
+                  <div className="absolute bottom-1.5 left-2 right-2 text-center">
                     <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
                       {locale === "en" ? `Age ${ordinal}` : `Çağ ${ordinal}`}
                     </p>
@@ -110,13 +113,13 @@ export default async function BuildingsPage() {
               </div>
 
               {rows.length === 0 ? (
-                <p className="rounded border border-[#2a3441]/60 bg-black/20 px-3 py-4 text-sm text-zinc-500">
+                <p className="border-b border-blue-950/70 px-3 py-4 text-sm text-zinc-500">
                   {eraId === "yeniden_dogus"
                     ? p.buildingsEraTechOnly
                     : p.buildingsEraEmpty}
                 </p>
               ) : (
-                <div className="grid grid-cols-1 gap-6">
+                <div>
                   {rows.map((row) => (
                     <BuildingCatalogCard
                       key={`${eraId}-${row.buildingId}`}
@@ -131,11 +134,12 @@ export default async function BuildingsPage() {
                       play={p}
                       locale={locale}
                       researchTier={user.researchTier}
+                      currentEra={user.currentEra}
                     />
                   ))}
                 </div>
               )}
-            </section>
+            </div>
           );
         })}
       </div>

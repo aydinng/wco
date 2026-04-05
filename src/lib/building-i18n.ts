@@ -10,6 +10,11 @@ const NAMES: Record<
   oilWell: { tr: "Petrol kuyusu", en: "Oil well" },
   farm: { tr: "Çiftlik", en: "Farm" },
   barracks: { tr: "Kışla", en: "Barracks" },
+  researchLodge: { tr: "Araştırma kulübesi", en: "Research lodge" },
+  shepherdLodge: { tr: "Çoban kulübesi", en: "Shepherd lodge" },
+  civilLodge: { tr: "Sivil kulübesi", en: "Civil lodge" },
+  bank: { tr: "Banka", en: "Bank" },
+  policeDept: { tr: "Polis departmanı", en: "Police department" },
 };
 
 export function buildingDisplayName(

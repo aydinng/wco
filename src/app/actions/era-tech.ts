@@ -60,6 +60,11 @@ export async function startEraTechResearch(
     };
   }
 
+  const hasActiveEraJob = await prisma.eraTechResearchJob.findFirst({
+    where: { userId, status: "queued", completesAt: { not: null } },
+    select: { id: true },
+  });
+
   const unlocks = getResourceUnlocks(user.currentEra);
   const cost = eraTechResearchCost(entry);
   if (!unlocks.oil && cost.oil > 0) {
@@ -89,7 +94,9 @@ export async function startEraTechResearch(
         update: { level: 1 },
       });
     } else {
-      const completesAt = new Date(Date.now() + dur * 1000);
+      const completesAt: Date | null = hasActiveEraJob
+        ? null
+        : new Date(Date.now() + dur * 1000);
       await tx.eraTechResearchJob.create({
         data: {
           userId,

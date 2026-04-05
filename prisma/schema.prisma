@@ -251,6 +251,11 @@ model City {
   oilWellLevel    Int @default(0)
   farmLevel       Int @default(0)
   barracksLevel   Int @default(0)
+  researchLodgeLevel Int @default(0)
+  shepherdLodgeLevel Int @default(0)
+  civilLodgeLevel    Int @default(0)
+  bankLevel          Int @default(0)
+  policeDeptLevel    Int @default(0)
   /// Kışlada eğitilmiş asker (filo saldırı önerisi için)
   soldiers        Int @default(0)
 
@@ -284,20 +289,22 @@ model UserEraTech {
 
 model EraTechResearchJob {
   id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
   userId      String
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   cityId      String
   city        City     @relation(fields: [cityId], references: [id], onDelete: Cascade)
   techKey     String
   durationSec Int
-  completesAt DateTime
+  /// null = sırada bekliyor; ilk iş bitince dolar (aynı anda tek aktif süre)
+  completesAt DateTime?
   status      String   @default("queued")
 
   @@index([userId, status])
   @@index([completesAt])
 }
 
-/// Bina yükseltme kuyruğu: şehir başına aynı anda 1 adet aktif (queued)
+/// Bina yükseltme kuyruğu: en fazla 2 kayıt; aynı anda yalnızca birinin süresi işler (sırayla)
 model BuildingJob {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
@@ -314,7 +321,8 @@ model BuildingJob {
   durationSec Int
 
   startsAt DateTime
-  completesAt DateTime
+  /// null = sırada bekliyor; önceki iş bitince başlar
+  completesAt DateTime?
 
   status String @default("queued") // queued | done | cancelled
 

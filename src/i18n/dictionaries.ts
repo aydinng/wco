@@ -334,6 +334,8 @@ export type Dictionary = {
     errMarketNotOpen: string;
     errMarketGone: string;
     errMarketSelf: string;
+    errMarketNeedBank: string;
+    errMarketNeedMedieval: string;
     marketDelayNote: string;
     marketSoldiersUnit: string;
     marketYourListing: string;
@@ -722,6 +724,9 @@ const tr: Dictionary = {
     errMarketNotOpen: "Geri sayım bitmeden bu ilan satın alınamaz.",
     errMarketGone: "İlan artık yok veya satıldı.",
     errMarketSelf: "Kendi ilanını satın alamazsın.",
+    errMarketNeedBank: "Market ilanı için şehirde en az 1. seviye banka gerekir.",
+    errMarketNeedMedieval:
+      "Market ilanı için en az Orta Çağ (2. çağ) gerekir.",
     marketDelayNote: "İlan sonrası bekleme (saniye): {sec}",
     marketSoldiersUnit: "asker",
     marketYourListing: "Senin ilanın",
@@ -1106,6 +1111,9 @@ const en: Dictionary = {
     errMarketNotOpen: "This listing cannot be bought until the countdown ends.",
     errMarketGone: "Listing is gone or already sold.",
     errMarketSelf: "You cannot buy your own listing.",
+    errMarketNeedBank: "You need at least a level 1 bank in the city to list on the market.",
+    errMarketNeedMedieval:
+      "You need at least the Medieval age (2nd age) to list on the market.",
     marketDelayNote: "Wait after listing (seconds): {sec}",
     marketSoldiersUnit: "soldiers",
     marketYourListing: "Your listing",

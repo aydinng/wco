@@ -48,6 +48,33 @@ export const ERA_BUILDING_CATALOG: Record<EraId, EraBuildingRow[]> = {
       descEn:
         "Trains troops and sets garrison capacity. Higher levels raise soldier caps.",
     },
+    {
+      buildingId: "researchLodge",
+      titleTr: "Araştırma kulübesi",
+      titleEn: "Research lodge",
+      descTr:
+        "İmparatorluk teknoloji araştırmasını hızlandırır; teknoloji bulmaya ve araştırma sürelerini kısaltmaya yarar.",
+      descEn:
+        "Speeds empire technology research; helps discover tech and shorten research times.",
+    },
+    {
+      buildingId: "shepherdLodge",
+      titleTr: "Çoban kulübesi",
+      titleEn: "Shepherd lodge",
+      descTr:
+        "Hayvancılık: besin üretimine ek olarak işçi başına dakikada +0,1 besin (saatlik üretimde işlenir).",
+      descEn:
+        "Extra +0.1 food per worker per minute (applied in hourly production).",
+    },
+    {
+      buildingId: "civilLodge",
+      titleTr: "Sivil kulübesi",
+      titleEn: "Civil lodge",
+      descTr:
+        "Nüfus yönetimi: seviye başına +10 nüfus limiti.",
+      descEn:
+        "+10 population cap per level.",
+    },
   ],
   orta_cag: [
     {
@@ -58,6 +85,24 @@ export const ERA_BUILDING_CATALOG: Record<EraId, EraBuildingRow[]> = {
         "Demir cevheri çıkarır. Orta Çağ ve sonrasında kullanılabilir; ordular ve ileri binalar için gereklidir.",
       descEn:
         "Mines iron ore. Available from the Medieval age onward; needed for armies and advanced structures.",
+    },
+    {
+      buildingId: "bank",
+      titleTr: "Banka",
+      titleEn: "Bank",
+      descTr:
+        "Yatırım ve pazar: markette asker ilanı verebilmek için gereklidir.",
+      descEn:
+        "Investment hub; required to list soldiers on the market.",
+    },
+    {
+      buildingId: "policeDept",
+      titleTr: "Polis departmanı",
+      titleEn: "Police department",
+      descTr:
+        "Düzen ve koruma: bankayı destekler; şehirdeki hammaddenin çok küçük bir kısmını saldırılara karşı korur (savunma bonusu, MVP).",
+      descEn:
+        "Supports the bank; slightly improves defense against raids (MVP).",
     },
   ],
   yeniden_dogus: [],

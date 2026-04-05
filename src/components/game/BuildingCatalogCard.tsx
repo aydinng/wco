@@ -2,12 +2,14 @@ import type { BuildingId } from "@/app/actions/game-city";
 import { CatalogFieldLine } from "@/components/game/CatalogGameRow";
 import {
   CATALOG_MIDDLE_COL,
+  CATALOG_NAME_COL,
+  CATALOG_ROW_GRID_TECH,
   CATALOG_TITLE_YELLOW,
 } from "@/components/game/catalog-layout";
 import { UpgradeBuildingButton } from "@/components/game/UpgradeBuildingButton";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { buildingImagePath } from "@/config/buildings";
-import type { ResourceUnlocks } from "@/config/eras";
+import { eraIndex, type ResourceUnlocks } from "@/config/eras";
 import { buildingUpgradeDurationSec } from "@/lib/duration-scaling";
 import { MAX_BUILDING_LEVEL } from "@/lib/economy";
 import type { City } from "@prisma/client";
@@ -15,11 +17,8 @@ import type { AppLocale } from "@/lib/locale";
 import { formatCountdownSeconds } from "@/lib/format-countdown";
 import Image from "next/image";
 
-const BUILDING_CARD_GRID =
-  "grid w-full grid-cols-1 items-start gap-3 px-2 py-3 sm:grid-cols-[11rem_minmax(0,16rem)_minmax(0,1fr)] sm:gap-x-3 sm:px-3";
-
-const BUILDING_IMG_BOX =
-  "relative h-28 w-28 shrink-0 overflow-hidden rounded-md border border-blue-950/50 bg-black/50 sm:h-28 sm:w-28";
+const SKY = "text-sky-400";
+const SKY_VAL = "text-sky-100";
 
 function levelFor(c: City, id: BuildingId): number {
   switch (id) {
@@ -35,6 +34,16 @@ function levelFor(c: City, id: BuildingId): number {
       return c.farmLevel;
     case "barracks":
       return c.barracksLevel;
+    case "researchLodge":
+      return c.researchLodgeLevel;
+    case "shepherdLodge":
+      return c.shepherdLodgeLevel;
+    case "civilLodge":
+      return c.civilLodgeLevel;
+    case "bank":
+      return c.bankLevel;
+    case "policeDept":
+      return c.policeDeptLevel;
     default:
       return 0;
   }
@@ -43,9 +52,12 @@ function levelFor(c: City, id: BuildingId): number {
 function isBuildingLocked(
   building: BuildingId,
   unlocks: ResourceUnlocks,
+  currentEra: string,
 ): boolean {
   if (building === "ironMine") return !unlocks.iron;
   if (building === "oilWell") return !unlocks.oil;
+  if (building === "bank" || building === "policeDept")
+    return eraIndex(currentEra) < 1;
   return false;
 }
 
@@ -59,6 +71,7 @@ type Props = {
   locale: AppLocale;
   eraOrdinal: number;
   researchTier: number;
+  currentEra: string;
 };
 
 export function BuildingCatalogCard({
@@ -71,8 +84,9 @@ export function BuildingCatalogCard({
   locale,
   eraOrdinal,
   researchTier,
+  currentEra,
 }: Props) {
-  const locked = isBuildingLocked(building, unlocks);
+  const locked = isBuildingLocked(building, unlocks, currentEra);
   const img = buildingImagePath(building);
 
   const resourceLabels = {
@@ -95,97 +109,98 @@ export function BuildingCatalogCard({
   });
 
   return (
-    <div className="w-full overflow-hidden rounded-lg border border-zinc-700/70">
+    <div
+      className="border-b border-blue-950/70"
+      style={{ fontFamily: "var(--font-warcity), serif" }}
+    >
       <div
-        className="border-b border-blue-950/70"
-        style={{ fontFamily: "var(--font-warcity), serif" }}
+        className={CATALOG_ROW_GRID_TECH}
+        style={{
+          background:
+            "linear-gradient(90deg, rgba(61,46,26,0.92) 0%, rgba(26,21,16,0.88) 45%, rgba(0,0,0,0.96) 100%)",
+        }}
       >
-        <div
-          className={BUILDING_CARD_GRID}
-          style={{
-            background:
-              "linear-gradient(90deg, rgba(61,46,26,0.92) 0%, rgba(26,21,16,0.88) 45%, rgba(0,0,0,0.96) 100%)",
-          }}
-        >
-          <div className="flex w-full flex-col items-center gap-2 sm:w-[11rem]">
-            <div className={BUILDING_IMG_BOX}>
-              <Image
-                src={img}
-                alt=""
-                fill
-                className="object-cover object-center"
-                sizes="112px"
-              />
-            </div>
-            <span className={`${CATALOG_TITLE_YELLOW} w-full text-center`}>
-              {title}
-            </span>
+        <div className={CATALOG_NAME_COL}>
+          <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-md border border-blue-950/50 bg-black/50">
+            <Image
+              src={img}
+              alt=""
+              fill
+              className="object-cover object-center"
+              sizes="56px"
+            />
           </div>
+          <span className={CATALOG_TITLE_YELLOW}>{title}</span>
+        </div>
 
-          <div className={CATALOG_MIDDLE_COL}>
-            <div className="flex flex-col gap-1 text-zinc-100/95">
-              <CatalogFieldLine
-                label={play.catalogFieldTime}
-                value={formatCountdownSeconds(durationLevel1Sec, locale)}
-              />
-              <CatalogFieldLine
-                label={play.catalogFieldAge}
-                value={String(eraOrdinal)}
-              />
-              <CatalogFieldLine
-                label={play.catalogFieldLevel}
-                value={levelStr}
-              />
-              <CatalogFieldLine
-                label={play.catalogFieldPurpose}
-                value={desc}
-                valueClassName="line-clamp-3"
-              />
-            </div>
-          </div>
+        <div className={CATALOG_MIDDLE_COL}>
+          <CatalogFieldLine
+            label={play.catalogFieldTime}
+            value={formatCountdownSeconds(durationLevel1Sec, locale)}
+            labelClassName={SKY}
+            valueClassName={SKY_VAL}
+          />
+          <CatalogFieldLine
+            label={play.catalogFieldAge}
+            value={String(eraOrdinal)}
+            labelClassName={SKY}
+            valueClassName={SKY_VAL}
+          />
+          <CatalogFieldLine
+            label={play.catalogFieldLevel}
+            value={levelStr}
+            labelClassName={SKY}
+            valueClassName={SKY_VAL}
+          />
+          <CatalogFieldLine
+            label={play.catalogFieldPurpose}
+            value={desc}
+            labelClassName={SKY}
+            valueClassName="text-sky-50 line-clamp-3"
+          />
+        </div>
 
-          <div className="flex min-w-0 flex-col gap-3">
-            {cities.map((c) => {
-              const lv = levelFor(c, building);
-              const maxed = lv >= MAX_BUILDING_LEVEL;
-              const nextDurSec =
-                maxed || locked
-                  ? undefined
-                  : buildingUpgradeDurationSec({
-                      buildingId: building,
-                      toLevel: lv + 1,
-                      researchTier,
-                    });
-              return (
-                <div
-                  key={c.id}
-                  className="flex flex-col gap-2 rounded border border-zinc-600/50 bg-black/30 px-2 py-2"
-                >
-                  <span className="text-sm font-medium text-amber-200/90">
-                    {c.name}
+        <div className="flex min-w-0 flex-col items-stretch justify-center gap-3 sm:items-end">
+          {cities.map((c) => {
+            const lv = levelFor(c, building);
+            const maxed = lv >= MAX_BUILDING_LEVEL;
+            const nextDurSec =
+              maxed || locked
+                ? undefined
+                : buildingUpgradeDurationSec({
+                    buildingId: building,
+                    toLevel: lv + 1,
+                    researchTier,
+                  });
+            return (
+              <div
+                key={c.id}
+                className="w-full max-w-[22rem] rounded border border-zinc-700/50 bg-black/25 px-2 py-2 sm:ml-auto"
+              >
+                <span className="mb-1 block text-center text-xs font-medium text-amber-200/90 sm:text-right">
+                  {c.name}
+                </span>
+                {locked ? (
+                  <span className="block text-center text-[11px] text-amber-600/90 sm:text-right">
+                    {play.errBuildingLocked}
                   </span>
-                  {locked ? (
-                    <span className="text-[11px] text-amber-600/90">
-                      {play.errBuildingLocked}
-                    </span>
-                  ) : (
-                    <UpgradeBuildingButton
-                      cityId={c.id}
-                      building={building}
-                      currentLevel={lv}
-                      buildLabel={play.buildFirst}
-                      upgradeLabel={play.upgrade}
-                      unlocks={unlocks}
-                      locale={locale}
-                      resourceLabels={resourceLabels}
-                      durationSec={nextDurSec}
-                      timeLabel={play.catalogFieldTime}
-                    />
-                  )}
-                </div>
-              );
-            })}
-          </div>
+                ) : (
+                  <UpgradeBuildingButton
+                    cityId={c.id}
+                    building={building}
+                    currentLevel={lv}
+                    buildLabel={play.buildFirst}
+                    upgradeLabel={play.upgrade}
+                    unlocks={unlocks}
+                    locale={locale}
+                    resourceLabels={resourceLabels}
+                    durationSec={nextDurSec}
+                    timeLabel={play.catalogFieldTime}
+                  />
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

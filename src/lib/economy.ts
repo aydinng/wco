@@ -43,17 +43,29 @@ export function researchMultiplier(researchTier: number) {
 export function computePopCap(city: {
   townHallLevel: number;
   barracksLevel: number;
+  civilLodgeLevel?: number;
 }) {
   const th = Math.max(0, city.townHallLevel);
   const br = Math.max(0, city.barracksLevel);
-  return Math.min(8000, 140 + th * 50 + br * 20);
+  const cl = Math.max(0, city.civilLodgeLevel ?? 0);
+  return Math.min(8000, 140 + th * 50 + br * 20 + cl * 10);
 }
 
 /** DB’deki popCap ile formülü birleştir (eski kayıtlar için) */
 export function effectivePopCap(
-  city: { popCap: number; townHallLevel: number; barracksLevel: number },
+  city: {
+    popCap: number;
+    townHallLevel: number;
+    barracksLevel: number;
+    civilLodgeLevel?: number;
+  },
 ) {
   return Math.max(city.popCap, computePopCap(city));
+}
+
+/** Polis: savunma önerisine küçük katkı (MVP). */
+export function policeDefenseBonus(policeDeptLevel: number): number {
+  return Math.max(0, Math.floor(policeDeptLevel)) * 10;
 }
 
 export type ProductionRates = {
@@ -75,6 +87,7 @@ export function hourlyProduction(
     | "ironMineLevel"
     | "oilWellLevel"
     | "farmLevel"
+    | "shepherdLodgeLevel"
   >,
   researchTier: number,
   unlocks: ResourceUnlocks,
@@ -82,6 +95,17 @@ export function hourlyProduction(
   const r = researchMultiplier(researchTier);
   const ironOn = unlocks.iron;
   const oilOn = unlocks.oil;
+  const shLv = Math.max(0, city.shepherdLodgeLevel ?? 0);
+  /** +0,1 besin / işçi / dakika → saatte 6 × işçi × seviye çarpanı */
+  const shepherdFoodHourly =
+    shLv >= 1
+      ? Math.floor(
+          city.workersFood *
+            6 *
+            buildingProductionMultiplier(shLv) *
+            r,
+        )
+      : 0;
   return {
     wood: Math.floor(
       city.workersWood *
@@ -102,12 +126,13 @@ export function hourlyProduction(
           city.workersOil * BASE.oil * mineOilMult(city.oilWellLevel) * r,
         )
       : 0,
-    food: Math.floor(
-      city.workersFood *
-        BASE.food *
-        woodFoodMult(city.farmLevel) *
-        r,
-    ),
+    food:
+      Math.floor(
+        city.workersFood *
+          BASE.food *
+          woodFoodMult(city.farmLevel) *
+          r,
+      ) + shepherdFoodHourly,
   };
 }
 

@@ -66,11 +66,16 @@ export default async function OverviewPage() {
     const firstBuildByCity = await Promise.all(
       cities.map(async (c) => {
         const b = await prisma.buildingJob.findFirst({
-          where: { userId: user.id, cityId: c.id, status: "queued" },
+          where: {
+            userId: user.id,
+            cityId: c.id,
+            status: "queued",
+            completesAt: { not: null },
+          },
           orderBy: { completesAt: "asc" },
           select: { buildingId: true, toLevel: true, completesAt: true },
         });
-        if (!b)
+        if (!b || !b.completesAt)
           return {
             cityId: c.id,
             buildLabel: p.overviewNone,
@@ -79,7 +84,7 @@ export default async function OverviewPage() {
           };
         const eta = Math.max(
           0,
-          Math.ceil((new Date(b.completesAt).getTime() - now) / 1000),
+          Math.ceil((b.completesAt.getTime() - now) / 1000),
         );
         return {
           cityId: c.id,

@@ -35,7 +35,7 @@ type Props = {
   playerEra: string;
   cityId: string;
   level: number;
-  activeJobs: { techKey: string; completesAt: string }[];
+  activeJobs: { techKey: string; completesAt: string | null }[];
   maxQueue: number;
 };
 
@@ -73,14 +73,17 @@ export function EraTechResearchRow({
   const queueFull =
     activeJobs.length >= maxQueue && !thisJob;
 
-  const etaSec = thisJob
-    ? Math.max(
-        0,
-        Math.ceil(
-          (new Date(thisJob.completesAt).getTime() - clock) / 1000,
-        ),
-      )
-    : 0;
+  const waitingInLine = thisJob != null && thisJob.completesAt == null;
+
+  const etaSec =
+    thisJob?.completesAt != null
+      ? Math.max(
+          0,
+          Math.ceil(
+            (new Date(thisJob.completesAt).getTime() - clock) / 1000,
+          ),
+        )
+      : 0;
 
   async function onResearch() {
     setErr(null);
@@ -123,6 +126,19 @@ export function EraTechResearchRow({
       <span className="rounded border border-amber-800/60 bg-black/40 px-3 py-2 text-center text-xs text-zinc-500">
         {labels.queued}
       </span>
+    );
+  } else if (thisJob && waitingInLine) {
+    button = (
+      <div className="flex flex-col items-center gap-1 px-1 text-center">
+        <span className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+          {locale === "en" ? "In queue" : "Sırada"}
+        </span>
+        <span className="text-[11px] leading-tight text-zinc-400">
+          {locale === "en"
+            ? "Timer starts when the first job finishes"
+            : "İlk iş bitince süre başlar"}
+        </span>
+      </div>
     );
   } else if (thisJob) {
     button = (
