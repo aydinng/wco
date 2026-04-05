@@ -253,6 +253,7 @@ export type Dictionary = {
     overviewNone: string;
     overviewTime: string;
     overviewIdleShownRed: string;
+    overviewUnassignedWorkersPrefix: string;
     tablePop: string;
     tableWorkers: string;
     fleetIntro: string;
@@ -637,6 +638,7 @@ const tr: Dictionary = {
     overviewNone: "Yok",
     overviewTime: "Süre",
     overviewIdleShownRed: "Boştaki işçiler kırmızı gösterilir.",
+    overviewUnassignedWorkersPrefix: "Yerleştirilmemiş boş işçi:",
     tablePop: "Nüfus",
     tableWorkers: "İşçiler",
     fleetIntro:
@@ -1027,6 +1029,7 @@ const en: Dictionary = {
     overviewNone: "None",
     overviewTime: "Time",
     overviewIdleShownRed: "Idle workers are shown in red.",
+    overviewUnassignedWorkersPrefix: "Unassigned idle workers:",
     tablePop: "Population",
     tableWorkers: "Workers",
     fleetIntro:

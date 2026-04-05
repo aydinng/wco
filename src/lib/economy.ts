@@ -12,6 +12,30 @@ function isFirstAgeResourceOpts(opts?: {
   return false;
 }
 
+/** `ERA_BUILDING_CATALOG.ilk_cag` — çağ ilerlese de bu binaların yükseltmesi yalnız odun + besin */
+export const ILK_CAG_CORE_BUILDING_IDS = new Set<string>([
+  "lumberMill",
+  "barracks",
+  "researchLodge",
+  "shepherdLodge",
+  "civilLodge",
+]);
+
+export function isIlkCagCoreBuilding(buildingId: string): boolean {
+  return ILK_CAG_CORE_BUILDING_IDS.has(buildingId);
+}
+
+function isUpgradeWoodFoodOnly(opts?: {
+  ilkCagWoodFoodOnly?: boolean;
+  currentEra?: string | null;
+  buildingId?: string;
+}) {
+  if (isFirstAgeResourceOpts(opts)) return true;
+  if (opts?.buildingId != null && isIlkCagCoreBuilding(opts.buildingId))
+    return true;
+  return false;
+}
+
 export const MAX_BUILDING_LEVEL = 20;
 export const MAX_RESEARCH_TIER = 20;
 
@@ -195,7 +219,11 @@ export function safeInt(n: number): number {
 export function getUpgradeCost(
   currentLevel: number,
   unlocks: ResourceUnlocks,
-  opts?: { ilkCagWoodFoodOnly?: boolean; currentEra?: string | null },
+  opts?: {
+    ilkCagWoodFoodOnly?: boolean;
+    currentEra?: string | null;
+    buildingId?: string;
+  },
 ) {
   const L = Math.max(1, currentLevel);
   const base = {
@@ -204,7 +232,7 @@ export function getUpgradeCost(
     oil: 38 * L * L,
     food: 55 * L * L,
   };
-  const onlyWF = isFirstAgeResourceOpts(opts);
+  const onlyWF = isUpgradeWoodFoodOnly(opts);
   return {
     wood: base.wood,
     iron: onlyWF ? 0 : !unlocks.iron ? 0 : base.iron,

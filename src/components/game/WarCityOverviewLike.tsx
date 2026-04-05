@@ -78,6 +78,7 @@ type Props = {
     researchIdle: string;
     time: string;
     idleShownRed: string;
+    unassignedWorkersPrefix: string;
     buildIdle: string;
     armyIdle: string;
     workersDialogTitle: string;
@@ -168,6 +169,18 @@ export function WarCityOverviewLike({
 
   const selectedCityName =
     cities.find((c) => c.id === selected)?.name ?? cities[0]?.name ?? "—";
+
+  const selectedCity = cities.find((c) => c.id === selected);
+  const idleWorkersUnassigned = selectedCity
+    ? Math.max(
+        0,
+        selectedCity.population -
+          selectedCity.workersWood -
+          selectedCity.workersIron -
+          selectedCity.workersOil -
+          selectedCity.workersFood,
+      )
+    : 0;
 
   return (
     <div className="rounded-xl border border-zinc-700/70 bg-zinc-900/65 shadow-[0_20px_40px_-20px_rgba(0,0,0,0.65)] backdrop-blur-sm">
@@ -381,9 +394,15 @@ export function WarCityOverviewLike({
           })}
         </div>
 
-        <p className="mt-2 text-center text-[11px] font-semibold text-red-400">
-          {labels.idleShownRed}
-        </p>
+        <div className="mt-2 space-y-1 text-center text-[11px]">
+          <p className="font-semibold text-red-400/95">{labels.idleShownRed}</p>
+          <p className="text-zinc-400">
+            {labels.unassignedWorkersPrefix}{" "}
+            <span className="font-semibold tabular-nums text-red-400">
+              {idleWorkersUnassigned}
+            </span>
+          </p>
+        </div>
       </div>
     </div>
   );

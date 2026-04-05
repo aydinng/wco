@@ -194,6 +194,7 @@ export default async function OverviewPage() {
           researchIdle: p.overviewResearchIdle,
           time: p.overviewTime,
           idleShownRed: p.overviewIdleShownRed,
+          unassignedWorkersPrefix: p.overviewUnassignedWorkersPrefix,
           buildIdle: locale === "en" ? "Idle" : "Boşta",
           armyIdle: locale === "en" ? "Idle" : "Boşta",
           workersDialogTitle: p.workersTitle,

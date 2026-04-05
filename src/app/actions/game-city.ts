@@ -9,6 +9,7 @@ import {
   computePopCap,
   getResearchCost,
   getUpgradeCost,
+  isIlkCagCoreBuilding,
   MAX_BUILDING_LEVEL,
   maxLevelForBuilding,
   MAX_RESEARCH_TIER,
@@ -169,8 +170,9 @@ export async function upgradeBuilding(
   let cost = getUpgradeCost(cur, unlocks, {
     ilkCagWoodFoodOnly: firstAge,
     currentEra: user.currentEra,
+    buildingId: building,
   });
-  if (firstAge) {
+  if (firstAge || isIlkCagCoreBuilding(building)) {
     cost = { ...cost, iron: 0, oil: 0 };
   }
   if (!canAfford(city, cost)) {
@@ -237,11 +239,13 @@ export async function cancelBuildingJob(jobId: string): Promise<ActionResult> {
 
   const unlocks = getResourceUnlocks(user.currentEra);
   const firstAge = eraIndex(user.currentEra) < 1;
+  const jobBuilding = job.buildingId as BuildingId;
   let cost = getUpgradeCost(job.fromLevel, unlocks, {
     ilkCagWoodFoodOnly: firstAge,
     currentEra: user.currentEra,
+    buildingId: jobBuilding,
   });
-  if (firstAge) {
+  if (firstAge || isIlkCagCoreBuilding(jobBuilding)) {
     cost = { ...cost, iron: 0, oil: 0 };
   }
 

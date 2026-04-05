@@ -1,3 +1,4 @@
+import { GameAutoRefresh } from "@/components/game/GameAutoRefresh";
 import { SideNav } from "@/components/game/SideNav";
 import { TopBanner } from "@/components/game/TopBanner";
 import { BRAND } from "@/config/brand";
@@ -5,6 +6,7 @@ import { getEraConfig } from "@/config/eras";
 import { getDictionary } from "@/i18n/dictionaries";
 import { getCurrentUser } from "@/lib/current-user";
 import { getLocale } from "@/lib/locale";
+import { getPendingCompletionHint } from "@/lib/pending-completion-hint";
 import { getPlayerRankByUsername } from "@/lib/player-rankings";
 import { prisma } from "@/lib/prisma";
 
@@ -29,6 +31,11 @@ export default async function GameShellLayout({
           total: user.scoreTotal,
           rank: (await getPlayerRankByUsername(user.username)) ?? 1,
         }
+      : null;
+
+  const completionHint =
+    user?.id != null
+      ? await getPendingCompletionHint(user.id)
       : null;
 
   const activeMissions =
@@ -86,7 +93,19 @@ export default async function GameShellLayout({
           activeMissionsTitle={locale === "en" ? "Active missions" : "Aktif görevler"}
           etaLabel="ETA"
         />
-        <main className="min-w-0 flex-1">{children}</main>
+        <main className="min-w-0 flex-1">
+          {completionHint ? (
+            <GameAutoRefresh
+              nextCompletionIso={
+                completionHint.nextCompletionAt?.toISOString() ?? null
+              }
+              pollStalledBuildingQueue={
+                completionHint.pollStalledBuildingQueue
+              }
+            />
+          ) : null}
+          {children}
+        </main>
       </div>
     </div>
   );

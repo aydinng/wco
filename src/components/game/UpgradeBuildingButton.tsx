@@ -6,7 +6,11 @@ import {
 } from "@/app/actions/game-city";
 import { eraIndex, type ResourceUnlocks } from "@/config/eras";
 import { ResourceIcon } from "@/components/game/ResourceIcon";
-import { getUpgradeCost, maxLevelForBuilding } from "@/lib/economy";
+import {
+  getUpgradeCost,
+  isIlkCagCoreBuilding,
+  maxLevelForBuilding,
+} from "@/lib/economy";
 import type { AppLocale } from "@/lib/locale";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -44,14 +48,17 @@ export function UpgradeBuildingButton({
   const cost = getUpgradeCost(currentLevel, unlocks, {
     ilkCagWoodFoodOnly,
     currentEra,
+    buildingId: building,
   });
   const actionLabel = currentLevel < 1 ? buildLabel : upgradeLabel;
   const tr = locale !== "en";
-  const firstAge =
+  /** İlk çağ çağı veya ilk çağ kataloğundaki çekirdek binalar → yalnız odun + besin */
+  const woodFoodOnly =
     ilkCagWoodFoodOnly === true ||
-    (currentEra != null && eraIndex(currentEra) < 1);
-  const showIron = !firstAge && unlocks.iron && cost.iron > 0;
-  const showOil = !firstAge && unlocks.oil && cost.oil > 0;
+    (currentEra != null && eraIndex(currentEra) < 1) ||
+    isIlkCagCoreBuilding(building);
+  const showIron = !woodFoodOnly && unlocks.iron && cost.iron > 0;
+  const showOil = !woodFoodOnly && unlocks.oil && cost.oil > 0;
 
   async function onClick() {
     setErr(null);
@@ -77,15 +84,7 @@ export function UpgradeBuildingButton({
           </span>
         ) : (
           <>
-            <button
-              type="button"
-              disabled={busy}
-              onClick={onClick}
-              className="shrink-0 rounded border border-amber-900/50 bg-amber-950/40 px-3 py-2 text-sm font-semibold text-amber-100 hover:bg-amber-900/50 disabled:opacity-40"
-            >
-              {busy ? "…" : actionLabel}
-            </button>
-            <div className="flex min-w-0 flex-wrap items-center justify-end gap-x-2 gap-y-0.5 text-xs tabular-nums text-zinc-400">
+            <div className="flex min-w-0 flex-1 flex-wrap items-center justify-end gap-x-2 gap-y-0.5 text-xs tabular-nums text-zinc-400">
               <span className="inline-flex items-center gap-0.5">
                 <ResourceIcon kind="wood" />
                 {cost.wood}
@@ -107,6 +106,14 @@ export function UpgradeBuildingButton({
                 {cost.food}
               </span>
             </div>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={onClick}
+              className="shrink-0 rounded border border-amber-900/50 bg-amber-950/40 px-3 py-2 text-sm font-semibold text-amber-100 hover:bg-amber-900/50 disabled:opacity-40"
+            >
+              {busy ? "…" : actionLabel}
+            </button>
           </>
         )}
       </div>
