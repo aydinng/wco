@@ -1,9 +1,10 @@
+import { getAuthSecret } from "@/lib/auth-secret";
 import { getToken } from "next-auth/jwt";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 /** Edge’de `@/auth` import etme — Prisma vb. ile 1 MB limiti aşılır. Sadece JWT. */
-const secret = process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET;
+const secret = getAuthSecret();
 
 export async function middleware(req: NextRequest) {
   if (!secret) {
