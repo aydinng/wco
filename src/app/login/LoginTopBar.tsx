@@ -36,7 +36,7 @@ export function LoginTopBar({ labels }: { labels: Labels }) {
     if (res?.error) {
       if (res.error === "Configuration") {
         setError(
-          "Oturum imzası sunucuda yok (AUTH_SECRET). Vercel’de: Project → Settings → Environment Variables → Add: adı tam olarak AUTH_SECRET, değeri tırnak olmadan uzun rastgele dize; Environment’da Production işaretli olsun. Kaydet → Deployments → son dağıtımı Redeploy. (İsterseniz aynı değeri NEXTAUTH_SECRET adıyla da ekleyebilirsiniz.)",
+          "Oturum ayarı hatası. Vercel → Environment Variables: AUTH_SECRET (ve gerekirse Preview için de) tanımlı mı? Kaydettikten sonra Redeploy. Yerelde .env içinde de olmalı.",
         );
       } else {
         setError(labels.badCredentials);
