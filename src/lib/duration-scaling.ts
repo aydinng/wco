@@ -1,17 +1,20 @@
 /**
+ * Klasik kalıcı tarayıcı strateji (Travian / OGame soyundan “köy alanı” inşaatları) ve
  * WarCityOnline tarzı kademeli süre: T ≈ B × K^(L−1) ÷ (1 + R/100)
- * B: taban süre (1. seviye), K: seviye katsayısı (~1.2–1.5), L: hedef seviye, R: hızlandırıcı % toplamı.
+ * B: taban süre (hedef seviye 1), K: seviye çarpanı (~1.2–1.5), L: yükseltmeden sonraki seviye,
+ * R: hız % toplamı. Her L için süre monoton artar; bitişik seviyeler aynı saniyede yuvarlanmasın
+ * diye küçük bir seviye adımı eklenir.
  * Hızlandırma satın alma yok; R yalnızca mevcut bonuslardan (ör. imparatorluk araştırması).
  */
 
-/** Seviye başına süre çarpanı (kitap tarzı: her hedef seviye belirgin uzar) */
-export const DURATION_LEVEL_COEFF = 1.36;
+/** Seviye başına süre çarpanı (üstel büyüme — üst seviye inşaat belirgin uzar) */
+export const DURATION_LEVEL_COEFF = 1.4;
 
 /** Araştırma: üst süre tavanı (kitap: 24h–168h; tek iş için üst sınır 168 saat) */
 export const MAX_RESEARCH_DURATION_SEC = 168 * 3600;
 
-/** Bina yükseltme: aşırı uzun işleri sınırla (oyun akışı) */
-export const MAX_BUILDING_DURATION_SEC = 48 * 3600;
+/** Bina yükseltme: üst sınır (yüksek L’lerde süreler üst üste aynı görünmesin diye araştırmadan biraz yüksek) */
+export const MAX_BUILDING_DURATION_SEC = 72 * 3600;
 
 /** İmparatorluk araştırma seviyesi başına “üretim/araştırma hızı” bonusu yüzde olarak R’ye katkı */
 export function researchSpeedBonusPct(completedResearchTier: number): number {
@@ -32,8 +35,9 @@ export function scaledDurationSec(opts: {
   const raw = opts.baseSec * Math.pow(coeff, L - 1);
   const denom = 1 + Math.max(0, opts.speedBonusPct) / 100;
   const t = raw / denom;
-  /** Üst üste yuvarlanınca komşu seviyeler aynı görünmesin diye seviye başına küçük ek */
-  const levelStepBonusSec = Math.max(0, L - 1) * 8;
+  /** Komşu hedef seviyeler aynı saniyeye yuvarlanmasın; taban süreye orantılı küçük adım */
+  const stepPerLevel = Math.max(10, Math.round(opts.baseSec * 0.028));
+  const levelStepBonusSec = Math.max(0, L - 1) * stepPerLevel;
   return Math.min(
     opts.maxSec,
     Math.max(1, Math.ceil(t) + levelStepBonusSec),
