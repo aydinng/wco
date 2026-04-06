@@ -9,6 +9,10 @@ import { UpgradeBuildingButton } from "@/components/game/UpgradeBuildingButton";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { buildingImagePath } from "@/config/buildings";
 import { eraIndex, type ResourceUnlocks } from "@/config/eras";
+import {
+  mergeQueuedBuildingJobs,
+  nextUpgradeTargetLevel,
+} from "@/lib/building-upgrade-preview";
 import { buildingUpgradeDurationSec } from "@/lib/duration-scaling";
 import { maxLevelForBuilding } from "@/lib/economy";
 import type { City } from "@prisma/client";
@@ -71,6 +75,8 @@ type Props = {
   eraOrdinal: number;
   researchTier: number;
   currentEra: string;
+  /** Kullanıcının sıradaki bina işleri (süre önizlemesi için) */
+  queuedBuildingJobs: { cityId: string; buildingId: string; toLevel: number }[];
 };
 
 export function BuildingCatalogCard({
@@ -84,9 +90,11 @@ export function BuildingCatalogCard({
   eraOrdinal,
   researchTier,
   currentEra,
+  queuedBuildingJobs,
 }: Props) {
   const locked = isBuildingLocked(building, unlocks, currentEra);
   const img = buildingImagePath(building);
+  const mergedQueue = mergeQueuedBuildingJobs(queuedBuildingJobs);
 
   const maxLv = cities.reduce(
     (m, c) => Math.max(m, levelFor(c, building)),
@@ -95,14 +103,23 @@ export function BuildingCatalogCard({
   const levelStr = maxLv < 1 ? play.levelNone : String(maxLv);
 
   const capLv = maxLevelForBuilding(building);
-  /** Her şehir için bir sonraki yükseltmenin hedef seviyesi (lv+1); maxLv kullanılmaz — çok şehirde yanlış süre gösterimini önler */
+  /** Her şehir için bir sonraki anlamlı yükseltmenin hedef seviyesi (kuyruk varsa job.toLevel+1) */
   const perCityNextDurations = cities
     .map((c) => {
       const lv = levelFor(c, building);
-      if (locked || lv >= capLv) return null;
+      if (locked) return null;
+      const q = mergedQueue.find(
+        (j) => j.cityId === c.id && j.buildingId === building,
+      );
+      const nextT = nextUpgradeTargetLevel({
+        currentLevel: lv,
+        queuedTargetLevel: q?.toLevel ?? null,
+        cap: capLv,
+      });
+      if (nextT == null) return null;
       return buildingUpgradeDurationSec({
         buildingId: building,
-        toLevel: lv + 1,
+        toLevel: nextT,
         researchTier,
       });
     })
@@ -148,7 +165,7 @@ export function BuildingCatalogCard({
           <CatalogFieldLine
             label={play.catalogFieldTime}
             value={
-              locked || maxLv >= capLv || perCityNextDurations.length === 0
+              locked || perCityNextDurations.length === 0
                 ? "—"
                 : timeFieldValue
             }
@@ -178,11 +195,19 @@ export function BuildingCatalogCard({
         <div className="flex min-w-0 flex-col items-stretch justify-center gap-3 sm:items-end">
           {cities.map((c) => {
             const lv = levelFor(c, building);
+            const q = mergedQueue.find(
+              (j) => j.cityId === c.id && j.buildingId === building,
+            );
+            const rowNextT = nextUpgradeTargetLevel({
+              currentLevel: lv,
+              queuedTargetLevel: q?.toLevel ?? null,
+              cap: capLv,
+            });
             const rowDurSec =
-              !locked && lv < capLv
+              !locked && rowNextT != null
                 ? buildingUpgradeDurationSec({
                     buildingId: building,
-                    toLevel: lv + 1,
+                    toLevel: rowNextT,
                     researchTier,
                   })
                 : null;
@@ -212,6 +237,8 @@ export function BuildingCatalogCard({
                     ilkCagWoodFoodOnly={eraIndex(currentEra) < 1}
                     currentEra={currentEra}
                     researchTier={researchTier}
+                    queuedTargetLevel={q?.toLevel ?? null}
+                    queuedLabel={play.buildingUpgradePending}
                   />
                   </>
                 )}

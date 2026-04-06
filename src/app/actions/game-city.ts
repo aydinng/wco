@@ -43,6 +43,7 @@ type PlayErr = keyof Pick<
   | "errInvalidAmount"
   | "errBuildingLocked"
   | "errBuildBusy"
+  | "errBuildingPending"
   | "errBuildQueueFull"
   | "errResearchMax"
   | "errResearchBusy"
@@ -149,6 +150,19 @@ export async function upgradeBuilding(
   });
   if (queueCount >= 2) {
     return { ok: false, error: await pe("errBuildQueueFull") };
+  }
+
+  const sameBuildingQueued = await prisma.buildingJob.findFirst({
+    where: {
+      userId: user.id,
+      cityId,
+      buildingId: building,
+      status: "queued",
+    },
+    select: { id: true },
+  });
+  if (sameBuildingQueued) {
+    return { ok: false, error: await pe("errBuildingPending") };
   }
 
   const hasActive = await prisma.buildingJob.findFirst({

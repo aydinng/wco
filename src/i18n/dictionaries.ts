@@ -224,6 +224,7 @@ export type Dictionary = {
     buildingBarracks: string;
     levelShort: string;
     upgrade: string;
+    buildingUpgradePending: string;
     cost: string;
     workersTitle: string;
     saveWorkers: string;
@@ -287,6 +288,7 @@ export type Dictionary = {
     errInvalidAmount: string;
     errBuildingLocked: string;
     errBuildBusy: string;
+    errBuildingPending: string;
     errBuildQueueFull: string;
     buildingQueueHeading: string;
     buildingQueueEmpty: string;
@@ -607,6 +609,7 @@ const tr: Dictionary = {
     buildingBarracks: "Kışla",
     levelShort: "Sv",
     upgrade: "Yükselt",
+    buildingUpgradePending: "Yükseltme sürüyor",
     cost: "Maliyet",
     workersTitle: "İşçi dağılımı",
     saveWorkers: "Kaydet",
@@ -675,6 +678,8 @@ const tr: Dictionary = {
     errInvalidAmount: "Geçersiz miktar",
     errBuildingLocked: "Bu çağda bu bina yok",
     errBuildBusy: "Bu şehirde yükseltme zaten devam ediyor.",
+    errBuildingPending:
+      "Bu bina için zaten bir yükseltme sürüyor veya sırada.",
     errBuildQueueFull:
       "Aynı anda en fazla 2 bina yükseltmesi sıraya alınabilir; biri bitsin veya bekleyin.",
     buildingQueueHeading: "Bina kuyruğu (en fazla 2)",
@@ -999,6 +1004,7 @@ const en: Dictionary = {
     buildingBarracks: "Barracks",
     levelShort: "Lv",
     upgrade: "Upgrade",
+    buildingUpgradePending: "Upgrade in progress",
     cost: "Cost",
     workersTitle: "Worker allocation",
     saveWorkers: "Save",
@@ -1067,6 +1073,8 @@ const en: Dictionary = {
     errInvalidAmount: "Invalid amount",
     errBuildingLocked: "This building is not available in your age",
     errBuildBusy: "A building upgrade is already in progress in this city.",
+    errBuildingPending:
+      "This building already has an upgrade in progress or queued.",
     errBuildQueueFull:
       "You can queue at most 2 building upgrades at once; wait for one to finish.",
     buildingQueueHeading: "Building queue (max 2)",

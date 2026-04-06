@@ -27,6 +27,12 @@ export default async function BuildingsPage() {
   const user = await getCurrentUser();
   const cities = user?.cities ?? [];
   const unlocks = getResourceUnlocks(user?.currentEra);
+  const queuedBuildingJobs = user
+    ? await prisma.buildingJob.findMany({
+        where: { userId: user.id, status: "queued" },
+        select: { cityId: true, buildingId: true, toLevel: true },
+      })
+    : [];
   if (!user || cities.length === 0) {
     return (
       <div className="rounded border border-[#2a3441]/90 bg-black/35 p-4 backdrop-blur-sm">
@@ -125,6 +131,7 @@ export default async function BuildingsPage() {
                       locale={locale}
                       researchTier={user.researchTier}
                       currentEra={user.currentEra}
+                      queuedBuildingJobs={queuedBuildingJobs}
                     />
                   ))}
                 </div>

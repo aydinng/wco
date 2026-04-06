@@ -11,6 +11,7 @@ import { getDictionary } from "@/i18n/dictionaries";
 import { getCurrentUser } from "@/lib/current-user";
 import { getLocale } from "@/lib/locale";
 import type { AppLocale } from "@/lib/locale";
+import { prisma } from "@/lib/prisma";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -33,6 +34,10 @@ export default async function CityDetailPage({
 
   const cities = [city];
   const unlocks = getResourceUnlocks(user.currentEra);
+  const queuedBuildingJobs = await prisma.buildingJob.findMany({
+    where: { userId: user.id, status: "queued" },
+    select: { cityId: true, buildingId: true, toLevel: true },
+  });
   const isAdmin = user.isAdmin === true;
 
   return (
@@ -113,6 +118,7 @@ export default async function CityDetailPage({
                       locale={locale}
                       researchTier={user.researchTier}
                       currentEra={user.currentEra}
+                      queuedBuildingJobs={queuedBuildingJobs}
                     />
                   ))}
                 </div>

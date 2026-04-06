@@ -11,6 +11,7 @@ import {
   isIlkCagCoreBuilding,
   maxLevelForBuilding,
 } from "@/lib/economy";
+import { nextUpgradeTargetLevel } from "@/lib/building-upgrade-preview";
 import { buildingUpgradeDurationSec } from "@/lib/duration-scaling";
 import { formatCountdownSeconds } from "@/lib/format-countdown";
 import type { AppLocale } from "@/lib/locale";
@@ -31,6 +32,10 @@ type Props = {
   currentEra?: string | null;
   /** İmparatorluk araştırma seviyesi — bir sonraki yükseltme süresi */
   researchTier: number;
+  /** Bu şehir+bina için kuyruktaki işin hedef seviyesi (varsa süre bir sonraki tier için gösterilir) */
+  queuedTargetLevel?: number | null;
+  /** Kuyrukta iken buton yazısı */
+  queuedLabel: string;
 };
 
 export function UpgradeBuildingButton({
@@ -44,13 +49,27 @@ export function UpgradeBuildingButton({
   ilkCagWoodFoodOnly = false,
   currentEra,
   researchTier,
+  queuedTargetLevel = null,
+  queuedLabel,
 }: Props) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const cap = maxLevelForBuilding(building);
-  const maxed = currentLevel >= cap;
-  const cost = getUpgradeCost(currentLevel, unlocks, {
+  const queued =
+    queuedTargetLevel != null && queuedTargetLevel > 0
+      ? queuedTargetLevel
+      : null;
+  const nextTargetLevel = nextUpgradeTargetLevel({
+    currentLevel,
+    queuedTargetLevel: queued,
+    cap,
+  });
+  const pendingToMax = queued != null && queued >= cap;
+  const maxed = currentLevel >= cap || pendingToMax;
+  const costLevel =
+    nextTargetLevel != null ? nextTargetLevel - 1 : currentLevel;
+  const cost = getUpgradeCost(costLevel, unlocks, {
     ilkCagWoodFoodOnly,
     currentEra,
     buildingId: building,
@@ -66,10 +85,10 @@ export function UpgradeBuildingButton({
   const showOil = !woodFoodOnly && unlocks.oil && cost.oil > 0;
 
   const nextDurSec =
-    !maxed && currentLevel < cap
+    !maxed && nextTargetLevel != null
       ? buildingUpgradeDurationSec({
           buildingId: building,
-          toLevel: currentLevel + 1,
+          toLevel: nextTargetLevel,
           researchTier,
         })
       : 0;
@@ -100,7 +119,11 @@ export function UpgradeBuildingButton({
             className="shrink-0 rounded border border-emerald-800/70 bg-emerald-950/35 px-3 py-1.5 text-center text-sm font-semibold text-emerald-100/95"
             style={{ fontFamily: "var(--font-warcity), serif" }}
           >
-            {tr ? "Tamamlandı" : "Completed"}
+            {pendingToMax
+              ? queuedLabel
+              : tr
+                ? "Tamamlandı"
+                : "Completed"}
           </span>
         ) : (
           <>
@@ -128,11 +151,11 @@ export function UpgradeBuildingButton({
             </div>
             <button
               type="button"
-              disabled={busy}
+              disabled={busy || queued != null}
               onClick={onClick}
               className="shrink-0 rounded border border-amber-900/50 bg-amber-950/40 px-3 py-2 text-sm font-semibold text-amber-100 hover:bg-amber-900/50 disabled:opacity-40"
             >
-              {busy ? "…" : actionLabel}
+              {busy ? "…" : queued != null ? queuedLabel : actionLabel}
             </button>
           </>
         )}
