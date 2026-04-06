@@ -9,13 +9,8 @@ export type LoginLandingData = {
     registrationCountry: string;
     createdAt: Date;
   } | null;
-  topCountries: { rank: number; countryId: string; score: number }[];
-  topPlayers: {
-    rank: number;
-    username: string;
-    countryId: string;
-    score: number;
-  }[];
+  topCountries: { rank: number; countryId: string }[];
+  topPlayers: { rank: number; username: string; countryId: string }[];
 };
 
 const emptyLandingData: LoginLandingData = {
@@ -39,7 +34,7 @@ export async function getLoginLandingData(): Promise<LoginLandingData> {
         select: {
           username: true,
           registrationCountry: true,
-          scoreTotal: true,
+          cities: { select: { wood: true, iron: true, oil: true, food: true } },
         },
       }),
       prisma.user.findFirst({
