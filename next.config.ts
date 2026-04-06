@@ -16,8 +16,22 @@ if (
   );
 }
 
+/**
+ * next-auth istemci paketi tarayıcıda process.env.VERCEL_URL görmez; NEXTAUTH_URL da
+ * NEXT_PUBLIC_ olmadığı için boş kalır → baseUrl localhost olur → giriş "Configuration" hatası.
+ * Build anında kök adresi burada sabitleriz (Vercel’de VERCEL_URL otomatik gelir).
+ */
+const authPublicUrl =
+  process.env.NEXTAUTH_URL?.trim() ||
+  process.env.AUTH_URL?.trim() ||
+  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "") ||
+  "http://localhost:3000";
+
 const nextConfig: NextConfig = {
-  /* config options here */
+  env: {
+    NEXTAUTH_URL: authPublicUrl,
+    AUTH_URL: authPublicUrl,
+  },
   reactCompiler: true,
   images: {
     remotePatterns: [
