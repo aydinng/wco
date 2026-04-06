@@ -6,11 +6,9 @@ import type { Dictionary } from "@/i18n/dictionaries";
 import { getDictionary } from "@/i18n/dictionaries";
 import {
   canAfford,
-  computePopCap,
   getResearchCost,
   getUpgradeCost,
   isIlkCagCoreBuilding,
-  MAX_BUILDING_LEVEL,
   maxLevelForBuilding,
   MAX_RESEARCH_TIER,
   soldierCap,
@@ -91,7 +89,7 @@ export async function assignWorkers(
   const r = await requireUserCity(cityId);
   if (!r.ok) return r;
   const { city, unlocks } = r;
-  let ww = Math.max(0, Math.floor(workersWood));
+  const ww = Math.max(0, Math.floor(workersWood));
   let wi = Math.max(0, Math.floor(workersIron));
   let wo = Math.max(0, Math.floor(workersOil));
   const wf = Math.max(0, Math.floor(workersFood));
@@ -305,7 +303,8 @@ export async function cancelBuildingJob(jobId: string): Promise<ActionResult> {
 export async function advanceResearch(payCityId: string): Promise<ActionResult> {
   const r = await requireUserCity(payCityId);
   if (!r.ok) return r;
-  let { city, user, unlocks } = r;
+  const { city, unlocks } = r;
+  let { user } = r;
 
   const fresh = await flushResearchJob(user.id);
   if (fresh) user = fresh;

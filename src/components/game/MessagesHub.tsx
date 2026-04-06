@@ -19,10 +19,8 @@ type DmRow = {
 };
 
 export function MessagesHub({
-  locale,
   labels,
 }: {
-  locale: string;
   labels: {
     reports: string;
     inbox: string;

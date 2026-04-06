@@ -34,7 +34,7 @@ export default async function MessagesPage() {
 
   return (
     <PlaceholderPage title={dict.game.messages}>
-      <MessagesHub locale={locale} labels={labels} />
+      <MessagesHub labels={labels} />
     </PlaceholderPage>
   );
 }

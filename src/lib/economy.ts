@@ -58,10 +58,6 @@ export function buildingProductionMultiplier(level: number): number {
   return 1 + Math.max(0, level - 1) * 0.1;
 }
 
-function buildingMult(level: number) {
-  return buildingProductionMultiplier(level);
-}
-
 /**
  * Odun / besin: bina seviyesi 0 iken bile işçiyle çok düşük “ilkel toplama”
  * (aksi halde çarpan 0 olurdu ve stok hiç artmazdı).

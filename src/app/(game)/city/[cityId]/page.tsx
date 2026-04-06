@@ -10,7 +10,6 @@ import {
 import { getDictionary } from "@/i18n/dictionaries";
 import { getCurrentUser } from "@/lib/current-user";
 import { getLocale } from "@/lib/locale";
-import type { AppLocale } from "@/lib/locale";
 import { prisma } from "@/lib/prisma";
 import Image from "next/image";
 import Link from "next/link";
