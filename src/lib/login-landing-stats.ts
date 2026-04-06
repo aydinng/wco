@@ -1,46 +1,41 @@
-/** Ülke skorları: şehir kaynakları ülke bazında toplanır. */
+/** Ülke sıralaması: toplam skor (User.scoreTotal) ülke bazında toplanır. */
 export function aggregateTopCountries(
-  rows: {
-    registrationCountry: string;
-    cities: { wood: number; iron: number; oil: number; food: number }[];
-  }[],
+  rows: { registrationCountry: string; scoreTotal: number }[],
   topN: number,
-): { rank: number; countryId: string }[] {
+): { rank: number; countryId: string; score: number }[] {
   const scoreBy = new Map<string, number>();
   for (const u of rows) {
     const code = u.registrationCountry?.trim();
     if (!code) continue;
-    let s = 0;
-    for (const c of u.cities) {
-      s += c.wood + c.iron + c.oil + c.food;
-    }
+    const s = Math.max(0, u.scoreTotal ?? 0);
     scoreBy.set(code, (scoreBy.get(code) ?? 0) + s);
   }
   return [...scoreBy.entries()]
     .sort((a, b) => b[1] - a[1])
     .slice(0, topN)
-    .map(([code], i) => ({
+    .map(([code, score], i) => ({
       rank: i + 1,
       countryId: code,
+      score,
     }));
 }
 
-/** Oyuncu skorları: tüm şehir kaynakları toplamı. */
+/** Oyuncu sıralaması: toplam skor. */
 export function aggregateTopPlayers(
   rows: {
     username: string;
     registrationCountry: string;
-    cities: { wood: number; iron: number; oil: number; food: number }[];
+    scoreTotal: number;
   }[],
   topN: number,
-): { rank: number; username: string; countryId: string }[] {
+): { rank: number; username: string; countryId: string; score: number }[] {
   const scored = rows.map((u) => {
-    let s = 0;
-    for (const c of u.cities) {
-      s += c.wood + c.iron + c.oil + c.food;
-    }
     const cid = u.registrationCountry?.trim() || "other";
-    return { username: u.username, countryId: cid, score: s };
+    return {
+      username: u.username,
+      countryId: cid,
+      score: Math.max(0, u.scoreTotal ?? 0),
+    };
   });
   return scored
     .sort((a, b) => b.score - a.score)
@@ -49,5 +44,6 @@ export function aggregateTopPlayers(
       rank: i + 1,
       username: u.username,
       countryId: u.countryId,
+      score: u.score,
     }));
 }
