@@ -1,0 +1,78 @@
+﻿Ôû▓ Next.js 16.2.1 (Turbopack)
+- Environments: .env
+
+node.exe : ÔÜá The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.o
+rg/docs/messages/middleware-to-proxy
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (ÔÜá The "middle...leware-to-proxy:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  Creating an optimized production build ...
+Ô£ô Compiled successfully in 36.1s
+  Running TypeScript ...
+  Finished TypeScript in 26.5s ...
+  Collecting page data using 3 workers ...
+  Generating static pages using 3 workers (0/29) ...
+  Generating static pages using 3 workers (7/29) 
+  Generating static pages using 3 workers (14/29) 
+  Generating static pages using 3 workers (21/29) 
+Ô£ô Generating static pages using 3 workers (29/29) in 416ms
+  Finalizing page optimization ...
+
+Route (app)
+Ôöî ãÆ /
+Ôö£ ãÆ /_not-found
+Ôö£ ãÆ /admin
+Ôö£ ãÆ /admin/era
+Ôö£ ãÆ /api/admin/era
+Ôö£ ãÆ /api/admin/ticket
+Ôö£ ãÆ /api/alliances
+Ôö£ ãÆ /api/alliances/invite
+Ôö£ ãÆ /api/alliances/invite/respond
+Ôö£ ãÆ /api/alliances/join
+Ôö£ ãÆ /api/alliances/kick
+Ôö£ ãÆ /api/alliances/leave
+Ôö£ ãÆ /api/alliances/messages
+Ôö£ ãÆ /api/auth/[...nextauth]
+Ôö£ ãÆ /api/auth/register
+Ôö£ ãÆ /api/battle-reports
+Ôö£ ãÆ /api/city/found
+Ôö£ ãÆ /api/city/support
+Ôö£ ãÆ /api/fleet/send
+Ôö£ ãÆ /api/health
+Ôö£ ãÆ /api/locale
+Ôö£ ãÆ /api/market/buy
+Ôö£ ãÆ /api/market/list
+Ôö£ ãÆ /api/messages
+Ôö£ ãÆ /api/presence/ping
+Ôö£ ãÆ /api/user/settings
+Ôö£ ãÆ /buildings
+Ôö£ ãÆ /city/[cityId]
+Ôö£ ãÆ /community
+Ôö£ ãÆ /diplomacy
+Ôö£ ãÆ /egitim
+Ôö£ ãÆ /fleet
+Ôö£ ãÆ /forum
+Ôö£ ãÆ /forum/[topicId]
+Ôö£ ãÆ /help
+Ôö£ ãÆ /kurallar
+Ôö£ ãÆ /login
+Ôö£ ãÆ /market
+Ôö£ ãÆ /messages
+Ôö£ ãÆ /missions
+Ôö£ ãÆ /options
+Ôö£ ãÆ /overview
+Ôö£ ãÆ /production
+Ôö£ ãÆ /register
+Ôö£ ãÆ /research
+Ôö£ ãÆ /resources
+Ôö£ ãÆ /stats
+Ôöö ãÆ /worldmap
+
+
+ãÆ Proxy (Middleware)
+
+ãÆ  (Dynamic)  server-rendered on demand
+

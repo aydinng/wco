@@ -4,16 +4,19 @@ const hasAuthSecret =
   Boolean(process.env.AUTH_SECRET?.trim()) ||
   Boolean(process.env.NEXTAUTH_SECRET?.trim());
 
-/** Vercel Production’da oturum imzası yoksa build bitsin; canlıda “Configuration” hatası yerine log’da net uyarı. */
+/** Vercel Production’da secret yoksa log’da uyar; build’i düşürme (deploy log’unda görünür). İmzasız prod istemiyorsanız `NEXT_CONFIG_FAIL_ON_MISSING_AUTH=1` ekleyin. */
 if (
   process.env.VERCEL === "1" &&
   process.env.VERCEL_ENV === "production" &&
   !hasAuthSecret
 ) {
-  throw new Error(
+  const msg =
     "Vercel Production: AUTH_SECRET veya NEXTAUTH_SECRET tanımlı değil. " +
-      "Dashboard → Project → Settings → Environment Variables → ekleyin (Production işaretli), sonra Redeploy.",
-  );
+    "Dashboard → Project → Settings → Environment Variables → ekleyin (Production), sonra Redeploy.";
+  if (process.env.NEXT_CONFIG_FAIL_ON_MISSING_AUTH === "1") {
+    throw new Error(msg);
+  }
+  console.warn(`[warcity-clone] ${msg}`);
 }
 
 /**
