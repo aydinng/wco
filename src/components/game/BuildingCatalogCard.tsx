@@ -23,6 +23,17 @@ import Image from "next/image";
 const SKY = "text-sky-400";
 const SKY_VAL = "text-sky-100";
 
+/** DB seviyesi; kuyrukta iş varsa hedef seviye (ör. 4→5 iken 5) — önizleme için */
+function effectiveLevelForCity(
+  c: City,
+  id: BuildingId,
+  merged: { cityId: string; buildingId: string; toLevel: number }[],
+): number {
+  const lv = levelFor(c, id);
+  const q = merged.find((j) => j.cityId === c.id && j.buildingId === id);
+  return q?.toLevel ?? lv;
+}
+
 function levelFor(c: City, id: BuildingId): number {
   switch (id) {
     case "townHall":
@@ -97,7 +108,7 @@ export function BuildingCatalogCard({
   const mergedQueue = mergeQueuedBuildingJobs(queuedBuildingJobs);
 
   const maxLv = cities.reduce(
-    (m, c) => Math.max(m, levelFor(c, building)),
+    (m, c) => Math.max(m, effectiveLevelForCity(c, building, mergedQueue)),
     0,
   );
   const levelStr = maxLv < 1 ? play.levelNone : String(maxLv);
@@ -106,13 +117,13 @@ export function BuildingCatalogCard({
   /** Her şehir için bir sonraki anlamlı yükseltmenin hedef seviyesi (kuyruk varsa job.toLevel+1) */
   const perCityNextDurations = cities
     .map((c) => {
-      const lv = levelFor(c, building);
+      const lvDb = levelFor(c, building);
       if (locked) return null;
       const q = mergedQueue.find(
         (j) => j.cityId === c.id && j.buildingId === building,
       );
       const nextT = nextUpgradeTargetLevel({
-        currentLevel: lv,
+        currentLevel: lvDb,
         queuedTargetLevel: q?.toLevel ?? null,
         cap: capLv,
       });
@@ -198,6 +209,7 @@ export function BuildingCatalogCard({
             const q = mergedQueue.find(
               (j) => j.cityId === c.id && j.buildingId === building,
             );
+            const effLv = effectiveLevelForCity(c, building, mergedQueue);
             const rowNextT = nextUpgradeTargetLevel({
               currentLevel: lv,
               queuedTargetLevel: q?.toLevel ?? null,
@@ -222,8 +234,14 @@ export function BuildingCatalogCard({
                 ) : (
                   <>
                     {showRowDur ? (
-                      <div className="mb-1 text-right text-[10px] tabular-nums text-sky-200/85">
-                        {c.name}: {formatCountdownSeconds(rowDurSec, locale)}
+                      <div className="mb-1 text-right text-[10px] leading-tight text-sky-200/85">
+                        <span className="block font-semibold text-sky-300/95">
+                          {c.name}: {play.catalogFieldLevel}{" "}
+                          <span className="text-sky-100">{effLv}</span>
+                        </span>
+                        <span className="tabular-nums">
+                          {formatCountdownSeconds(rowDurSec, locale)}
+                        </span>
                       </div>
                     ) : null}
                     <UpgradeBuildingButton
@@ -239,6 +257,7 @@ export function BuildingCatalogCard({
                     researchTier={researchTier}
                     queuedTargetLevel={q?.toLevel ?? null}
                     queuedLabel={play.buildingUpgradePending}
+                    levelFieldLabel={play.catalogFieldLevel}
                   />
                   </>
                 )}

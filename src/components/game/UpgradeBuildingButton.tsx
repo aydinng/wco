@@ -36,6 +36,8 @@ type Props = {
   queuedTargetLevel?: number | null;
   /** Kuyrukta iken buton yazısı */
   queuedLabel: string;
+  /** Orta sütunla aynı: "Seviye:" / "Level:" — önizleme satırında kullanılır */
+  levelFieldLabel: string;
 };
 
 export function UpgradeBuildingButton({
@@ -51,6 +53,7 @@ export function UpgradeBuildingButton({
   researchTier,
   queuedTargetLevel = null,
   queuedLabel,
+  levelFieldLabel,
 }: Props) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
@@ -93,6 +96,9 @@ export function UpgradeBuildingButton({
         })
       : 0;
 
+  /** Kuyruk varken hedef seviye (ör. 4→5 işinde 5), yoksa DB seviyesi — süre bir sonraki tier için */
+  const displayLevel = queued ?? currentLevel;
+
   async function onClick() {
     setErr(null);
     setBusy(true);
@@ -109,8 +115,14 @@ export function UpgradeBuildingButton({
     <div className="flex w-full min-w-0 flex-col gap-1.5">
       <div className="flex w-full min-w-0 flex-col items-stretch gap-1">
         {!maxed && nextDurSec > 0 ? (
-          <div className="text-right text-[10px] tabular-nums text-sky-200/90">
-            {formatCountdownSeconds(nextDurSec, locale)}
+          <div className="text-right leading-tight">
+            <div className="text-[11px] font-semibold tabular-nums text-sky-300/95">
+              {levelFieldLabel}{" "}
+              <span className="text-sky-100">{displayLevel}</span>
+            </div>
+            <div className="mt-0.5 text-[10px] tabular-nums text-sky-200/90">
+              {formatCountdownSeconds(nextDurSec, locale)}
+            </div>
           </div>
         ) : null}
         <div className="flex w-full min-w-0 flex-row flex-wrap items-center justify-end gap-2">
