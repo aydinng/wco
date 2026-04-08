@@ -17,7 +17,7 @@ type Props = {
   locale: AppLocale;
   play: Dictionary["play"];
   currentEra: string;
-  defaultCityId: string;
+  selectedCityId: string;
   eraTechLevels: Record<string, number>;
   activeEraTechJobs: {
     id: string;
@@ -58,7 +58,7 @@ export function TechnologyCatalog({
   locale,
   play,
   currentEra,
-  defaultCityId,
+  selectedCityId,
   eraTechLevels,
   activeEraTechJobs,
 }: Props) {
@@ -111,7 +111,7 @@ export function TechnologyCatalog({
                   locale={locale}
                   play={play}
                   playerEra={currentEra}
-                  cityId={defaultCityId}
+                  cityId={selectedCityId}
                   level={eraTechLevels[entry.id] ?? 0}
                   activeJobs={activeEraTechJobs}
                   maxQueue={MAX_ERA_TECH_QUEUE}

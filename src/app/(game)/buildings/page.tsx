@@ -3,6 +3,7 @@ import {
   BuildingJobsQueue,
   type BuildingJobQueueItem,
 } from "@/components/game/BuildingJobsQueue";
+import { CityResourceBar } from "@/components/game/CityResourceBar";
 import { ERA_BUILDING_CATALOG } from "@/config/building-catalog";
 import {
   ERA_ORDER,
@@ -16,23 +17,34 @@ import { getCurrentUser } from "@/lib/current-user";
 import { getLocale } from "@/lib/locale";
 import { prisma } from "@/lib/prisma";
 import Image from "next/image";
+import { Suspense } from "react";
 
 export const dynamic = "force-dynamic";
 
-export default async function BuildingsPage() {
+export default async function BuildingsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ city?: string }>;
+}) {
   const locale = await getLocale();
   const dict = getDictionary(locale);
   const p = dict.play;
+  const sp = await searchParams;
   const user = await getCurrentUser();
   const cities = user?.cities ?? [];
   const unlocks = getResourceUnlocks(user?.currentEra);
+  const defaultCityId = cities[0]?.id ?? "";
+  const selectedCityId =
+    sp.city && cities.some((c) => c.id === sp.city) ? sp.city : defaultCityId;
+  const selectedCity =
+    cities.find((c) => c.id === selectedCityId) ?? cities[0] ?? null;
   const queuedBuildingJobs = user
     ? await prisma.buildingJob.findMany({
         where: { userId: user.id, status: "queued" },
         select: { cityId: true, buildingId: true, toLevel: true },
       })
     : [];
-  if (!user || cities.length === 0) {
+  if (!user || cities.length === 0 || !selectedCity) {
     return (
       <div className="rounded border border-[#2a3441]/90 bg-black/35 p-4 backdrop-blur-sm">
         <h2
@@ -70,6 +82,23 @@ export default async function BuildingsPage() {
           {p.buildingsTitle}
         </h2>
       </div>
+      <Suspense
+        fallback={
+          <div className="mb-4 h-16 max-w-2xl animate-pulse rounded bg-zinc-800/40" />
+        }
+      >
+        <CityResourceBar
+          cities={cities.map((c) => ({ id: c.id, name: c.name }))}
+          selectLabel={p.overviewSelectCity}
+          page="buildings"
+          wood={selectedCity.wood}
+          iron={selectedCity.iron}
+          oil={selectedCity.oil}
+          food={selectedCity.food}
+          showIron={unlocks.iron}
+          showOil={unlocks.oil}
+        />
+      </Suspense>
       <BuildingJobsQueue
         jobs={buildingQueueItems}
         locale={locale}

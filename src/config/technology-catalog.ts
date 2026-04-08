@@ -33,17 +33,17 @@ export function isOneShotEraTech(
 }
 
 const H48 = 48 * 3600;
+/** Bina süreleriyle uyumlu üstel his — her seviye bir öncekinden belirgin uzun */
+const ERA_TECH_LV_COEFF = 1.3;
 
-/** Tekrarlanan araştırmalarda süre ölçeği (mevcut seviye = bu araştırmadan önce). */
+/** Tekrarlanan araştırmalarda süre (mevcut seviye = bu adımdan hemen önce). */
 export function scaledEraTechDurationSec(
   entry: Pick<TechCatalogEntry, "durationSec">,
   currentLevelBeforeResearch: number,
 ): number {
   const base = Math.max(0, entry.durationSec);
-  /** Her mevcut seviye için süre belirgin şekilde uzar (tekrarlanan araştırmalar). */
   const lv = Math.max(0, currentLevelBeforeResearch);
-  /** Tekrarlayan çağ teknolojilerinde süre seviye ile belirgin uzar */
-  const scaled = Math.round(base * (1 + lv * 0.2) + lv * 12);
+  const scaled = Math.round(base * Math.pow(ERA_TECH_LV_COEFF, lv) + lv * 18);
   if (scaled === 0) return 0;
   return Math.min(H48, Math.max(1, scaled));
 }
@@ -384,7 +384,7 @@ export function eraTechResearchCost(
   food: number;
 } {
   const tl = Math.max(1, Math.floor(targetLevel));
-  let repeatScale = 1 + (tl - 1) * 0.22;
+  let repeatScale = 1 + (tl - 1) * 0.28;
   if (entry.id === "sadelik") {
     repeatScale *= 1 + (tl - 1) * 0.1;
   }

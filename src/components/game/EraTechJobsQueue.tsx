@@ -1,0 +1,177 @@
+"use client";
+
+import { cancelEraTechResearch } from "@/app/actions/era-tech";
+import { formatCountdownSeconds } from "@/lib/format-countdown";
+import type { AppLocale } from "@/lib/locale";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { useCountdownIso } from "@/components/game/useCountdownIso";
+
+export type EraTechJobQueueItem = {
+  id: string;
+  completesAtIso: string | null;
+  cityName: string;
+  summaryLine: string;
+};
+
+function CancelEraTechButton({
+  jobId,
+  locale,
+}: {
+  jobId: string;
+  locale: AppLocale;
+}) {
+  const router = useRouter();
+  const [busy, setBusy] = useState(false);
+  const tr = locale !== "en";
+
+  async function onCancel() {
+    setBusy(true);
+    try {
+      const r = await cancelEraTechResearch(jobId);
+      if (!r.ok) {
+        window.alert(r.error);
+        return;
+      }
+      router.refresh();
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      disabled={busy}
+      onClick={onCancel}
+      className="shrink-0 rounded border border-zinc-600/60 bg-black/30 px-1.5 py-0.5 text-[10px] text-zinc-400 hover:border-red-800/60 hover:text-red-300 disabled:opacity-40"
+    >
+      {busy ? "…" : tr ? "İptal" : "Cancel"}
+    </button>
+  );
+}
+
+function ActiveEraRow({
+  job,
+  locale,
+  onComplete,
+}: {
+  job: EraTechJobQueueItem;
+  locale: AppLocale;
+  onComplete: () => void;
+}) {
+  const completesAtIso = job.completesAtIso!;
+  const sec = useCountdownIso(completesAtIso);
+  const prevSec = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (
+      prevSec.current !== null &&
+      prevSec.current > 0 &&
+      sec === 0
+    ) {
+      onComplete();
+    }
+    prevSec.current = sec;
+  }, [sec, onComplete]);
+
+  const tr = locale !== "en";
+
+  return (
+    <div className="rounded border border-amber-900/40 bg-black/50 px-3 py-2">
+      <div className="flex flex-wrap items-baseline justify-between gap-2 text-sm">
+        <span className="min-w-0 font-medium text-amber-100/95">
+          <span className="text-zinc-400">{tr ? "Şehir:" : "City:"} </span>
+          {job.cityName}
+        </span>
+        <div className="flex items-center gap-2">
+          <span className="tabular-nums font-semibold text-amber-200">
+            {sec > 0 ? formatCountdownSeconds(sec, locale) : tr ? "0 sn" : "0s"}
+          </span>
+          <CancelEraTechButton jobId={job.id} locale={locale} />
+        </div>
+      </div>
+      <p className="mt-0.5 text-xs text-zinc-300">{job.summaryLine}</p>
+      <p className="mt-1 text-[10px] text-emerald-400/90">
+        {tr ? "Süre işliyor" : "Timer running"}
+      </p>
+    </div>
+  );
+}
+
+function PendingEraRow({
+  job,
+  locale,
+}: {
+  job: EraTechJobQueueItem;
+  locale: AppLocale;
+}) {
+  const tr = locale !== "en";
+
+  return (
+    <div className="rounded border border-zinc-600/60 bg-black/40 px-3 py-2">
+      <div className="flex flex-wrap items-baseline justify-between gap-2 text-sm">
+        <span className="min-w-0 font-medium text-zinc-300">
+          <span className="text-zinc-500">{tr ? "Şehir:" : "City:"} </span>
+          {job.cityName}
+        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-zinc-500">
+            {tr ? "Sırada" : "Queued"}
+          </span>
+          <CancelEraTechButton jobId={job.id} locale={locale} />
+        </div>
+      </div>
+      <p className="mt-0.5 text-xs text-zinc-400">{job.summaryLine}</p>
+      <p className="mt-1 text-[10px] leading-snug text-zinc-500">
+        {tr
+          ? "Birinci iş bitene kadar süre başlamaz."
+          : "Timer starts after the first job completes."}
+      </p>
+    </div>
+  );
+}
+
+export function EraTechJobsQueue({
+  jobs,
+  locale,
+  heading,
+  emptyLabel,
+}: {
+  jobs: EraTechJobQueueItem[];
+  locale: AppLocale;
+  heading: string;
+  emptyLabel: string;
+}) {
+  const router = useRouter();
+  const refresh = () => router.refresh();
+
+  return (
+    <div className="mb-6 space-y-2">
+      <p
+        className="text-center text-xs text-amber-200/90"
+        style={{ fontFamily: "var(--font-warcity), serif" }}
+      >
+        {heading}
+      </p>
+      {jobs.length === 0 ? (
+        <p className="text-center text-sm text-zinc-500">{emptyLabel}</p>
+      ) : (
+        <div className="mx-auto grid max-w-xl grid-cols-1 gap-2 sm:grid-cols-2">
+          {jobs.map((j) =>
+            j.completesAtIso ? (
+              <ActiveEraRow
+                key={j.id}
+                job={j}
+                locale={locale}
+                onComplete={refresh}
+              />
+            ) : (
+              <PendingEraRow key={j.id} job={j} locale={locale} />
+            ),
+          )}
+        </div>
+      )}
+    </div>
+  );
+}

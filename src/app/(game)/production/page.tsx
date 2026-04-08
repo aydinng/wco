@@ -1,4 +1,4 @@
-import { ProductionCityPicker } from "@/components/game/ProductionCityPicker";
+import { CityResourceBar } from "@/components/game/CityResourceBar";
 import { TrainingQueueBar } from "@/components/game/TrainingQueueBar";
 import { UnitCatalog } from "@/components/game/UnitCatalog";
 import { catalogUnits, getUnitSpec } from "@/config/units";
@@ -75,12 +75,19 @@ export default async function ProductionPage({
 
       <Suspense
         fallback={
-          <div className="mb-4 h-10 max-w-md animate-pulse rounded bg-zinc-800/40" />
+          <div className="mb-4 h-16 max-w-2xl animate-pulse rounded bg-zinc-800/40" />
         }
       >
-        <ProductionCityPicker
+        <CityResourceBar
           cities={cities.map((c) => ({ id: c.id, name: c.name }))}
-          label={p.overviewSelectCity}
+          selectLabel={p.overviewSelectCity}
+          page="production"
+          wood={selectedCity.wood}
+          iron={selectedCity.iron}
+          oil={selectedCity.oil}
+          food={selectedCity.food}
+          showIron={unlocks.iron}
+          showOil={unlocks.oil}
         />
       </Suspense>
 

@@ -292,6 +292,8 @@ export type Dictionary = {
     errBuildQueueFull: string;
     buildingQueueHeading: string;
     buildingQueueEmpty: string;
+    eraTechQueueHeading: string;
+    eraTechQueueEmpty: string;
     errResearchMax: string;
     errResearchBusy: string;
     errResearchLodgeRequired: string;
@@ -684,6 +686,8 @@ const tr: Dictionary = {
       "Aynı anda en fazla 2 bina yükseltmesi sıraya alınabilir; biri bitsin veya bekleyin.",
     buildingQueueHeading: "Bina kuyruğu (en fazla 2)",
     buildingQueueEmpty: "Kuyrukta bina yükseltmesi yok.",
+    eraTechQueueHeading: "Çağ teknolojisi kuyruğu (en fazla 2)",
+    eraTechQueueEmpty: "Kuyrukta çağ teknolojisi araştırması yok.",
     errResearchMax: "Araştırma maksimum",
     errResearchBusy: "Zaten bir araştırma sürüyor; bitene kadar bekleyin.",
     errResearchLodgeRequired:
@@ -1079,6 +1083,8 @@ const en: Dictionary = {
       "You can queue at most 2 building upgrades at once; wait for one to finish.",
     buildingQueueHeading: "Building queue (max 2)",
     buildingQueueEmpty: "No building upgrades in the queue.",
+    eraTechQueueHeading: "Era technology queue (max 2)",
+    eraTechQueueEmpty: "No era technology research in the queue.",
     errResearchMax: "Research is at maximum",
     errResearchBusy: "Research is already in progress; wait until it finishes.",
     errResearchLodgeRequired:

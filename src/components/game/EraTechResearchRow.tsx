@@ -78,24 +78,38 @@ export function EraTechResearchRow({
   const oneShot = isOneShotEraTech(entry);
   const done = oneShot && level >= 1;
 
-  const nextLevel = Math.max(0, level) + 1;
-  const cost = eraTechResearchCost(entry, nextLevel);
+  const thisJob = activeJobs.find((j) => j.techKey === entry.id) ?? null;
+  const queueFull = activeJobs.length >= maxQueue && !thisJob;
+  const hasJob = thisJob != null;
+  /** Kuyruk varken hedef seviye (iş bitince); yoksa DB seviyesi */
+  const displayLevel = hasJob ? level + 1 : level;
+  const oneShotQueued = oneShot && hasJob;
+
+  /** Sonraki adımın maliyet/süre önizlemesi (iş bitinceki bir sonraki araştırma) */
+  const nextCostTargetLevel = hasJob ? level + 2 : level + 1;
+  const nextDurFromLevel = hasJob ? level + 1 : level;
+  const needPreviewCost =
+    !lockedByEra && !done && !oneShotQueued && !queueFull;
+
+  const cost = needPreviewCost
+    ? eraTechResearchCost(entry, nextCostTargetLevel)
+    : { wood: 0, iron: 0, oil: 0, food: 0 };
   const unlocks = getResourceUnlocks(playerEra);
-  const nextDurSec = scaledEraTechDurationSec(entry, level);
+  const nextDurSec = needPreviewCost
+    ? scaledEraTechDurationSec(entry, nextDurFromLevel)
+    : 0;
 
   const name = locale === "en" ? entry.nameEn : entry.nameTr;
   const goal = locale === "en" ? entry.goalEn : entry.goalTr;
   const ageStr = String(entry.eraOrdinal);
 
-  const durLabel =
-    nextDurSec < 1
+  const durLabel = oneShotQueued
+    ? "—"
+    : nextDurSec < 1
       ? locale === "en"
         ? "Instant"
         : "Anında"
       : formatCountdownSeconds(nextDurSec, locale);
-
-  const thisJob = activeJobs.find((j) => j.techKey === entry.id) ?? null;
-  const queueFull = activeJobs.length >= maxQueue && !thisJob;
 
   const waitingInLine = thisJob != null && thisJob.completesAt == null;
 
@@ -168,15 +182,15 @@ export function EraTechResearchRow({
   } else if (thisJob && waitingInLine) {
     button = (
       <div className="flex w-full min-w-0 flex-col items-end gap-2 sm:flex-row sm:items-center sm:justify-end">
-        <div className="flex flex-col items-end gap-1 text-right">
-          <span className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
-            {locale === "en" ? "In queue" : "Sırada"}
-          </span>
-          <span className="max-w-[14rem] text-[11px] leading-tight text-zinc-400">
+        <div className="text-right">
+          <p className="text-xs font-semibold text-amber-200/95">
+            {play.buildingUpgradePending}
+          </p>
+          <p className="mt-0.5 max-w-[14rem] text-[10px] leading-tight text-zinc-500">
             {locale === "en"
               ? "Timer starts when the first job finishes"
               : "İlk iş bitince süre başlar"}
-          </span>
+          </p>
         </div>
         <button
           type="button"
@@ -191,13 +205,13 @@ export function EraTechResearchRow({
   } else if (thisJob) {
     button = (
       <div className="flex w-full min-w-0 flex-col items-end gap-2 sm:flex-row sm:items-center sm:justify-end">
-        <div className="flex flex-col items-end gap-1 text-right">
-          <span className="text-xs font-semibold uppercase tracking-wide text-amber-400/90">
-            {locale === "en" ? "Researching" : "Araştırılıyor"}
-          </span>
-          <span className="tabular-nums text-lg font-semibold text-amber-100">
+        <div className="text-right">
+          <p className="text-xs font-semibold text-amber-200/95">
+            {play.buildingUpgradePending}
+          </p>
+          <p className="tabular-nums text-lg font-semibold text-amber-100">
             {fmtEta(etaSec)}
-          </span>
+          </p>
         </div>
         <button
           type="button"
@@ -222,37 +236,47 @@ export function EraTechResearchRow({
     );
   }
 
+  const resourceLine = (
+    <div className="flex min-w-0 flex-1 flex-wrap items-center justify-end gap-x-2 gap-y-0.5 text-xs tabular-nums text-zinc-400">
+      <span className="inline-flex items-center gap-0.5">
+        <ResourceIcon kind="wood" />
+        {cost.wood}
+      </span>
+      {showIron ? (
+        <span className="inline-flex items-center gap-0.5">
+          <ResourceIcon kind="iron" />
+          {cost.iron}
+        </span>
+      ) : null}
+      {showOil ? (
+        <span className="inline-flex items-center gap-0.5">
+          <ResourceIcon kind="oil" />
+          {cost.oil}
+        </span>
+      ) : null}
+      <span className="inline-flex items-center gap-0.5">
+        <ResourceIcon kind="food" />
+        {cost.food}
+      </span>
+    </div>
+  );
+
   const costRow =
-    !lockedByEra && !done && !thisJob ? (
+    !lockedByEra && !done && needPreviewCost ? (
       <>
-        {nextDurSec > 0 ? (
-          <div className="w-full text-right text-[10px] tabular-nums text-sky-200/90">
-            {durLabel}
+        <div className="text-right leading-tight">
+          <div className="text-[11px] font-semibold tabular-nums text-sky-300/95">
+            {play.catalogFieldLevel}{" "}
+            <span className="text-sky-100">{Math.max(0, displayLevel)}</span>
           </div>
-        ) : null}
+          <div className="mt-0.5 text-[10px] tabular-nums text-sky-200/90">
+            {nextDurSec > 0
+              ? formatCountdownSeconds(nextDurSec, locale)
+              : durLabel}
+          </div>
+        </div>
         <div className="flex w-full min-w-0 flex-row flex-wrap items-center justify-end gap-2">
-          <div className="flex min-w-0 flex-1 flex-wrap items-center justify-end gap-x-2 gap-y-0.5 text-xs tabular-nums text-zinc-400">
-            <span className="inline-flex items-center gap-0.5">
-              <ResourceIcon kind="wood" />
-              {cost.wood}
-            </span>
-            {showIron ? (
-              <span className="inline-flex items-center gap-0.5">
-                <ResourceIcon kind="iron" />
-                {cost.iron}
-              </span>
-            ) : null}
-            {showOil ? (
-              <span className="inline-flex items-center gap-0.5">
-                <ResourceIcon kind="oil" />
-                {cost.oil}
-              </span>
-            ) : null}
-            <span className="inline-flex items-center gap-0.5">
-              <ResourceIcon kind="food" />
-              {cost.food}
-            </span>
-          </div>
+          {resourceLine}
           {button}
         </div>
       </>
@@ -300,7 +324,7 @@ export function EraTechResearchRow({
           />
           <CatalogFieldLine
             label={labels.level}
-            value={String(Math.max(0, level))}
+            value={String(Math.max(0, displayLevel))}
             labelClassName="text-sky-400"
             valueClassName="text-sky-100"
           />
