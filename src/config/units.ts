@@ -1,6 +1,11 @@
 import { eraIndex, type EraId } from "@/config/eras";
 
-export type UnitPurpose = "saldırı" | "koruma" | "saldırı/koruma";
+export type UnitPurpose =
+  | "saldırı"
+  | "koruma"
+  | "saldırı/koruma"
+  | "taşıma"
+  | "casusluk";
 
 /** Üretim maliyeti: taban + ek (petrol/nadir birimler) */
 export type UnitCostAddon = {
@@ -14,7 +19,7 @@ export type UnitSpec = {
   id: string;
   name: string;
   minEra: EraId;
-  /** Tek asker eğitim süresi (sn) — denge: erken kısa, geç oyun uzun */
+  /** Tek asker eğitim süresi (sn) */
   trainSeconds: number;
   purpose: UnitPurpose;
   attack: number;
@@ -30,11 +35,9 @@ export type UnitSpec = {
 };
 
 /**
- * 7 çağ modeli: isimler ilkel → teknolojik; güçler kademeli.
- * Eski kuyruklar için legacy id’ler sonda tutuldu.
+ * Çağ eşlemesi (oyuncu): 2→orta_cag, 3→yeniden_dogus, 4→sanayi, 5→modern
  */
 export const UNITS: UnitSpec[] = [
-  // --- İlk Çağ ---
   {
     id: "mizrakci",
     name: "Mızrakçı",
@@ -48,238 +51,28 @@ export const UNITS: UnitSpec[] = [
     carry: 8,
     hp: 22,
     foodPerMinute: 1,
-    /** Görsel: public/units/mızrakçı.jpg (kendi dosyanızla değiştirin) */
     imageSrc: "/units/mizrakci.jpg",
   },
-  // --- Orta Çağ ---
-  {
-    id: "muhafiz",
-    name: "Muhafız",
-    minEra: "orta_cag",
-    trainSeconds: 280,
-    purpose: "koruma",
-    attack: 18,
-    defense: 28,
-    agility: 14,
-    speed: 18,
-    carry: 0,
-    hp: 45,
-    foodPerMinute: 2,
-    imageSrc: "/units/unit-strip.svg",
-  },
-  {
-    id: "agir_suvari",
-    name: "Ağır Süvari (Şövalye)",
-    minEra: "orta_cag",
-    trainSeconds: 2100,
-    purpose: "saldırı",
-    attack: 52,
-    defense: 38,
-    agility: 20,
-    speed: 32,
-    carry: 0,
-    hp: 55,
-    foodPerMinute: 5,
-    imageSrc: "/units/unit-strip.svg",
-    costAddon: { iron: 15, food: 10 },
-  },
-  {
-    id: "arbaletci",
-    name: "Arbaletçi",
-    minEra: "orta_cag",
-    trainSeconds: 360,
-    purpose: "saldırı",
-    attack: 44,
-    defense: 16,
-    agility: 24,
-    speed: 20,
-    carry: 0,
-    hp: 28,
-    foodPerMinute: 2,
-    imageSrc: "/units/unit-strip.svg",
-  },
-  // --- Rönesans ---
-  {
-    id: "arkebuscu",
-    name: "İlk Arkebüzcü",
-    minEra: "yeniden_dogus",
-    trainSeconds: 520,
-    purpose: "saldırı",
-    attack: 62,
-    defense: 22,
-    agility: 28,
-    speed: 38,
-    carry: 0,
-    hp: 48,
-    foodPerMinute: 3,
-    imageSrc: "/units/unit-strip.svg",
-  },
-  {
-    id: "makinali",
-    name: "Seri Atışlı Tüfek",
-    minEra: "yeniden_dogus",
-    trainSeconds: 3600,
-    purpose: "saldırı/koruma",
-    attack: 88,
-    defense: 36,
-    agility: 22,
-    speed: 42,
-    carry: 0,
-    hp: 72,
-    foodPerMinute: 4,
-    imageSrc: "/units/unit-strip.svg",
-    costAddon: { iron: 25, food: 15 },
-  },
-  // --- Sanayi ---
-  {
-    id: "tufekci",
-    name: "Tüfekçi",
-    minEra: "sanayi",
-    trainSeconds: 1100,
-    purpose: "saldırı/koruma",
-    attack: 72,
-    defense: 40,
-    agility: 26,
-    speed: 36,
-    carry: 0,
-    hp: 58,
-    foodPerMinute: 3,
-    imageSrc: "/units/unit-strip.svg",
-  },
-  {
-    id: "sahra_topu",
-    name: "Sahra Topu",
-    minEra: "sanayi",
-    trainSeconds: 7800,
-    purpose: "saldırı",
-    attack: 120,
-    defense: 28,
-    agility: 10,
-    speed: 12,
-    carry: 0,
-    hp: 95,
-    foodPerMinute: 6,
-    imageSrc: "/units/unit-strip.svg",
-    costAddon: { iron: 40, oil: 8, food: 20 },
-  },
-  // --- Modern ---
-  {
-    id: "komando",
-    name: "Komando",
-    minEra: "modern",
-    trainSeconds: 4200,
-    purpose: "saldırı",
-    attack: 95,
-    defense: 55,
-    agility: 40,
-    speed: 55,
-    carry: 12,
-    hp: 85,
-    foodPerMinute: 5,
-    imageSrc: "/units/unit-strip.svg",
-  },
-  {
-    id: "ana_muharebe_tanki",
-    name: "Ana Muharebe Tankı",
-    minEra: "modern",
-    trainSeconds: 28800,
-    purpose: "koruma",
-    attack: 110,
-    defense: 130,
-    agility: 12,
-    speed: 22,
-    carry: 0,
-    hp: 220,
-    foodPerMinute: 12,
-    imageSrc: "/units/unit-strip.svg",
-    costAddon: { iron: 80, oil: 35, food: 40 },
-  },
-  // --- Dijital ---
-  {
-    id: "siber_saldiri",
-    name: "Siber Saldırı Ekibi",
-    minEra: "dijital",
-    trainSeconds: 5400,
-    purpose: "saldırı",
-    attack: 85,
-    defense: 35,
-    agility: 45,
-    speed: 40,
-    carry: 0,
-    hp: 40,
-    foodPerMinute: 4,
-    imageSrc: "/units/unit-strip.svg",
-  },
-  {
-    id: "iha",
-    name: "İHA Operatörü",
-    minEra: "dijital",
-    trainSeconds: 14400,
-    purpose: "saldırı",
-    attack: 70,
-    defense: 18,
-    agility: 55,
-    speed: 90,
-    carry: 0,
-    hp: 25,
-    foodPerMinute: 3,
-    imageSrc: "/units/unit-strip.svg",
-    costAddon: { oil: 20, iron: 30, food: 25 },
-  },
-  // --- Küresel ısınma ---
-  {
-    id: "cevre_muhafizi",
-    name: "Çevre Muhafızı",
-    minEra: "kuresel_isinma",
-    trainSeconds: 21600,
-    purpose: "saldırı/koruma",
-    attack: 78,
-    defense: 92,
-    agility: 30,
-    speed: 35,
-    carry: 15,
-    hp: 110,
-    foodPerMinute: 6,
-    imageSrc: "/units/unit-strip.svg",
-  },
-  {
-    id: "mech_birim",
-    name: "Mech Birim",
-    minEra: "kuresel_isinma",
-    trainSeconds: 43200,
-    purpose: "koruma",
-    attack: 95,
-    defense: 140,
-    agility: 18,
-    speed: 28,
-    carry: 0,
-    hp: 260,
-    foodPerMinute: 2,
-    imageSrc: "/units/unit-strip.svg",
-    costAddon: { iron: 50, oil: 25, food: 15 },
-  },
-
-  // --- Legacy (eski kuyruk unitId uyumluluğu) ---
   {
     id: "asil_sovalye",
-    name: "Asil Şövalye (eski)",
+    name: "Asil Şövalye",
     minEra: "orta_cag",
-    trainSeconds: 1800,
-    purpose: "saldırı",
-    attack: 52,
-    defense: 38,
+    trainSeconds: 22,
+    purpose: "saldırı/koruma",
+    attack: 84,
+    defense: 42,
     agility: 37,
     speed: 28,
     carry: 0,
-    hp: 30,
+    hp: 90,
     foodPerMinute: 4,
     imageSrc: "/units/unit-strip.svg",
   },
   {
     id: "kilic_ustasi",
-    name: "Kılıç Ustası (eski)",
+    name: "Kılıç Ustası",
     minEra: "orta_cag",
-    trainSeconds: 130,
+    trainSeconds: 19,
     purpose: "saldırı/koruma",
     attack: 53,
     defense: 36,
@@ -292,9 +85,9 @@ export const UNITS: UnitSpec[] = [
   },
   {
     id: "sovalye",
-    name: "Şövalye (eski)",
+    name: "Şövalye",
     minEra: "orta_cag",
-    trainSeconds: 120,
+    trainSeconds: 16,
     purpose: "saldırı/koruma",
     attack: 58,
     defense: 34,
@@ -306,10 +99,25 @@ export const UNITS: UnitSpec[] = [
     imageSrc: "/units/unit-strip.svg",
   },
   {
-    id: "tufekli_asker",
-    name: "Tüfekli Asker (eski)",
+    id: "makinali",
+    name: "Makinalı",
     minEra: "yeniden_dogus",
-    trainSeconds: 900,
+    trainSeconds: 59,
+    purpose: "saldırı/koruma",
+    attack: 113,
+    defense: 36,
+    agility: 24,
+    speed: 53,
+    carry: 0,
+    hp: 113,
+    foodPerMinute: 5,
+    imageSrc: "/units/unit-strip.svg",
+  },
+  {
+    id: "tufekli_asker",
+    name: "Tüfekli Asker",
+    minEra: "yeniden_dogus",
+    trainSeconds: 47,
     purpose: "saldırı/koruma",
     attack: 83,
     defense: 35,
@@ -322,9 +130,9 @@ export const UNITS: UnitSpec[] = [
   },
   {
     id: "bazuka",
-    name: "Bazuka (eski)",
+    name: "Bazuka",
     minEra: "yeniden_dogus",
-    trainSeconds: 1200,
+    trainSeconds: 39,
     purpose: "saldırı/koruma",
     attack: 93,
     defense: 34,
@@ -333,6 +141,111 @@ export const UNITS: UnitSpec[] = [
     carry: 0,
     hp: 135,
     foodPerMinute: 4,
+    imageSrc: "/units/unit-strip.svg",
+  },
+  {
+    id: "keskin_nisanci",
+    name: "Keskin Nişancı",
+    minEra: "yeniden_dogus",
+    trainSeconds: 38,
+    purpose: "saldırı/koruma",
+    attack: 115,
+    defense: 30,
+    agility: 172,
+    speed: 53,
+    carry: 0,
+    hp: 57,
+    foodPerMinute: 4,
+    imageSrc: "/units/unit-strip.svg",
+  },
+  {
+    id: "helikopter",
+    name: "Helikopter",
+    minEra: "sanayi",
+    trainSeconds: 49,
+    purpose: "taşıma",
+    attack: 29,
+    defense: 41,
+    agility: 122,
+    speed: 113,
+    carry: 150_000,
+    hp: 113,
+    foodPerMinute: 5,
+    imageSrc: "/units/unit-strip.svg",
+  },
+  {
+    id: "casus_ucak",
+    name: "Casus Uçak",
+    minEra: "sanayi",
+    trainSeconds: 63,
+    purpose: "casusluk",
+    attack: 32,
+    defense: 36,
+    agility: 222,
+    speed: 923,
+    carry: 0,
+    hp: 113,
+    foodPerMinute: 5,
+    imageSrc: "/units/unit-strip.svg",
+  },
+  {
+    id: "bombardiman_ucagi",
+    name: "Bombardıman Uçağı",
+    minEra: "sanayi",
+    trainSeconds: 46,
+    purpose: "saldırı/koruma",
+    attack: 378,
+    defense: 41,
+    agility: 32,
+    speed: 103,
+    carry: 0,
+    hp: 45,
+    foodPerMinute: 10,
+    imageSrc: "/units/unit-strip.svg",
+  },
+  {
+    id: "roket_atar",
+    name: "Roket Atar",
+    minEra: "modern",
+    trainSeconds: 316,
+    purpose: "saldırı/koruma",
+    attack: 578,
+    defense: 41,
+    agility: 23,
+    speed: 68,
+    carry: 0,
+    hp: 563,
+    foodPerMinute: 22,
+    imageSrc: "/units/unit-strip.svg",
+  },
+  {
+    id: "firavun",
+    name: "Firavun",
+    minEra: "modern",
+    trainSeconds: 394,
+    purpose: "saldırı/koruma",
+    attack: 178,
+    defense: 61,
+    agility: 222,
+    speed: 68,
+    carry: 0,
+    hp: 338,
+    foodPerMinute: 15,
+    imageSrc: "/units/unit-strip.svg",
+  },
+  {
+    id: "alev_tanki",
+    name: "Alev Tankı",
+    minEra: "modern",
+    trainSeconds: 238,
+    purpose: "saldırı/koruma",
+    attack: 378,
+    defense: 66,
+    agility: 23,
+    speed: 53,
+    carry: 0,
+    hp: 900,
+    foodPerMinute: 20,
     imageSrc: "/units/unit-strip.svg",
   },
 ];
@@ -345,21 +258,11 @@ export function getUnitSpec(unitId: string): UnitSpec | undefined {
   return UNIT_BY_ID.get(unitId);
 }
 
-/** Eski kayıtlı kuyruk id’leri — katalogda gösterme */
-const LEGACY_UNIT_IDS = new Set([
-  "asil_sovalye",
-  "kilic_ustasi",
-  "sovalye",
-  "tufekli_asker",
-  "bazuka",
-]);
-
 export function unlockedUnits(playerEra: string | null | undefined): UnitSpec[] {
   const idx = eraIndex(playerEra);
   const seen = new Set<string>();
   const out: UnitSpec[] = [];
   for (const u of UNITS) {
-    if (LEGACY_UNIT_IDS.has(u.id)) continue;
     if (eraIndex(u.minEra) > idx) continue;
     if (seen.has(u.id)) continue;
     seen.add(u.id);
@@ -373,7 +276,6 @@ export function catalogUnits(): UnitSpec[] {
   const seen = new Set<string>();
   const out: UnitSpec[] = [];
   for (const u of UNITS) {
-    if (LEGACY_UNIT_IDS.has(u.id)) continue;
     if (seen.has(u.id)) continue;
     seen.add(u.id);
     out.push(u);

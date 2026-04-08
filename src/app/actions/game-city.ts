@@ -378,7 +378,7 @@ export async function trainSoldiers(
 ): Promise<ActionResult> {
   const r = await requireUserCity(cityId);
   if (!r.ok) return r;
-  const { city, unlocks } = r;
+  const { city, unlocks, user } = r;
   const n = Math.max(0, Math.floor(amount));
   if (n < 1) return { ok: false, error: await pe("errInvalidAmount") };
   if (city.barracksLevel < 1) {
@@ -388,7 +388,7 @@ export async function trainSoldiers(
   if (city.soldiers + n > cap) {
     return { ok: false, error: await pe("errBarracksFull") };
   }
-  const tc = trainCostPerSoldier(unlocks);
+  const tc = trainCostPerSoldier(unlocks, user.currentEra);
   const w = tc.wood * n;
   const i = tc.iron * n;
   const f = tc.food * n;
@@ -450,7 +450,7 @@ export async function queueTrainUnit(
         throw Object.assign(new Error("barracks"), { code: "BARRACKS" as const });
       }
 
-      const tc = trainCostPerSoldier(unlocks);
+      const tc = trainCostPerSoldier(unlocks, user.currentEra);
       const add = spec.costAddon ?? {};
       const w = (tc.wood + (add.wood ?? 0)) * n;
       const i = (tc.iron + (add.iron ?? 0)) * n;

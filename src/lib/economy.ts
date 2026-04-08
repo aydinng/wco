@@ -283,10 +283,14 @@ export function suggestedFleetAttack(
   return Math.max(0, soldiers * 12 + barracksLevel * 80 + sad);
 }
 
-export function trainCostPerSoldier(unlocks: ResourceUnlocks) {
+export function trainCostPerSoldier(
+  unlocks: ResourceUnlocks,
+  currentEra?: string | null,
+) {
+  const firstAge = isFirstAgeResourceOpts({ currentEra });
   return {
     wood: 8,
-    iron: unlocks.iron ? 18 : 0,
+    iron: firstAge ? 0 : unlocks.iron ? 18 : 0,
     food: 22,
   };
 }
@@ -295,8 +299,9 @@ export function trainCostPerSoldier(unlocks: ResourceUnlocks) {
 export function unitTrainCostPerSoldierTotal(
   spec: Pick<UnitSpec, "costAddon">,
   unlocks: ResourceUnlocks,
+  currentEra?: string | null,
 ) {
-  const tc = trainCostPerSoldier(unlocks);
+  const tc = trainCostPerSoldier(unlocks, currentEra);
   const add = spec.costAddon ?? {};
   return {
     wood: tc.wood + (add.wood ?? 0),

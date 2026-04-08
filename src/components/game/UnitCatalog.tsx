@@ -37,23 +37,29 @@ function purposeText(
   if (locale === "en") {
     if (p === "saldırı") return "Attack";
     if (p === "koruma") return "Defense";
+    if (p === "taşıma") return "Transport";
+    if (p === "casusluk") return "Scouting";
     return "Attack/Defense";
   }
   if (p === "saldırı") return "Saldırı";
   if (p === "koruma") return "Koruma";
+  if (p === "taşıma") return "Taşıma";
+  if (p === "casusluk") return "Casusluk";
   return "Saldırı/Koruma";
 }
 
 function UnitCostBlock({
   spec,
   unlocks,
+  playerEra,
   play,
 }: {
   spec: UnitSpec;
   unlocks: ResourceUnlocks;
+  playerEra?: string | null;
   play: Dictionary["play"];
 }) {
-  const c = unitTrainCostPerSoldierTotal(spec, unlocks);
+  const c = unitTrainCostPerSoldierTotal(spec, unlocks, playerEra);
   return (
     <div className="flex flex-wrap gap-x-3 gap-y-1 text-[13px] text-amber-100/95">
       {c.wood > 0 ? (
@@ -203,7 +209,12 @@ export function UnitCatalog({
                           <span className="text-cyan-400">
                             {locale === "en" ? "Resources" : "Hammadde"}
                           </span>
-                          <UnitCostBlock spec={u} unlocks={unlocks} play={play} />
+                          <UnitCostBlock
+                            spec={u}
+                            unlocks={unlocks}
+                            playerEra={playerEra}
+                            play={play}
+                          />
                         </div>
                         <CatalogFieldLine
                           label={play.catalogFieldPurpose}
