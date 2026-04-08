@@ -13,6 +13,7 @@ import {
   MAX_RESEARCH_TIER,
   soldierCap,
   trainCostPerSoldier,
+  unitTrainCostPerSoldierTotal,
 } from "@/lib/economy";
 import { getLocale } from "@/lib/locale";
 import { prisma } from "@/lib/prisma";
@@ -388,10 +389,14 @@ export async function trainSoldiers(
   if (city.soldiers + n > cap) {
     return { ok: false, error: await pe("errBarracksFull") };
   }
-  const tc = trainCostPerSoldier(unlocks, user.currentEra);
-  const w = tc.wood * n;
-  const i = tc.iron * n;
-  const f = tc.food * n;
+  const per = unitTrainCostPerSoldierTotal(
+    { costAddon: undefined },
+    unlocks,
+    user.currentEra,
+  );
+  const w = per.wood * n;
+  const i = per.iron * n;
+  const f = per.food * n;
   if (city.wood < w || city.iron < i || city.food < f) {
     return { ok: false, error: await pe("errInsufficient") };
   }
@@ -450,12 +455,11 @@ export async function queueTrainUnit(
         throw Object.assign(new Error("barracks"), { code: "BARRACKS" as const });
       }
 
-      const tc = trainCostPerSoldier(unlocks, user.currentEra);
-      const add = spec.costAddon ?? {};
-      const w = (tc.wood + (add.wood ?? 0)) * n;
-      const i = (tc.iron + (add.iron ?? 0)) * n;
-      const o = (unlocks.oil ? (add.oil ?? 0) : 0) * n;
-      const f = (tc.food + (add.food ?? 0)) * n;
+      const per = unitTrainCostPerSoldierTotal(spec, unlocks, user.currentEra);
+      const w = per.wood * n;
+      const i = per.iron * n;
+      const o = per.oil * n;
+      const f = per.food * n;
       if (city.wood < w || city.iron < i || city.oil < o || city.food < f) {
         throw Object.assign(new Error("res"), { code: "RES" as const });
       }

@@ -9,8 +9,9 @@ function isFirstAgeResourceOpts(opts?: {
   currentEra?: string | null;
 }) {
   if (opts?.ilkCagWoodFoodOnly === true) return true;
-  if (opts?.currentEra != null && eraIndex(opts.currentEra) < 1) return true;
-  return false;
+  /** `opts` yokken false; `currentEra: null` ilk çağ sayılır (normalize → ilk_cag). */
+  if (opts === undefined) return false;
+  return eraIndex(opts.currentEra) < 1;
 }
 
 /** `ERA_BUILDING_CATALOG.ilk_cag` — çağ ilerlese de bu binaların yükseltmesi yalnız odun + besin */
@@ -287,7 +288,8 @@ export function trainCostPerSoldier(
   unlocks: ResourceUnlocks,
   currentEra?: string | null,
 ) {
-  const firstAge = isFirstAgeResourceOpts({ currentEra });
+  /** `currentEra` DB’de null olabilir → normalize ile ilk çağ (demir yok). */
+  const firstAge = eraIndex(currentEra) < 1;
   return {
     wood: 8,
     iron: firstAge ? 0 : unlocks.iron ? 18 : 0,
@@ -301,8 +303,17 @@ export function unitTrainCostPerSoldierTotal(
   unlocks: ResourceUnlocks,
   currentEra?: string | null,
 ) {
+  const firstAge = eraIndex(currentEra) < 1;
   const tc = trainCostPerSoldier(unlocks, currentEra);
   const add = spec.costAddon ?? {};
+  if (firstAge) {
+    return {
+      wood: tc.wood + (add.wood ?? 0),
+      iron: 0,
+      oil: 0,
+      food: tc.food + (add.food ?? 0),
+    };
+  }
   return {
     wood: tc.wood + (add.wood ?? 0),
     iron: tc.iron + (add.iron ?? 0),
