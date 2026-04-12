@@ -1,7 +1,7 @@
 import { CityResourceBar } from "@/components/game/CityResourceBar";
 import { TrainingQueueBar } from "@/components/game/TrainingQueueBar";
 import { UnitCatalog } from "@/components/game/UnitCatalog";
-import { catalogUnits, getUnitSpec } from "@/config/units";
+import { UNITS, getUnitSpec } from "@/config/units";
 import { getResourceUnlocks } from "@/config/eras";
 import { getDictionary } from "@/i18n/dictionaries";
 import { getCurrentUser } from "@/lib/current-user";
@@ -22,7 +22,7 @@ export default async function ProductionPage({
   const user = await getCurrentUser();
   const cities = user?.cities ?? [];
   const sp = await searchParams;
-  const units = catalogUnits();
+  const units = UNITS;
 
   if (!user || cities.length === 0) {
     return (

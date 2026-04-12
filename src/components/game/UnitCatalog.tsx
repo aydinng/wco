@@ -11,10 +11,11 @@ import { UnitTrainRow } from "@/components/game/UnitTrainRow";
 import {
   ERA_ORDER,
   eraBackgroundUrl,
-  eraOrdinalNumber,
   eraIndex,
+  eraOrdinalNumber,
   getEraConfig,
   getEraDisplayName,
+  normalizeEraId,
   type ResourceUnlocks,
 } from "@/config/eras";
 import type { UnitSpec } from "@/config/units";
@@ -95,6 +96,7 @@ function UnitCostBlock({
 }
 
 type Props = {
+  /** `UNITS` veya aynı şekilde doldurulmuş liste — asker üretim kataloğu */
   units: UnitSpec[];
   playerEra?: string | null;
   play: Dictionary["play"];
@@ -114,9 +116,9 @@ export function UnitCatalog({
   if (units.length === 0) return null;
   const pIdx = eraIndex(playerEra);
 
-  const sections = ERA_ORDER.map((eraId) => {
+  let sections = ERA_ORDER.map((eraId) => {
     const list = units
-      .filter((u) => u.minEra === eraId)
+      .filter((u) => normalizeEraId(u.minEra) === eraId)
       .sort((a, b) =>
         a.name.localeCompare(b.name, locale === "en" ? "en" : "tr"),
       );
@@ -130,10 +132,29 @@ export function UnitCatalog({
     eraName: string;
   }[];
 
+  /** Çağ eşleşmesi beklenmedik şekilde boş kalırsa tüm birimleri tek blokta göster */
+  if (sections.length === 0 && units.length > 0) {
+    const cfg = getEraConfig("ilk_cag");
+    sections = [
+      {
+        eraId: "ilk_cag",
+        list: [...units].sort((a, b) =>
+          a.name.localeCompare(b.name, locale === "en" ? "en" : "tr"),
+        ),
+        eraName: getEraDisplayName(cfg, locale),
+      },
+    ];
+  }
+
   const lockedLabel = locale === "en" ? "Locked" : "Kilitli";
 
   return (
     <div className="mb-2 w-full space-y-8 overflow-hidden rounded-lg border border-zinc-700/70">
+      <p className="text-sm text-zinc-400">
+        {locale === "en"
+          ? `${units.length} unit types below (locked rows until you reach that age). Scroll to see all eras.`
+          : `Aşağıda ${units.length} asker türü var; çağınız yetmeyenler kilitli. Tüm çağları görmek için kaydırın.`}
+      </p>
       {sections.map(({ eraId, list, eraName }) => {
         const cfg = getEraConfig(eraId);
         const bg = eraBackgroundUrl(eraId);
