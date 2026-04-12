@@ -2,7 +2,7 @@
 
 /** Üst düzey grid: isim | süre/amış | (birimlerde istatistik) | eylem */
 export const CATALOG_ROW_GRID_UNITS =
-  "grid w-full grid-cols-1 items-start gap-3 px-2 py-3 sm:grid-cols-[12.5rem_18rem_10.5rem_auto] sm:items-center sm:gap-x-3 sm:px-3";
+  "grid w-full grid-cols-1 items-start gap-3 px-2 py-3 sm:grid-cols-[12.5rem_18rem_13rem_auto] sm:items-center sm:gap-x-3 sm:px-3";
 
 /** Teknoloji: istatistik sütunu yok */
 export const CATALOG_ROW_GRID_TECH =
@@ -24,6 +24,6 @@ export const CATALOG_TITLE_YELLOW =
 export const CATALOG_MIDDLE_COL =
   "flex min-h-[5.5rem] w-full flex-col justify-center gap-1 text-sm leading-snug sm:w-[18rem] sm:min-w-[18rem] sm:max-w-[18rem] sm:text-[15px]";
 
-/** Birim saldırı istatistikleri */
+/** Birim istatistikleri (saldırı … besin/dk) */
 export const CATALOG_STATS_COL =
-  "w-full min-w-0 sm:w-[10.5rem] sm:shrink-0";
+  "w-full min-w-0 sm:w-[13rem] sm:shrink-0";

@@ -201,7 +201,7 @@ export function UnitCatalog({
                   style={{ fontFamily: "var(--font-warcity), serif" }}
                 >
                   <div
-                    className={CATALOG_ROW_GRID_UNITS}
+                    className={`${CATALOG_ROW_GRID_UNITS} sm:items-start sm:py-4`}
                     style={{
                       background:
                         "linear-gradient(90deg, rgba(61,46,26,0.92) 0%, rgba(26,21,16,0.88) 45%, rgba(0,0,0,0.96) 100%)",
@@ -249,7 +249,7 @@ export function UnitCatalog({
                     </div>
 
                     <div className={CATALOG_STATS_COL}>
-                      <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-sm text-white sm:text-[15px]">
+                      <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-sm text-white sm:text-[14px]">
                         <span className="text-cyan-300">
                           {play.catalogStatAttack}
                         </span>
@@ -266,6 +266,26 @@ export function UnitCatalog({
                           {play.catalogStatSpeed}
                         </span>
                         <span className="tabular-nums">{u.speed}</span>
+                        <span className="text-cyan-300">
+                          {play.catalogStatCarry}
+                        </span>
+                        <span className="tabular-nums">
+                          {u.carry.toLocaleString(
+                            locale === "en" ? "en-US" : "tr-TR",
+                          )}
+                        </span>
+                        <span className="text-cyan-300">
+                          {play.catalogStatHp}
+                        </span>
+                        <span className="tabular-nums">{u.hp}</span>
+                        <span className="text-cyan-300">
+                          {play.catalogStatFood}
+                        </span>
+                        <span className="tabular-nums">
+                          {locale === "en"
+                            ? `${u.foodPerMinute}/min`
+                            : `${u.foodPerMinute}/dk`}
+                        </span>
                       </div>
                     </div>
 
